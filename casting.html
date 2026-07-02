@@ -390,30 +390,32 @@ const Sfx=(function(){
     src.connect(f).connect(g).connect(c.destination); src.start(t0); }
   /* --- tiny ambient loop: two chords, a muted pulse, the odd sparkle. whisper-quiet. --- */
   let mTimer=null, mStep=0, mNext=0, mWanted=false;
-  const SPB=60/118/2;                                        // one eighth note at 118bpm
-  const CHORDS=[                                             // I V vi IV, one bar each — the uplifting classic
-    [130.8,261.6,329.6,392,587.3],   // Cadd9
-    [98,196,246.9,293.7,392],        // G
-    [110,220,261.6,329.6,392],       // Am7
-    [87.31,174.6,220,261.6,349.2]];  // Fmaj7
+  const SPB=60/116/2;                                        // one eighth note at 116bpm — ballroom tempo
+  const VAMP=[                                               // early-90s house vamp, two minor chords (2 bars each)
+    {root:110,   chord:[220,261.6,329.6,392]},               // Am7
+    {root:146.8, chord:[293.7,349.2,440,523.3]}];            // Dm7
   function mKick(t){ const o=ctx.createOscillator(),g=ctx.createGain();
     o.type="sine"; o.frequency.setValueAtTime(105,t); o.frequency.exponentialRampToValueAtTime(48,t+.09);
     env(g,t,.002,.11,.045); o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+.16); }
-  function mHat(t){ const len=Math.floor(ctx.sampleRate*.03), b=ctx.createBuffer(1,len,ctx.sampleRate), d=b.getChannelData(0);
+  function mHat(t,dur,peak){ const len=Math.floor(ctx.sampleRate*(dur||.03)), b=ctx.createBuffer(1,len,ctx.sampleRate), d=b.getChannelData(0);
     for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
     const src=ctx.createBufferSource(); src.buffer=b;
     const f=ctx.createBiquadFilter(); f.type="highpass"; f.frequency.value=6500;
-    const g=ctx.createGain(); env(g,t,.001,.03,.011); src.connect(f).connect(g).connect(ctx.destination); src.start(t); }
+    const g=ctx.createGain(); env(g,t,.001,dur||.03,peak||.011); src.connect(f).connect(g).connect(ctx.destination); src.start(t); }
   function mNote(fr,t,dur,peak,type){ const o=ctx.createOscillator(),g=ctx.createGain();
     o.type=type||"triangle"; o.frequency.value=fr; env(g,t,dur*.4,dur,peak);
     o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+dur*1.7); }
   function mPlay(st,t){
-    const ch=CHORDS[(st>>3)&3];                              // new chord every bar
-    if(st%4===0) mKick(t);
-    if(st%4===2) mHat(t);
-    if(st%8===0){ mNote(ch[0],t,SPB*7,.028); for(let i=1;i<ch.length;i++) mNote(ch[i],t,SPB*7,.013); }
-    if((st%8===3||st%8===6) && Math.random()<.8)             // chord-tone arpeggio, an octave up
-      mNote(ch[1+Math.floor(Math.random()*(ch.length-1))]*2,t,SPB*1.8,.015,"sine");
+    const V=VAMP[(st>>4)&1];                                 // 2 bars Am7, 2 bars Dm7
+    if(st%4===0) mKick(t);                                   // four on the floor
+    if(st%4===2) mHat(t,.09,.016);                           // open hat on the offbeat
+    else if(st%2===0) mHat(t,.02,.006);                      // whisper ticks between
+    const bp=st%8;                                           // house bass: root with octave pops
+    if(bp===0||bp===4) mNote(V.root,t,SPB*1.6,.042,"triangle");
+    if(bp===3||bp===7) mNote(V.root*2,t,SPB*1.2,.032,"triangle");
+    if(bp===2||bp===5)                                       // syncopated piano-ish stab
+      for(const n of V.chord) mNote(n,t,SPB*1.1,.013);
+    if(st%16===0){ mNote(V.root*2,t,SPB*15,.011,"sine"); mNote(V.root*3,t,SPB*15,.009,"sine"); }  // airy strings
   }
   function musicStart(){ mWanted=true; if(!on) return; const c=ac(); if(!c||mTimer) return;
     mStep=0; mNext=c.currentTime+.1;
