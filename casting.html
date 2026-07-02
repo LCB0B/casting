@@ -57,6 +57,8 @@
   .gauge-cap.warn{color:#C97A1F; font-weight:800}
   .gauge-cap.red{color:#C22B1F; font-weight:800}
   .gauge-cap.crit{color:#C22B1F; font-weight:900; animation:capblink .95s ease-in-out infinite}
+  .gauge-cap.ok{color:#7FA33F; font-weight:800}
+  .gauge-cap.happy{color:var(--good); font-weight:800}
   @keyframes capblink{0%,100%{transform:scale(1); opacity:1}50%{transform:scale(1.16); opacity:.7}}
 
   .tag{display:flex; gap:8px; align-items:center; font-family:var(--ui); font-weight:800; font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:5px 9px; margin-top:6px; border:1px solid var(--ink)}
@@ -595,7 +597,7 @@ function gaugeArc(){
     return `<path d="M ${pt(t0,R)} A ${R} ${R} 0 0 1 ${pt(t1,R)} L ${pt(t1,Ri)} A ${Ri} ${Ri} 0 0 0 ${pt(t0,Ri)} Z" fill="${c}" stroke="var(--paper)" stroke-width="1"/>`;}).join("");
 }
 const needleAngle=v=>((clamp(v)-50)/50)*90;
-const capClass=v=> v<15?" crit":(v<30?" red":(v<45?" warn":""));   // caption heats up as the panel sours
+const capClass=v=> v<15?" crit":(v<30?" red":(v<45?" warn":(v>=75?" happy":(v>=60?" ok":""))));   // caption heats with anger, greens with joy
 function gaugeHTML(key,label,value,idp){
   return `<div class="gauge"><svg viewBox="0 0 100 56" class="gauge-svg">${gaugeArc()}
     <g class="needle" id="${idp}-${key}" transform="rotate(${needleAngle(value).toFixed(1)} 50 50)">
