@@ -490,13 +490,24 @@ const Sfx=(function(){
   function bell(f,t,dur,peak){ for(const [m,a] of [[1,1],[2,.38],[3,.14]]){ const o=ctx.createOscillator(),g=ctx.createGain();
     o.type="sine"; o.frequency.value=f*m; env(g,t,.012,dur,peak*a);
     o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+dur+.3); } }
+  function womp(f,t,dur,peak,fall){                           // the sad brass: a note that droops as it goes
+    const o=ctx.createOscillator(), fl=ctx.createBiquadFilter(), g=ctx.createGain();
+    o.type="sawtooth"; o.frequency.setValueAtTime(f,t); o.frequency.exponentialRampToValueAtTime(f*(fall||.86),t+dur*.85);
+    fl.type="lowpass"; fl.frequency.value=950;
+    env(g,t,.04,dur,peak); o.connect(fl).connect(g).connect(ctx.destination); o.start(t); o.stop(t+dur+.1); }
   function themeLose(){ const c=ac(); if(!c||!on) return; const t0=c.currentTime+.15;
-    const bass=[110,98,87.31,82.41];                          // the lament: A G F E, falling
+    womp(220,t0,1.0,.05); womp(196,t0+1.25,1.0,.05);          // pown... pown...
+    womp(174.6,t0+2.5,1.1,.05);
+    womp(164.8,t0+3.9,2.6,.055,.68);                          // ...pooooown (the long droop)
+    const L=t0+7;                                             // then the lament, twice through
+    const bass=[110,98,87.31,82.41];                          // A G F E, falling
     const chords=[[220,261.6,329.6],[196,246.9,293.7],[174.6,220,261.6],[164.8,207.7,246.9]];
-    bass.forEach((f,i)=>{ const t=t0+i*3.2;
-      padVoice(f,t,3.4,.032); padVoice(f*2,t,3.4,.013);
-      chords[i].forEach((n,j)=> mNote(n,t+.5+j*.85,1.7,.02,"sine")); });
-    padVoice(110,t0+12.8,5.5,.028); bell(220,t0+13.2,4,.018); // it settles, low and unresolved
+    for(let r=0;r<2;r++) bass.forEach((f,i)=>{ const t=L+r*12.8+i*3.2;
+      padVoice(f,t,3.4,r?.026:.032); padVoice(f*2,t,3.4,.012);
+      if(r===0) chords[i].forEach((n,j)=> mNote(n,t+.5+j*.85,1.7,.02,"sine"));
+      else chords[i].slice(0,2).forEach((n,j)=> bell(n,t+.6+j*1.3,2,.013)); });   // second pass: sparser, bells
+    padVoice(110,L+25.6,6,.028); bell(220,L+26,5,.015);
+    womp(110,L+26.5,3.2,.032,.72);                            // one last low sigh
   }
   function themeWin(){ const c=ac(); if(!c||!on) return; const t0=c.currentTime+.15;
     for(const [f,p] of [[65.41,.03],[98,.026],[130.8,.028],[196,.018],[261.6,.012]])
