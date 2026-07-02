@@ -52,7 +52,7 @@
   .top .r{font-family:var(--ui); font-weight:700; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2)}
   .top .r b{color:var(--ink)}
 
-  .gauges{display:grid; grid-template-columns:repeat(4,1fr); gap:0; margin:8px 0 2px}
+  .gauges{display:grid; grid-template-columns:repeat(3,1fr); gap:0 14px; margin:8px 0 2px; padding:0 20px}
   .gauge{text-align:center}
   .gauge-svg{width:100%; height:auto; display:block; margin:0 auto}
   .needle{transition:transform 1.05s cubic-bezier(.33,1.15,.45,1)}
@@ -200,6 +200,43 @@
   .good .rv-h em{font-style:italic}
   @media(prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
 
+  /* ---------------- appointment briefing (before the tutorial) ---------------- */
+  .brief-veil{background:rgba(16,15,14,.82); z-index:150}
+  .brief{background:var(--paper); border:1px solid var(--ink); box-shadow:8px 8px 0 var(--ink); max-width:440px; width:100%; padding:24px 24px 20px; max-height:92vh; overflow-y:auto}
+  .brief .bk{border-bottom:1px solid var(--ink); padding-bottom:7px; margin-bottom:16px; display:flex; justify-content:space-between}
+  .brief .bl{opacity:0; transform:translateY(10px); animation:briefin .55s ease forwards; font-family:var(--ui); font-size:14px; line-height:1.5; margin:0 0 12px}
+  .brief .bt{font-family:var(--serif); font-weight:800; font-size:21px; line-height:1.25; margin-bottom:14px}
+  .brief .bs{font-style:italic; color:var(--ink)}
+  .brief .btn.bl{margin-top:8px}
+  @keyframes briefin{to{opacity:1; transform:none}}
+  .brief.done .bl{animation:none; opacity:1; transform:none}
+  @media(prefers-reduced-motion:reduce){.brief .bl,.rrow{opacity:1!important; transform:none!important}}
+
+  /* envelope that delivers the appointment letter */
+  .env-wrap{display:flex; align-items:center; justify-content:center; width:100%}
+  .envelope{position:relative; width:min(80vw,330px); height:205px; cursor:pointer; perspective:700px; animation:envdrop .85s cubic-bezier(.25,1.2,.4,1) both}
+  @keyframes envdrop{from{transform:translateY(-55vh) rotate(-7deg); opacity:0} 70%{transform:translateY(12px) rotate(1.6deg); opacity:1} to{transform:none; opacity:1}}
+  .env-back{position:absolute; inset:0; background:var(--panel); border:1.5px solid var(--ink); box-shadow:8px 8px 0 rgba(0,0,0,.35)}
+  .env-letter{position:absolute; left:6%; right:6%; top:7%; bottom:12%; background:#fff; border:1px solid var(--hair); z-index:1;
+    background-image:repeating-linear-gradient(var(--hair) 0 1px, transparent 1px 12px); background-size:72% 60%; background-position:14% 78%; background-repeat:no-repeat;
+    transition:transform .6s cubic-bezier(.3,1,.4,1) .28s}
+  .env-front{position:absolute; inset:0; background:var(--panel); border:1.5px solid var(--ink); z-index:2;
+    -webkit-clip-path:polygon(0 0,50% 36%,100% 0,100% 100%,0 100%); clip-path:polygon(0 0,50% 36%,100% 0,100% 100%,0 100%);
+    display:flex; align-items:flex-end; justify-content:center; padding-bottom:16px}
+  .env-to{text-align:center; line-height:1.7; letter-spacing:.22em}
+  .env-to b{display:block; font-size:12px; color:var(--ink); letter-spacing:.14em}
+  .env-flap{position:absolute; inset:0 0 auto 0; height:53%; background:var(--paper); border:1.5px solid var(--ink); z-index:3;
+    -webkit-clip-path:polygon(0 0,100% 0,50% 100%); clip-path:polygon(0 0,100% 0,50% 100%);
+    transform-origin:top; transition:transform .5s ease, opacity .25s ease .3s}
+  .env-seal{position:absolute; top:calc(53% - 17px); left:50%; margin-left:-17px; width:34px; height:34px; border-radius:50%; z-index:4;
+    background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center;
+    font-family:var(--ui); font-weight:900; font-size:15px; transition:opacity .3s}
+  .env-hint{position:absolute; bottom:-30px; left:0; right:0; text-align:center; transition:opacity .3s}
+  .envelope.open .env-flap{transform:rotateX(180deg); opacity:0}
+  .envelope.open .env-seal{opacity:0}
+  .envelope.open .env-hint{opacity:0}
+  .envelope.open .env-letter{transform:translateY(-72%)}
+
   /* ---------------- first-run tutorial (spotlight coachmarks) ---------------- */
   .tut-layer{position:fixed; inset:0; z-index:200; display:none}
   .tut-layer.show{display:block; animation:fade .22s ease both}
@@ -281,6 +318,20 @@
   </div>
 </div>
 
+<div class="veil brief-veil" id="brief-veil">
+  <div class="env-wrap" id="env-wrap">
+    <div class="envelope" id="envelope" onclick="Briefing.open()">
+      <div class="env-back"></div>
+      <div class="env-letter"></div>
+      <div class="env-front"><div class="env-to kick" id="env-to"></div></div>
+      <div class="env-flap"></div>
+      <div class="env-seal" id="env-seal"></div>
+      <div class="env-hint kick">tap to open</div>
+    </div>
+  </div>
+  <div class="brief" id="brief" onclick="Briefing.skip()" style="display:none"></div>
+</div>
+
 <div class="veil" id="veil">
   <div class="resol">
     <div class="hk"><span class="kick" id="resol-kick">Look I · reviews</span><span class="kick" id="resol-house"></span></div>
@@ -310,8 +361,8 @@ const HOUSE_FALLBACK = ["MAISON LUMEN","ATELIER NÓR","HOUSE OF VÉLA","STUDIO �
 const POP_BMI = 29;          // real-population reference (US adult average, ~BMI 29)
 const FLOOR = 18.5;          // Milan 2006 rule
 
-const STAKE = [{id:"board",cap:"Board"},{id:"walks",cap:"Body size"},{id:"census",cap:"Ethnicity"},{id:"press",cap:"Press"}];
-const PANEL = {board:"The Board", walks:"All Walks · body size", census:"The Census · ethnicity", press:"The Front Row"};
+const STAKE = [{id:"board",cap:"Board"},{id:"walks",cap:"Body size"},{id:"census",cap:"Ethnicity"}];
+const PANEL = {board:"The Board", walks:"All Walks · body size", census:"The Census · ethnicity"};
 const TIERS = ["Outsider","Emerging","Established","Elite"];
 const TENURE_BASE = 8, TENURE_MAX = 10, RENEW_BAR = 40, TAU = 30, PICK = 5;
 const ROMAN=["","I","II","III","IV","V","VI","VII","VIII","IX","X"];
@@ -319,7 +370,7 @@ const ROMAN=["","I","II","III","IV","V","VI","VII","VIII","IX","X"];
 /* ---------------- state ---------------- */
 const G = {
   brand:"HOUSE", season:1, tier:0,
-  meters:{board:60, press:55, walks:45, census:45},
+  meters:{board:60, walks:45, census:45},
   prev:{L:0, E:0},
   stack:[], booked:[], lastPassed:null, curEvent:null, _lastEvent:null,
   since:{nonWhite:0, plus:0, intersx:0},
@@ -505,10 +556,10 @@ function setNeedles(idp,v){ STAKE.forEach(s=>{ const el=$(idp+"-"+s.id); if(el) 
 /* ---------------- events (occasional, random — not every show) ---------------- */
 const EVENTS = [
   {kind:"milan",  label:"Milan · BMI floor in effect",            style:"rule", floor:true},
-  {kind:"trend",  label:"Inclusivity is in vogue",                style:"boom", divMult:0.5, pressBias:5},
+  {kind:"trend",  label:"Inclusivity is in vogue",                style:"boom", divMult:0.5},
   {kind:"expose", label:"Tokenism exposé — eyes on the house",    style:"rule", advocateStakes:1.8, tokenWatch:true},
   {kind:"slump",  label:"Market slump — the owners are nervous",  style:"rule", boardBias:-3},
-  {kind:"viral",  label:"A look goes viral",                      style:"boom", pressBias:6},
+  {kind:"viral",  label:"A look goes viral — buyers pile in",     style:"boom", boardBias:5},
 ];
 const NOTES = ["The orders are in.","The house holds its breath.","Another season, another runway.",
   "The front row is filling.","Backstage, the rails are loaded.","The lights come up.","Buyers are watching."];
@@ -636,15 +687,14 @@ function scoreCast(cast){
   const whip=Math.abs(L-G.prev.L)+Math.abs(E-G.prev.E);
   const firstPlus=(L>0 && !G.everPlus);
   const newDistinct=(L>=1 && E>=1 && T<Math.min(L,E));
-  let dBoard = 2 + 1.5*I + 2.2*S - 3*divMult*Div + 0.1*(G.meters.press-50) + (e.boardBias||0);   // a star soothes the owners — and stars only come in the ideal
-  let dPress = 2.5 - 2.5*whip + (e.pressBias||0);
+  let dBoard = 2 + 1.5*I + 2.2*S - 3*divMult*Div + (e.boardBias||0);   // a star soothes the owners — and stars only come in the ideal
   let dWalks = (L>=1) ? (L===1? 5 : (L===2? 8 : 9))
              : (M>=2 ? 0 : (M===1 ? -4 : -8));                 // mid-size softens the anger but doesn't satisfy
   let dCensus= (E===0)? -8 : (E===1? 5 : (E===2? 8 : 9));
   if(dWalks<0) dWalks*=stk;                                    // advocacy stakes deepen the cost of ignoring them
   if(E===0) dCensus*=stk;
-  if(e.tokenWatch && oddsRatio()>=2.5){ dBoard-=4; dPress-=4; } // an exposé punishes a tokenised record
-  return {dBoard,dPress,dWalks,dCensus,I,L,E,T,M,S,Div,whip,firstPlus,newDistinct};
+  if(e.tokenWatch && oddsRatio()>=2.5){ dBoard-=4; }            // an exposé punishes a tokenised record
+  return {dBoard,dWalks,dCensus,I,L,E,T,M,S,Div,whip,firstPlus,newDistinct};
 }
 
 /* ---------------- reactions (authored by each panel) ---------------- */
@@ -655,11 +705,6 @@ function reactBoard(r){ let b;
   else if(r.S>=1 && r.Div<=1) b=["The star's name alone moves pre-orders. The board is soothed.","“Book her every season,” the chairman says of the star. Numbers up.","A famous face on the runway — the owners forgive a lot for that.","The star brings press, buyers, calm. The board purrs.","With a star in the lineup, nobody upstairs asks questions."];
   else if(r.Div<=1 && r.I>=4) b=["Buyers purr over the clean, aspirational line.","“Timeless, on-brand, sellable,” the board beams.","Pre-orders spike — this is the look that moves units.","The money side has never looked happier.","“This,” the chairman says, “is the house.”","A quiet, profitable triumph. The board exhales."];
   else b=["Sales hold. The board can work with this.","A measured outing — commercial enough.","“Interesting,” the board says, reserving judgment.","Dependable numbers, if not thrilling.","The buyers nod, slowly.","Nothing scares the owners this season."];
-  return pick(b); }
-function reactPress(r){ let b;
-  if(r.whip>=3) b=["“Last show was Scandinavia, this one's a UN summit — pick a house.”","Critics call it incoherent — “a different brand every season.”","“Whiplash,” reads the review. The Front Row is unimpressed.","“Who ARE they?” the trade press sighs.","The house reads as a panic, not a point of view.","“Identity by committee,” one critic writes."];
-  else if(r.whip===2) b=["A new note this season — the Front Row clocks it.","“They're turning a corner,” the reviews observe.","Some movement; critics watch to see where it goes.","A shift, handled cleanly enough."];
-  else b=["A coherent house, evolving on its own terms — critics approve.","“They know who they are,” the reviews note.","Consistent, considered. The Front Row nods.","“Evolution, not whiplash,” one critic writes, approvingly.","The house reads as a point of view. Rare, that.","Restraint the critics actually respect."];
   return pick(b); }
 function reactWalks(r){ let b;
   if(r.firstPlus) b=["At last — a larger body walks. They're moved.","A historic first. All Walks applauds.","They've waited years for this booking.","“Finally,” the coalition says, and means it.","A real body on the runway. The room exhales."];
@@ -675,7 +720,7 @@ function reactCensus(r){ let b;
   else if(r.T>=1 && r.T>=r.E) b=["Colour on the runway — but only on your larger bodies. They notice.","“Your diversity and your curve model are the same person,” the Census notes.","One face doing two jobs. They clock it.","Representation concentrated onto a token. Half a clap.","They count the faces, and where the colour landed."];
   else b=["Some colour — noted, if modest.","A face or two. They've seen bolder.","“Better,” the Census says, leaving the rest unsaid.","A step in the right direction. They'd like more."];
   return pick(b); }
-const REACT={board:reactBoard, walks:reactWalks, census:reactCensus, press:reactPress};
+const REACT={board:reactBoard, walks:reactWalks, census:reactCensus};
 
 function headlineFor(r){ const B=G.brand;
   if(r.firstPlus) return `“A watershed”: ${B} sends its first larger body down the runway.`;
@@ -691,13 +736,11 @@ function stage(){
   const cast=G.booked.slice(); if(cast.length!==PICK) return;
   const r=scoreCast(cast); const before={...G.meters};
   G.meters.board =clamp(G.meters.board +r.dBoard);
-  G.meters.press =clamp(G.meters.press +r.dPress);
   G.meters.walks =clamp(G.meters.walks +r.dWalks);
   G.meters.census=clamp(G.meters.census+r.dCensus);
-  // cross-panel cascades: a furious coalition damages sales & press; bad press damages sales
-  if(G.meters.walks<TAU){ G.meters.board=clamp(G.meters.board-5); G.meters.press=clamp(G.meters.press-4); }
-  if(G.meters.census<TAU){ G.meters.board=clamp(G.meters.board-5); G.meters.press=clamp(G.meters.press-4); }
-  if(G.meters.press<TAU){ G.meters.board=clamp(G.meters.board-5); }
+  // cross-panel cascade: a furious coalition damages sales
+  if(G.meters.walks<TAU)  G.meters.board=clamp(G.meters.board-5);
+  if(G.meters.census<TAU) G.meters.board=clamp(G.meters.board-5);
   if(r.L>0){ G.everPlus=true; G.cum.seasonsWithPlus++; }
   G.cum.total+=cast.length;
   cast.forEach(m=>{ if(m.nonWhite)G.cum.nonWhite++; G.cum.regions.add(m.region);
@@ -867,9 +910,46 @@ function renderIntroStrip(){
   [makeModel({_ideal:true}),makeModel({_ideal:true}),makeModel({plus:true,nonWhite:true}),makeModel({_ideal:true}),makeModel({nonWhite:true})]
     .forEach(m=>h.insertAdjacentHTML("beforeend",figWrap(m)));
 }
-function begin(){ const raw=$("brand-input").value.trim(); G.brand=(raw||pick(HOUSE_FALLBACK)).toUpperCase(); show("season"); renderSeason(); Tutorial.maybeStart(); }
+function begin(){ const raw=$("brand-input").value.trim(); G.brand=(raw||pick(HOUSE_FALLBACK)).toUpperCase(); show("season"); renderSeason(); Briefing.show(()=>Tutorial.maybeStart()); }
+
+/* ---------------- appointment briefing: animated welcome before the tutorial ---------------- */
+const Briefing=(function(){
+  let cb=null, autoT=null;
+  function show(onDone){
+    cb=onDone;
+    const B=escHTML(G.brand);
+    $("brief").classList.remove("done"); $("brief").style.display="none";
+    $("env-wrap").style.display="flex"; $("envelope").classList.remove("open");
+    $("env-to").innerHTML=`to \u00b7 the new casting director<br><b>${B}</b>`;
+    $("env-seal").textContent=(G.brand[0]||"M").toUpperCase();
+    $("brief-veil").classList.add("show");
+    autoT=setTimeout(open, 3200);                             // opens itself if the player just watches
+  }
+  function open(){
+    clearTimeout(autoT);
+    const env=$("envelope"); if(env.classList.contains("open")) return;
+    env.classList.add("open");
+    setTimeout(()=>{ $("env-wrap").style.display="none"; renderLetter(); }, 980);
+  }
+  function renderLetter(){
+    const B=escHTML(G.brand);
+    $("brief").style.display="block";
+    $("brief").innerHTML=`
+      <div class="bk"><span class="kick">${B}</span><span class="kick">your appointment</span></div>
+      <p class="bl bt" style="animation-delay:.2s">Welcome. You've just been hired as the casting director of <em>${B}</em>.</p>
+      <p class="bl" style="animation-delay:1.2s">Each season, you choose the models who walk for the house — the faces and bodies that will speak for it.</p>
+      <p class="bl" style="animation-delay:2.2s">Keep <b>the Board</b> happy: the money has to keep coming.</p>
+      <p class="bl" style="animation-delay:3.2s">And try not to enrage the advocates — <b>body size</b> and <b>ethnic diversity</b> are watching every lineup you send out.</p>
+      <p class="bl bs" style="animation-delay:4.2s">Good luck. Let's see how you shape the world of fashion.</p>
+      <button class="btn bl" style="animation-delay:4.9s" onclick="Briefing.done(event)">Take the job <span class="ar">→</span></button>`;
+  }
+  function skip(){ $("brief").classList.add("done"); }               // tap: reveal the whole letter at once
+  function done(e){ if(e) e.stopPropagation(); $("brief-veil").classList.remove("show"); const f=cb; cb=null; if(f) f(); }
+  return {show, open, skip, done};
+})();
+window.Briefing=Briefing;
 function restart(){
-  Object.assign(G,{ season:1,tier:0,meters:{board:60,press:55,walks:45,census:45}, prev:{L:0,E:0},
+  Object.assign(G,{ season:1,tier:0,meters:{board:60,walks:45,census:45}, prev:{L:0,E:0},
     stack:[],booked:[],curEvent:null,_lastEvent:null, since:{nonWhite:0,plus:0,intersx:0},
     everPlus:false,allCast:[],hist:[],milanSeen:false,
     cum:{total:0,nonWhite:0,plus:0,plusNonWhite:0,plusWhite:0,nonplusNonWhite:0,nonplusWhite:0,regions:new Set(),seasonsWithPlus:0}, firedBy:null,_end:false,_busy:false,_recorded:false });
@@ -897,8 +977,8 @@ const Tutorial = (function(){
       kick:"The casting call", title:"Read the body. Then decide.",
       body:"Every model arrives as a card — read it like a casting sheet. <b>BMI</b> sits top-right, with a scale showing where that body sits between the industry floor and the average person. <b>Origin</b> and height run under the name. The <b>body, skin tone, hair and eyes</b> you read off the figure itself. Swipe right to book, left to pass — five make a show." },
     { tgt:()=>$("gauges"),
-      kick:"The four panels", title:"Four people are watching.",
-      body:"Your five picks please \u2014 or annoy \u2014 four judges. They never hand you a score. Each needle just swings: left is trouble, right is pleased. You read the room, not a scoreboard. Meet them." },
+      kick:"The three panels", title:"Three panels are watching.",
+      body:"Your five picks please \u2014 or annoy \u2014 three judges. They never hand you a score. Each needle just swings: left is trouble, right is pleased. You read the room, not a scoreboard. Meet them." },
     { tgt:()=>gauge(0),
       kick:"The Board", title:"The <em>Board</em> \u2014 the money.",
       body:"The owners who bankroll the show (the <b>Board</b> needle). They want the look they can sell \u2014 sleek, conventional, aspirational. Stray too far and they fret over the order book. A <b>\u2605 star</b> booking always calms them \u2014 but notice who gets to be a star." },
@@ -908,12 +988,9 @@ const Tutorial = (function(){
     { tgt:()=>gauge(2),
       kick:"The Census", title:"The <em>Census</em> \u2014 representation.",
       body:"The diversity body (the <b>Ethnicity</b> needle). They want a cast that looks like the world \u2014 models of colour, a real spread of origins. An all-white lineup never goes unnoticed." },
-    { tgt:()=>gauge(3),
-      kick:"The Front Row", title:"The <em>Front Row</em> \u2014 the press.",
-      body:"The critics (the <b>Press</b> needle). They reward a house with a clear point of view and punish whiplash \u2014 a wildly different lineup every season reads as panic, not vision." },
     { tgt:()=>$("gauges"), last:true,
       kick:"The catch", title:"They don\u2019t <em>agree</em>.",
-      body:"And they never will. What delights one panel can sink another \u2014 and you get only <b>five slots a season</b> to keep all four happy at once. Hold every needle out of the red for as long as you can. That\u2019s the job." },
+      body:"And they never will. What delights one panel can sink another \u2014 and you get only <b>five slots a season</b> to keep all three happy at once. Hold every needle out of the red for as long as you can. That\u2019s the job." },
   ];
 
   function build(){
