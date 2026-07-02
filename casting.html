@@ -95,7 +95,7 @@
   .cspec{font-family:var(--ui); font-weight:600; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin-top:4px}
   .bmibar{display:block; width:100%; height:auto; margin-top:9px}
   .bmibar .bmit{font-family:var(--ui); font-weight:700; font-size:7.5px; letter-spacing:.07em; text-transform:uppercase; fill:var(--ink2)}
-  .swipe-tag{position:absolute; top:16px; font-family:var(--serif); font-weight:900; font-size:24px; text-transform:uppercase; padding:3px 11px; border:2px solid; opacity:0; pointer-events:none}
+  .swipe-tag{position:absolute; top:58px; font-family:var(--serif); font-weight:900; font-size:24px; text-transform:uppercase; padding:3px 11px; border:2px solid; opacity:0; pointer-events:none}
   .swipe-tag.book{right:12px; color:var(--good); border-color:var(--good); transform:rotate(11deg)}
   .swipe-tag.pass{left:12px; color:var(--ink); border-color:var(--ink); transform:rotate(-11deg)}
   .withdrawn{position:absolute; inset:auto 12px 70px; text-align:center; font-family:var(--ui); font-weight:800; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--paper); background:var(--ink); padding:5px}
@@ -108,6 +108,10 @@
   .ctrl.book{border-color:var(--good); color:var(--good); font-weight:700}
   .ctrl.book:hover{background:var(--good); color:#fff}.ctrl.pass:hover{background:var(--ink); color:var(--paper)}
   .ctrl:disabled{opacity:.25; cursor:not-allowed; transform:none}
+  .undo{display:block; margin:0 auto 2px; background:none; border:none; font-family:var(--ui); font-weight:700; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); text-decoration:underline; text-underline-offset:3px; padding:4px 8px}
+  .undo:hover{color:var(--ink)}
+  .keyhint{display:none; text-align:center; font-family:var(--ui); font-weight:700; font-size:8.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink3); margin-top:2px}
+  @media(hover:hover) and (pointer:fine){ .keyhint{display:block} }
 
   /* figure */
   .figwrap{display:flex; align-items:flex-end; justify-content:center}
@@ -260,6 +264,8 @@
         <button class="ctrl pass" id="btn-pass" aria-label="Pass" onclick="GAME.swipe(-1)">✕</button>
         <button class="ctrl book" id="btn-book" aria-label="Book" onclick="GAME.swipe(1)">✓</button>
       </div>
+      <button class="undo" id="btn-undo" style="visibility:hidden" onclick="GAME.undo()">↩ undo pass</button>
+      <div class="keyhint">keys · ← pass · book →</div>
     </div>
   </section>
 
@@ -315,7 +321,7 @@ const G = {
   brand:"HOUSE", season:1, tier:0,
   meters:{board:60, press:55, walks:45, census:45},
   prev:{L:0, E:0},
-  stack:[], booked:[], curEvent:null, _lastEvent:null,
+  stack:[], booked:[], lastPassed:null, curEvent:null, _lastEvent:null,
   since:{nonWhite:0, plus:0, intersx:0},
   everPlus:false, allCast:[], hist:[], milanSeen:false,
   cum:{total:0, nonWhite:0, plus:0, plusNonWhite:0, plusWhite:0, nonplusNonWhite:0, nonplusWhite:0, regions:new Set(), seasonsWithPlus:0},
@@ -527,7 +533,7 @@ function renderSeason(){
     ts.innerHTML=`<div class="tag ${e.style==='boom'?'boom':''}">${e.label}<span class="x">${e.style==='boom'?'+':'§'}</span></div>`;
   }
   renderGauges("gauges","g",G.meters);
-  resetStream(); G.booked=[];
+  resetStream(); G.booked=[]; G.lastPassed=null;
   renderLookbook(); updateCount(); renderDeck();
 }
 
@@ -560,7 +566,8 @@ function renderDeck(){
   const t=document.createElement("div"); t.innerHTML=cardHTML(G.stack[0]); const top=t.firstElementChild;
   deck.appendChild(top); attachSwipe(top, G.stack[0]); updateButtons();
 }
-function updateButtons(){ const none=G.stack.length===0||G.booked.length>=PICK; $("btn-pass").disabled=none; $("btn-book").disabled=none; }
+function updateButtons(){ const none=G.stack.length===0||G.booked.length>=PICK; $("btn-pass").disabled=none; $("btn-book").disabled=none;
+  $("btn-undo").style.visibility=(G.lastPassed&&!none)?"visible":"hidden"; }
 function renderLookbook(){
   const host=$("slots"); host.innerHTML="";
   for(let i=0;i<PICK;i++){ const s=document.createElement("div"); s.className="lb-cell";
@@ -606,7 +613,8 @@ function commit(el, model, dir){
 }
 function book(model){ G.booked.push(G.stack.shift()); refill(); renderLookbook(); updateCount();
   if(G.booked.length>=PICK){ renderDeck(); setTimeout(stage,360); } else renderDeck(); }
-function pass(){ G.stack.shift(); refill(); renderDeck(); }
+function pass(){ G.lastPassed=G.stack.shift(); refill(); renderDeck(); }
+function undoPass(){ if(G._busy||!G.lastPassed) return; G.stack.unshift(G.lastPassed); G.lastPassed=null; renderDeck(); }
 function unbook(i){ const m=G.booked.splice(i,1)[0]; G.stack.unshift(m); renderLookbook(); updateCount(); renderDeck(); }
 function swipeBtn(dir){ if(G._busy||G.stack.length===0||G.booked.length>=PICK) return;
   const top=$("deck").querySelector(".card:not(.behind)"); if(!top) return; commit(top, G.stack[0], dir); }
@@ -1021,7 +1029,7 @@ const Tutorial = (function(){
 })();
 window.Tutorial = Tutorial;
 
-window.GAME={ begin, swipe:swipeBtn, next, reveal, restart, skipRunway };
+window.GAME={ begin, swipe:swipeBtn, undo:undoPass, next, reveal, restart, skipRunway };
 renderIntroStrip(); renderPast();
 </script>
 </body>
