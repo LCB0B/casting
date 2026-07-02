@@ -405,17 +405,24 @@ const Sfx=(function(){
   function mNote(fr,t,dur,peak,type){ const o=ctx.createOscillator(),g=ctx.createGain();
     o.type=type||"triangle"; o.frequency.value=fr; env(g,t,dur*.4,dur,peak);
     o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+dur*1.7); }
+  function mSynth(fr,t,dur,peak,cutoff,attack){              // two detuned saws through a lowpass — the 90s synth voice
+    const f=ctx.createBiquadFilter(); f.type="lowpass"; f.frequency.setValueAtTime(cutoff,t);
+    f.frequency.exponentialRampToValueAtTime(Math.max(200,cutoff*.35),t+dur);
+    const g=ctx.createGain(); env(g,t,attack||.012,dur,peak);
+    for(const det of [-8,8]){ const o=ctx.createOscillator(); o.type="sawtooth";
+      o.frequency.value=fr; o.detune.value=det; o.connect(f); o.start(t); o.stop(t+dur*1.7); }
+    f.connect(g).connect(ctx.destination); }
   function mPlay(st,t){
     const V=VAMP[(st>>4)&1];                                 // 2 bars Am7, 2 bars Dm7
     if(st%4===0) mKick(t);                                   // four on the floor
     if(st%4===2) mHat(t,.09,.016);                           // open hat on the offbeat
     else if(st%2===0) mHat(t,.02,.006);                      // whisper ticks between
-    const bp=st%8;                                           // house bass: root with octave pops
-    if(bp===0||bp===4) mNote(V.root,t,SPB*1.6,.042,"triangle");
-    if(bp===3||bp===7) mNote(V.root*2,t,SPB*1.2,.032,"triangle");
-    if(bp===2||bp===5)                                       // syncopated piano-ish stab
-      for(const n of V.chord) mNote(n,t,SPB*1.1,.013);
-    if(st%16===0){ mNote(V.root*2,t,SPB*15,.011,"sine"); mNote(V.root*3,t,SPB*15,.009,"sine"); }  // airy strings
+    const bp=st%8;                                           // house bass: root with octave pops, saw growl under
+    if(bp===0||bp===4){ mNote(V.root,t,SPB*1.6,.04,"triangle"); mSynth(V.root,t,SPB*1.4,.02,420); }
+    if(bp===3||bp===7) mNote(V.root*2,t,SPB*1.2,.03,"triangle");
+    if(bp===2||bp===5)                                       // syncopated synth stab
+      for(const n of V.chord) mSynth(n,t,SPB*1.15,.011,2400);
+    if(st%16===0){ mSynth(V.root*2,t,SPB*15,.009,950,SPB*4); mSynth(V.root*3,t,SPB*15,.007,950,SPB*4); }  // synth-string pad
   }
   function musicStart(){ mWanted=true; if(!on) return; const c=ac(); if(!c||mTimer) return;
     mStep=0; mNext=c.currentTime+.1;
