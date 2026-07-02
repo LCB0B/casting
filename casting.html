@@ -46,6 +46,8 @@
   .top .h{font-family:var(--ui); font-weight:900; font-size:16px; letter-spacing:.08em; text-transform:uppercase}
   .helpbtn{position:absolute; right:0; top:1px; width:22px; height:22px; border-radius:50%; border:1.2px solid var(--ink2); background:none; color:var(--ink2); font-family:var(--ui); font-weight:800; font-size:11px; line-height:1; padding:0; transition:color .2s, border-color .2s}
   .helpbtn:hover{color:var(--ink); border-color:var(--ink)}
+  .sndbtn{right:30px}
+  .sndbtn.off{opacity:.35; text-decoration:line-through}
 
   .gauges{display:grid; grid-template-columns:repeat(3,1fr); gap:0 14px; margin:8px 0 2px; padding:0 20px}
   .gauge{text-align:center}
@@ -272,7 +274,7 @@
 
   <!-- SEASON -->
   <section id="season" class="screen">
-    <div class="top"><div class="h" id="house-name">House</div><button class="helpbtn" onclick="Tutorial.start()" title="How to play" aria-label="How to play">?</button></div>
+    <div class="top"><div class="h" id="house-name">House</div><button class="helpbtn sndbtn" id="snd-btn" onclick="GAME.sound()" title="Sound on/off" aria-label="Sound on/off">♪</button><button class="helpbtn" onclick="Tutorial.start()" title="How to play" aria-label="How to play">?</button></div>
     <div class="gauges" id="gauges"></div>
     <div id="tag-slot"></div>
 
@@ -363,6 +365,40 @@ const G = {
   cum:{total:0, nonWhite:0, plus:0, plusNonWhite:0, plusWhite:0, nonplusNonWhite:0, nonplusWhite:0, regions:new Set(), seasonsWithPlus:0},
   firedBy:null, _end:false, _floor:false, _runTimer:null, _runCb:null, _busy:false
 };
+
+/* ---------------- sound (Web Audio, synthesized — no files) ---------------- */
+const Sfx=(function(){
+  let ctx=null, on=true;
+  try{ on = localStorage.getItem("hoc_snd")!=="0"; }catch(_){}
+  function ac(){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null;
+    if(!ctx) ctx=new AC(); if(ctx.state==="suspended") ctx.resume(); return ctx; }
+  function env(g,t0,a,d,peak){ g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(peak,t0+a); g.gain.exponentialRampToValueAtTime(0.0001,t0+a+d); }
+  function tone(freq,dur,type,peak,when,slide){ if(!on) return; const c=ac(); if(!c) return; const t0=c.currentTime+(when||0);
+    const o=c.createOscillator(), g=c.createGain(); o.type=type||"sine"; o.frequency.setValueAtTime(freq,t0);
+    if(slide) o.frequency.exponentialRampToValueAtTime(slide,t0+dur);
+    env(g,t0,.005,dur,peak||.07); o.connect(g).connect(c.destination); o.start(t0); o.stop(t0+dur+.05); }
+  function noise(dur,peak,fc,when){ if(!on) return; const c=ac(); if(!c) return; const t0=c.currentTime+(when||0);
+    const len=Math.max(1,Math.floor(c.sampleRate*dur)), buf=c.createBuffer(1,len,c.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+    const src=c.createBufferSource(); src.buffer=buf;
+    const f=c.createBiquadFilter(); f.type="bandpass"; f.frequency.value=fc||1800; f.Q.value=.8;
+    const g=c.createGain(); env(g,t0,.005,dur,peak||.05);
+    src.connect(f).connect(g).connect(c.destination); src.start(t0); }
+  return {
+    unlock(){ ac(); },
+    pass(){ noise(.08,.045,900); tone(220,.07,"triangle",.035); },
+    book(){ tone(660,.09,"sine",.06); tone(880,.13,"sine",.06,.07); },
+    deal(){ noise(.05,.028,2400); },
+    deny(){ tone(160,.16,"square",.035); },
+    envelope(){ noise(.32,.05,1200); tone(520,.2,"sine",.028,.15,780); },
+    flash(){ noise(.05,.08,3200); noise(.05,.055,3200,.12); noise(.04,.045,3200,.22); },
+    walk(){ tone(392,.12,"sine",.05); tone(494,.12,"sine",.05,.12); tone(587,.18,"sine",.05,.24); },
+    good(){ tone(523,.12,"sine",.055); tone(659,.12,"sine",.055,.1); tone(784,.22,"sine",.055,.2); },
+    bad(){ tone(233,.3,"sawtooth",.04); tone(175,.4,"sawtooth",.04,.12); },
+    toggle(){ on=!on; try{ localStorage.setItem("hoc_snd",on?"1":"0"); }catch(_){} if(on) ac(); return on; },
+    get on(){ return on; }
+  };
+})();
 
 /* ---------------- helpers ---------------- */
 const $ = id => document.getElementById(id);
@@ -635,17 +671,18 @@ function snapBack(el){ el.style.transition="transform .25s ease"; el.style.trans
   const tb=el.querySelector(".swipe-tag.book"), tp=el.querySelector(".swipe-tag.pass"); if(tb)tb.style.opacity=0; if(tp)tp.style.opacity=0;
   setTimeout(()=>{ if(el) el.style.transition=""; },260); }
 function commit(el, model, dir){
-  if(dir>0 && blockedNow(model)){ el.classList.add("shake"); setTimeout(()=>el.classList.remove("shake"),420);
+  if(dir>0 && blockedNow(model)){ Sfx.deny(); el.classList.add("shake"); setTimeout(()=>el.classList.remove("shake"),420);
     el.style.transition="transform .2s ease"; el.style.transform=""; const tb=el.querySelector(".swipe-tag.book"); if(tb) tb.style.opacity=0; return; }
   G._busy=true;
   el.style.transition="transform .34s cubic-bezier(.4,0,.5,1), opacity .34s";
   el.style.transform=`translateX(${dir*150}%) rotate(${dir*20}deg)`; el.style.opacity="0";
+  (dir>0?Sfx.book:Sfx.pass)();
   setTimeout(()=>{ G._busy=false; dir>0 ? book(model) : pass(); }, 320);
 }
 function book(model){ G.booked.push(G.stack.shift()); refill(); renderLookbook(); updateCount();
   if(G.booked.length>=PICK){ renderDeck(); setTimeout(stage,360); } else renderDeck(); }
 function pass(){ G.lastPassed=G.stack.shift(); refill(); renderDeck(); }
-function undoPass(){ if(G._busy||!G.lastPassed) return; G.stack.unshift(G.lastPassed); G.lastPassed=null; renderDeck(); }
+function undoPass(){ if(G._busy||!G.lastPassed) return; Sfx.deal(); G.stack.unshift(G.lastPassed); G.lastPassed=null; renderDeck(); }
 function unbook(i){ const m=G.booked.splice(i,1)[0]; G.stack.unshift(m); renderLookbook(); updateCount(); renderDeck(); }
 function swipeBtn(dir){ if(G._busy||G.stack.length===0||G.booked.length>=PICK) return;
   const top=$("deck").querySelector(".card:not(.behind)"); if(!top) return; commit(top, G.stack[0], dir); }
@@ -737,8 +774,8 @@ function playRunway(cast, cb){
   const w=$("walkers"); w.innerHTML="";
   cast.forEach((m,i)=>{ const d=document.createElement("div"); d.className="walker"; d.style.animationDelay=(i*0.12)+"s";
     d.innerHTML=`<div class="fig walking" style="animation-delay:${(-i*0.1).toFixed(2)}s">${figure(m)}</div>`; w.appendChild(d); });
-  $("stamp").classList.remove("in"); $("flash").classList.remove("pop"); $("runway-veil").classList.add("show");
-  setTimeout(()=>$("flash").classList.add("pop"),1150); setTimeout(()=>$("stamp").classList.add("in"),1300);
+  $("stamp").classList.remove("in"); $("flash").classList.remove("pop"); $("runway-veil").classList.add("show"); Sfx.walk();
+  setTimeout(()=>{ $("flash").classList.add("pop"); Sfx.flash(); },1150); setTimeout(()=>$("stamp").classList.add("in"),1300);
   G._runCb=cb; G._runTimer=setTimeout(finishRunway,2500);
 }
 function skipRunway(){ if($("runway-veil").classList.contains("show")) finishRunway(); }
@@ -842,6 +879,7 @@ function reveal(){
     <a class="btn line" href="https://www.pnas.org/doi/10.1073/pnas.2602380123" target="_blank" rel="noopener" style="text-decoration:none">Read the paper <span class="ar">→</span></a></div>`;
 
   let cls="", picto="", h="", sub="", body="";
+  if(end.kind==="fired") Sfx.bad(); else if(end.kind==="everywalk") Sfx.good();
   if(end.kind==="fired"){
     cls="fired";
     const why={ board:["Replaced","The Board let you go.","The collection stopped selling and the owners panicked — you pushed the runway further than the house could bank."],
@@ -876,7 +914,7 @@ function renderIntroStrip(){
     .forEach(m=>h.insertAdjacentHTML("beforeend",figWrap(m)));
 }
 function rollHouse(){ G.brand=pick(HOUSES); }   // kept secret until the letter arrives
-function begin(){ show("season"); renderSeason(); Briefing.show(()=>Tutorial.maybeStart()); }
+function begin(){ Sfx.unlock(); show("season"); renderSeason(); Briefing.show(()=>Tutorial.maybeStart()); }
 
 /* ---------------- appointment briefing: animated welcome before the tutorial ---------------- */
 const Briefing=(function(){
@@ -894,7 +932,7 @@ const Briefing=(function(){
   function open(){
     clearTimeout(autoT);
     const env=$("envelope"); if(env.classList.contains("open")) return;
-    env.classList.add("open");
+    env.classList.add("open"); Sfx.envelope();
     setTimeout(()=>{ $("env-wrap").style.display="none"; renderLetter(); }, 980);
   }
   function renderLetter(){
@@ -1065,7 +1103,9 @@ const Tutorial = (function(){
 })();
 window.Tutorial = Tutorial;
 
-window.GAME={ begin, swipe:swipeBtn, undo:undoPass, next, reveal, restart, skipRunway };
+function toggleSound(){ const on=Sfx.toggle(); const b=$("snd-btn"); if(b) b.classList.toggle("off",!on); }
+window.GAME={ begin, swipe:swipeBtn, undo:undoPass, next, reveal, restart, skipRunway, sound:toggleSound };
+if(!Sfx.on) $("snd-btn").classList.add("off");
 renderIntroStrip(); rollHouse();
 </script>
 </body>
