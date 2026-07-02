@@ -62,8 +62,6 @@
   .tag{display:flex; gap:8px; align-items:center; font-family:var(--ui); font-weight:800; font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:5px 9px; margin-top:6px; border:1px solid var(--ink)}
   .tag.boom{border-color:var(--accent); color:var(--accent)}
   .tag .x{font-family:var(--serif); font-weight:400; font-size:12px; opacity:.6; margin-left:auto}
-  .cert{display:flex; align-items:center; gap:9px; font-family:var(--ui); font-size:11px; color:var(--ink2); margin-top:6px; cursor:pointer}
-  .cert input{width:15px; height:15px; accent-color:var(--ink)}
 
   /* lookbook */
   .lookbook{margin:8px 0 2px}
@@ -246,7 +244,6 @@
     <div class="gauges" id="gauges"></div>
     <div class="lookline"><div class="looknum"><span>look</span><span id="look-n">I</span></div><div class="note" id="note"></div></div>
     <div id="tag-slot"></div>
-    <label class="cert" id="cert" style="display:none"><input type="checkbox" id="cert-box"> medical certificate on file</label>
 
     <div class="lookbook">
       <div class="lb-head"><span class="kick">The show</span><span class="kick" id="count">0 / 5</span></div>
@@ -316,7 +313,7 @@ const G = {
   prev:{L:0, E:0},
   stack:[], booked:[], curEvent:null, _lastEvent:null,
   since:{nonWhite:0, plus:0, intersx:0},
-  everPlus:false, allCast:[], hist:[], milanSeen:false, parisSeen:false,
+  everPlus:false, allCast:[], hist:[], milanSeen:false,
   cum:{total:0, nonWhite:0, plus:0, plusNonWhite:0, plusWhite:0, nonplusNonWhite:0, nonplusWhite:0, regions:new Set(), seasonsWithPlus:0},
   firedBy:null, _end:false, _floor:false, _runTimer:null, _runCb:null, _busy:false
 };
@@ -495,7 +492,6 @@ function setNeedles(idp,v){ STAKE.forEach(s=>{ const el=$(idp+"-"+s.id); if(el) 
 /* ---------------- events (occasional, random — not every show) ---------------- */
 const EVENTS = [
   {kind:"milan",  label:"Milan · BMI floor in effect",            style:"rule", floor:true},
-  {kind:"paris",  label:"Paris · voluntary medical certificate",  style:"rule", cert:true},
   {kind:"trend",  label:"Inclusivity is in vogue",                style:"boom", divMult:0.5, pressBias:5},
   {kind:"expose", label:"Tokenism exposé — eyes on the house",    style:"rule", advocateStakes:1.8, tokenWatch:true},
   {kind:"slump",  label:"Market slump — the owners are nervous",  style:"rule", boardBias:-3},
@@ -516,12 +512,11 @@ function renderSeason(){
   G.curEvent=rollEvent();
   $("house-name").textContent=G.brand; $("prestige").innerHTML=`Prestige · <b>${TIERS[G.tier]}</b>`;
   $("look-n").textContent=ROMAN[G.season]; $("note").textContent=pick(NOTES);
-  G._floor=false; $("cert").style.display="none"; $("cert-box").checked=false;
+  G._floor=false;
   const ts=$("tag-slot"); ts.innerHTML="";
   if(G.curEvent){
     const e=G.curEvent;
     if(e.kind==="milan"){ G._floor=true; G.milanSeen=true; }
-    if(e.kind==="paris"){ $("cert").style.display="flex"; G.parisSeen=true; }
     ts.innerHTML=`<div class="tag ${e.style==='boom'?'boom':''}">${e.label}<span class="x">${e.style==='boom'?'+':'§'}</span></div>`;
   }
   renderGauges("gauges","g",G.meters);
@@ -531,7 +526,7 @@ function renderSeason(){
 
 /* ---------------- deck (swipe) ---------------- */
 /* Tiny BMI context scale: most players have no feel for raw BMI numbers, so the card
-   shows where this body sits between the industry floor (18.5) and a real person (~29). */
+   shows where this body sits between the industry floor (18.5) and the average person (~29). */
 function bmiBar(m){
   const LO=15, HI=34, X=v=>4+(clamp(v,LO,HI)-LO)/(HI-LO)*192;
   const xm=X(m.bmi).toFixed(1), xf=X(FLOOR).toFixed(1), xp=X(POP_BMI).toFixed(1);
@@ -541,7 +536,7 @@ function bmiBar(m){
     <line x1="${xf}" x2="${xf}" y1="3" y2="11" stroke="var(--ink2)" stroke-width="1"/>
     <line x1="${xp}" x2="${xp}" y1="3" y2="11" stroke="var(--ink2)" stroke-width="1"/>
     <text x="${xf}" y="21" text-anchor="middle" class="bmit">${FLOOR} · floor</text>
-    <text x="${xp}" y="21" text-anchor="middle" class="bmit">${POP_BMI} · real people</text>
+    <text x="${xp}" y="21" text-anchor="middle" class="bmit">${POP_BMI} · avg. person</text>
     <circle cx="${xm}" cy="7" r="3.4" fill="${col}"/></svg>`;
 }
 function cardHTML(m){
@@ -690,7 +685,7 @@ function stage(){
     else { m.nonWhite?G.cum.nonplusNonWhite++:G.cum.nonplusWhite++; } });
   const medBMI=median(cast.map(m=>m.bmi)), nwPct=G.cum.nonWhite/G.cum.total*100;
   const divIndex=clamp(14+9*G.cum.seasonsWithPlus+1.1*nwPct+2.2*G.cum.regions.size);
-  G.hist.push({season:G.season,median:medBMI,divIndex,Div:r.Div,whip:r.whip,L:r.L,E:r.E,milan:G._floor,paris:(G.curEvent&&G.curEvent.kind==="paris")});
+  G.hist.push({season:G.season,median:medBMI,divIndex,Div:r.Div,whip:r.whip,L:r.L,E:r.E,milan:G._floor});
   cast.forEach(m=>G.allCast.push(m));
   G.prev={L:r.L, E:r.E};
   playRunway(cast, ()=>showResolution(r,before));
@@ -740,7 +735,7 @@ function sparkline(series, opts){
   const dots=series.map(p=>`<circle cx="${x(p.season).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="3" fill="${opts.color}"/>`).join("");
   const yl=(opts.ticks||[]).map(t=>`<text x="${padL-6}" y="${y(t)+3}" text-anchor="end" font-family="Archivo" font-size="9" fill="#8C8884">${t}</text><line x1="${padL}" x2="${W-padR}" y1="${y(t)}" y2="${y(t)}" stroke="#E1DFD9" stroke-width="1"/>`).join("");
   let ref=""; if(opts.ref!=null) ref=`<line x1="${padL}" x2="${W-padR}" y1="${y(opts.ref)}" y2="${y(opts.ref)}" stroke="${opts.refColor}" stroke-width="1.5" stroke-dasharray="6 4"/><text x="${W-padR}" y="${y(opts.ref)-5}" text-anchor="end" font-family="Archivo" font-weight="700" font-size="9" fill="${opts.refColor}">${opts.refLabel}</text>`;
-  const marks=series.filter(p=>p.milan||p.paris).map(p=>{ const isM=p.milan,lbl=isM?"MILAN":"PARIS",c=isM?"#E6007E":"#8C8884"; return `<line x1="${x(p.season)}" x2="${x(p.season)}" y1="${padT}" y2="${H-padB}" stroke="${c}" stroke-width="1" stroke-dasharray="2 2" opacity=".6"/><text x="${x(p.season)}" y="${H-6}" text-anchor="middle" font-family="Archivo" font-size="8" fill="${c}">${lbl}</text>`; }).join("");
+  const marks=series.filter(p=>p.milan).map(p=>{ const lbl="MILAN",c="#E6007E"; return `<line x1="${x(p.season)}" x2="${x(p.season)}" y1="${padT}" y2="${H-padB}" stroke="${c}" stroke-width="1" stroke-dasharray="2 2" opacity=".6"/><text x="${x(p.season)}" y="${H-6}" text-anchor="middle" font-family="Archivo" font-size="8" fill="${c}">${lbl}</text>`; }).join("");
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img">${yl}${ref}${marks}<polyline points="${pts}" fill="none" stroke="${opts.color}" stroke-width="2.5" stroke-linejoin="round"/>${dots}</svg>`;
 }
 function classifyEnding(){
@@ -790,13 +785,13 @@ function pictoEveryWalk(){
 function reveal(){
   show("reveal");
   const B=G.brand, series=G.hist, end=classifyEnding();
-  const divS=series.map(p=>({season:p.season,value:p.divIndex,milan:p.milan,paris:p.paris}));
-  const medS=series.map(p=>({season:p.season,value:p.median,milan:p.milan,paris:p.paris}));
+  const divS=series.map(p=>({season:p.season,value:p.divIndex,milan:p.milan}));
+  const medS=series.map(p=>({season:p.season,value:p.median,milan:p.milan}));
   const gap=(POP_BMI-median(series.map(s=>s.median))).toFixed(0);
   const figs=G.allCast.map(m=>figWrap(m)).join("");
   const parade=G.allCast.length?`<div class="parade"><div class="pcap">Everyone who walked for ${B} — hover to pause</div><div class="parade-track">${figs}${figs}</div></div>`:"";
   const charts=`<div class="chartbox"><p class="ct">Your diversity index <span>the story the press told</span></p>${sparkline(divS,{lo:0,hi:100,color:'#141312',ticks:[0,50,100],h:120})}</div>
-    <div class="chartbox"><p class="ct">Median body on your runway · BMI <span>what actually walked</span></p>${sparkline(medS,{lo:14,hi:32,color:'#141312',ticks:[16,22,28],ref:POP_BMI,refColor:'#E6007E',refLabel:'real people ≈ '+POP_BMI,h:130})}</div>`;
+    <div class="chartbox"><p class="ct">Median body on your runway · BMI <span>what actually walked</span></p>${sparkline(medS,{lo:14,hi:32,color:'#141312',ticks:[16,22,28],ref:POP_BMI,refColor:'#E6007E',refLabel:'avg. person ≈ '+POP_BMI,h:130})}</div>`;
   const src=`<p class="src">Every number mirrors a finding in Boucherie et al., “Cultural evolution of beauty standards,” <em>PNAS</em> 2026 · <a href="https://www.pnas.org/doi/10.1073/pnas.2602380123" target="_blank" rel="noopener">doi:10.1073/pnas.2602380123</a></p>`;
   const actions=`<div class="end-actions"><button class="btn" onclick="GAME.restart()">Cast again <span class="ar">→</span></button>
     <a class="btn line" href="https://www.pnas.org/doi/10.1073/pnas.2602380123" target="_blank" rel="noopener" style="text-decoration:none">Read the paper <span class="ar">→</span></a></div>`;
@@ -811,7 +806,7 @@ function reveal(){
     body=`<p class="verdict">${why[2]}</p>${charts}${src}`;
   } else if(end.kind==="standard"){
     picto=pictoStandard(); h=`Business as <em>usual</em>`; sub=`You survived ${G.hist.length} show${G.hist.length===1?"":"s"}. Nothing changed.`;
-    body=`<div class="punch"><div class="big">${gap}<span style="font-size:.4em"> BMI</span></div><div class="cap">The gap between your runway's median body and real people held at ~${gap} BMI points — “diversity” season after season, and the body never moved.</div></div>${charts}
+    body=`<div class="punch"><div class="big">${gap}<span style="font-size:.4em"> BMI</span></div><div class="cap">The gap between your runway's median body and the average person held at ~${gap} BMI points — “diversity” season after season, and the body never moved.</div></div>${charts}
       <p class="verdict">You kept your job by keeping the runway thin and white and feeding the coalitions the bare minimum. The press called it timeless. But this is the engine the study is about — a runway that sells an unreachable body to everyone watching, and the documented cost is real: disordered eating and body dysmorphia, landing hardest on the youngest.</p>${src}
       <p class="src" style="border-top:1px solid var(--line); padding-top:12px">If this subject touches you personally: in the US the National Alliance for Eating Disorders runs a free, clinician-staffed helpline — <strong>1-866-662-1235</strong>, weekdays.</p>`;
   } else if(end.kind==="token"){
@@ -821,7 +816,7 @@ function reveal(){
   } else {
     cls="good"; picto=pictoEveryWalk(); h=`Every <em>walk</em>`; sub=`You made ${G.hist.length} show${G.hist.length===1?"":"s"} — and introduced diversity honestly.`;
     body=`<div class="punch good"><div class="big" style="color:var(--ink)">${end.OR.toFixed(1)}×</div><div class="cap">A larger body was just ${end.OR.toFixed(1)}× more likely to be non-white than white — no concentration. The industry runs at 4.5×.</div></div>${charts}
-      <p class="verdict">You brought diversity in <strong>step by step</strong>, and spread it across <strong>different bodies</strong> — size on some, colour on others, no single model made to carry the whole story. The median on your runway actually moved toward real people. This is the hard version, and the rare one. The house survived it anyway.</p>${src}`;
+      <p class="verdict">You brought diversity in <strong>step by step</strong>, and spread it across <strong>different bodies</strong> — size on some, colour on others, no single model made to carry the whole story. The median on your runway actually moved toward the average person. This is the hard version, and the rare one. The house survived it anyway.</p>${src}`;
   }
   $("reveal-inner").innerHTML=`<div class="${cls}">
     <div class="rv-kick"><span class="kick">${B}</span><span class="kick">The record</span></div>
@@ -839,7 +834,7 @@ function begin(){ const raw=$("brand-input").value.trim(); G.brand=(raw||pick(HO
 function restart(){
   Object.assign(G,{ season:1,tier:0,meters:{board:60,press:55,walks:45,census:45}, prev:{L:0,E:0},
     stack:[],booked:[],curEvent:null,_lastEvent:null, since:{nonWhite:0,plus:0,intersx:0},
-    everPlus:false,allCast:[],hist:[],milanSeen:false,parisSeen:false,
+    everPlus:false,allCast:[],hist:[],milanSeen:false,
     cum:{total:0,nonWhite:0,plus:0,plusNonWhite:0,plusWhite:0,nonplusNonWhite:0,nonplusWhite:0,regions:new Set(),seasonsWithPlus:0}, firedBy:null,_end:false,_busy:false });
   renderIntroStrip(); $("brand-input").value=G.brand==="HOUSE"?"":G.brand; show("intro");
 }
@@ -863,7 +858,7 @@ const Tutorial = (function(){
   const steps = [
     { tgt:()=>document.querySelector("#deck .card:not(.behind)"),
       kick:"The casting call", title:"Read the body. Then decide.",
-      body:"Every model arrives as a card — read it like a casting sheet. <b>BMI</b> sits top-right, with a scale showing where that body sits between the industry floor and a real person. <b>Origin</b> and height run under the name. The <b>body, skin tone, hair and eyes</b> you read off the figure itself. Swipe right to book, left to pass — five make a show." },
+      body:"Every model arrives as a card — read it like a casting sheet. <b>BMI</b> sits top-right, with a scale showing where that body sits between the industry floor and the average person. <b>Origin</b> and height run under the name. The <b>body, skin tone, hair and eyes</b> you read off the figure itself. Swipe right to book, left to pass — five make a show." },
     { tgt:()=>$("gauges"),
       kick:"The four panels", title:"Four people are watching.",
       body:"Your five picks please \u2014 or annoy \u2014 four judges. They never hand you a score. Each needle just swings: left is trouble, right is pleased. You read the room, not a scoreboard. Meet them." },
