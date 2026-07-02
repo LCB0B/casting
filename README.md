@@ -12,7 +12,9 @@ spreading representation across distinct bodies is the hard one. That friction i
 
 ## Play
 
-Open `casting.html` in any modern browser. No build step, no dependencies — everything
+Play online: **https://lcb0b.github.io/casting/**
+
+Or open `index.html` in any modern browser. No build step, no dependencies — everything
 (art, animation, logic) lives in the one file.
 
 ## Tech
