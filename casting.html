@@ -454,17 +454,12 @@ function figWrap(m){ const d=(-Math.random()*3).toFixed(2); return `<div class="
 
 /* ---------------- gauges ---------------- */
 function gaugeArc(){
-  /* full half-circle of filled sectors — five pizza slices from red to green.
-     Slices are unstroked (a stroke would outline every edge and hollow out the hub);
-     the pizza cuts are drawn separately and stop short of the centre. */
-  const cx=50,cy=50,r=48;
+  /* half-DONUT: five thick colored ring segments (red -> green) around an open centre */
+  const cx=50,cy=50,R=48,Ri=27;
   const C=["#CC6F5E","#DD9A63","#E3C45F","#A7C063","#5FA567"];
-  const pt=t=>{const a=(180-t*180)*Math.PI/180; return (cx+r*Math.cos(a)).toFixed(1)+" "+(cy-r*Math.sin(a)).toFixed(1);};
-  const slices=C.map((c,i)=>{const t0=Math.max(0,i/5-.004), t1=Math.min(1,(i+1)/5+.004);
-    return `<path d="M ${cx} ${cy} L ${pt(t0)} A ${r} ${r} 0 0 1 ${pt(t1)} Z" fill="${c}"/>`;}).join("");
-  const cuts=[1,2,3,4].map(i=>{const a=(180-i/5*180)*Math.PI/180, c=Math.cos(a), s=Math.sin(a);
-    return `<line x1="${(cx+9*c).toFixed(1)}" y1="${(cy-9*s).toFixed(1)}" x2="${(cx+r*c).toFixed(1)}" y2="${(cy-r*s).toFixed(1)}" stroke="var(--paper)" stroke-width="1.2"/>`;}).join("");
-  return slices+cuts;
+  const pt=(t,r)=>{const a=(180-t*180)*Math.PI/180; return (cx+r*Math.cos(a)).toFixed(1)+" "+(cy-r*Math.sin(a)).toFixed(1);};
+  return C.map((c,i)=>{const t0=i/5, t1=(i+1)/5;
+    return `<path d="M ${pt(t0,R)} A ${R} ${R} 0 0 1 ${pt(t1,R)} L ${pt(t1,Ri)} A ${Ri} ${Ri} 0 0 0 ${pt(t0,Ri)} Z" fill="${c}" stroke="var(--paper)" stroke-width="1"/>`;}).join("");
 }
 const needleAngle=v=>((clamp(v)-50)/50)*90;
 function gaugeHTML(key,label,value,idp){
