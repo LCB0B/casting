@@ -935,7 +935,7 @@ function stage(){
   G.hist.push({season:G.season,median:medBMI,divIndex,Div:r.Div,whip:r.whip,L:r.L,E:r.E,milan:G._floor});
   cast.forEach(m=>G.allCast.push(m));
   G.prev={L:r.L, E:r.E};
-  G.accl=clamp(G.accl + (r.Div>=G.accl?0.35:0.6)*(r.Div-G.accl), 0, 3);   // the house's normal drifts toward what walked
+  G.accl=clamp(G.accl + (r.Div>=G.accl?0.5:0.6)*(r.Div-G.accl), 0, 3);   // the house's normal drifts toward what walked
   playRunway(cast, ()=>showResolution(r,before));
 }
 function playRunway(cast, cb){
@@ -998,7 +998,7 @@ function classifyEnding(){
   const OR=oddsRatio();
   const avgL=G.hist.reduce((s,h)=>s+(h.L||0),0)/Math.max(G.hist.length,1);  // did the body ever really move?
   const maxWhip=Math.max(0,...G.hist.map(h=>h.whip||0));
-  if(avgL<0.8) return {kind:"standard", OR};        // body stayed thin — business as usual, whatever the index said
+  if(avgL<0.6) return {kind:"standard", OR};        // body stayed thin — business as usual, whatever the index said
   if(OR>=2.5)  return {kind:"token", OR};           // diversity concentrated onto a few bodies
   return {kind:"everywalk", OR, smooth:maxWhip<=2}; // spread across distinct bodies
 }
