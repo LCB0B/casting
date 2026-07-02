@@ -163,9 +163,9 @@
   .rrow .gauge-svg{width:88px; max-width:88px}
   .rrow .rwho{font-family:var(--ui); font-weight:800; font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin-bottom:3px}
   .rrow .rtext{font-family:var(--serif); font-size:14px; line-height:1.3}
-  .rdelta{display:inline-block; font-family:var(--ui); font-weight:800; font-size:9px; letter-spacing:.06em; padding:1.5px 6px; border:1px solid; margin-left:7px; vertical-align:middle; text-transform:none}
+  .rdelta{display:inline-block; font-family:var(--ui); font-weight:900; font-size:13px; line-height:1; padding:1.5px 6px 2.5px; border:1px solid; margin-left:7px; vertical-align:middle; text-transform:none}
   .rdelta.up{color:var(--good); border-color:var(--good)}
-  .rdelta.down{color:var(--accent); border-color:var(--accent)}
+  .rdelta.down{color:#C22B1F; border-color:#C22B1F}
 
   /* reveal */
   #reveal{display:none}#reveal.active{display:block}
@@ -841,7 +841,8 @@ function showResolution(r, before){
   const rows=$("resol-rows"); rows.innerHTML="";
   STAKE.forEach((s,i)=>{ const el=document.createElement("div"); el.className="rrow"; el.style.animationDelay=(i*0.1)+"s";
     const d=Math.round(G.meters[s.id]-before[s.id]);
-    const chip=d===0?"":(d>0?`<span class="rdelta up">▲ +${d}</span>`:`<span class="rdelta down">▼ −${-d}</span>`);
+    const sym=d===0?"":(d>0?(d>=6?"++":"+"):(d<=-6?"−−":"−"));
+    const chip=sym?`<span class="rdelta ${d>0?"up":"down"}">${sym}</span>`:"";
     el.innerHTML=`<div>${gaugeHTML(s.id,"",before[s.id],"rg")}</div><div><div class="rwho">${PANEL[s.id]}${chip}</div><div class="rtext">${REACT[s.id](r)}</div></div>`;
     rows.appendChild(el); });
   initNeedles("rg", before);                                          // start sweep from prior values
