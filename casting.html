@@ -454,18 +454,24 @@ function figWrap(m){ const d=(-Math.random()*3).toFixed(2); return `<div class="
 
 /* ---------------- gauges ---------------- */
 function gaugeArc(){
-  /* full half-circle of filled sectors — five pizza slices from red to green */
+  /* full half-circle of filled sectors — five pizza slices from red to green.
+     Slices are unstroked (a stroke would outline every edge and hollow out the hub);
+     the pizza cuts are drawn separately and stop short of the centre. */
   const cx=50,cy=50,r=48;
   const C=["#CC6F5E","#DD9A63","#E3C45F","#A7C063","#5FA567"];
   const pt=t=>{const a=(180-t*180)*Math.PI/180; return (cx+r*Math.cos(a)).toFixed(1)+" "+(cy-r*Math.sin(a)).toFixed(1);};
-  return C.map((c,i)=>`<path d="M ${cx} ${cy} L ${pt(i/5)} A ${r} ${r} 0 0 1 ${pt((i+1)/5)} Z" fill="${c}" stroke="var(--paper)" stroke-width="1"/>`).join("");
+  const slices=C.map((c,i)=>{const t0=Math.max(0,i/5-.004), t1=Math.min(1,(i+1)/5+.004);
+    return `<path d="M ${cx} ${cy} L ${pt(t0)} A ${r} ${r} 0 0 1 ${pt(t1)} Z" fill="${c}"/>`;}).join("");
+  const cuts=[1,2,3,4].map(i=>{const a=(180-i/5*180)*Math.PI/180, c=Math.cos(a), s=Math.sin(a);
+    return `<line x1="${(cx+9*c).toFixed(1)}" y1="${(cy-9*s).toFixed(1)}" x2="${(cx+r*c).toFixed(1)}" y2="${(cy-r*s).toFixed(1)}" stroke="var(--paper)" stroke-width="1.2"/>`;}).join("");
+  return slices+cuts;
 }
 const needleAngle=v=>((clamp(v)-50)/50)*90;
 function gaugeHTML(key,label,value,idp){
   return `<div class="gauge"><svg viewBox="0 0 100 56" class="gauge-svg">${gaugeArc()}
     <g class="needle" id="${idp}-${key}" transform="rotate(${needleAngle(value).toFixed(1)} 50 50)">
       <polygon points="48.6,50 51.4,50 50.5,9 49.5,9" fill="var(--ink)"/></g>
-    <circle cx="50" cy="50" r="4.6" fill="var(--accent)"/><circle cx="50" cy="50" r="1.9" fill="#fff"/></svg>
+    <circle cx="50" cy="50" r="4.2" fill="var(--accent)"/></svg>
     ${label?`<div class="gauge-cap">${label}</div>`:""}</div>`;
 }
 /* Needle rotation uses the SVG `transform` ATTRIBUTE (core SVG 1.1, identical in every engine)
