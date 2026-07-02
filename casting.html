@@ -833,6 +833,20 @@ function swipeBtn(dir){ if(G._busy||G.stack.length===0||G.booked.length>=PICK) r
   const top=$("deck").querySelector(".card:not(.behind)"); if(!top) return; commit(top, G.stack[0], dir); }
 document.addEventListener("keydown", e=>{ if(window.Tutorial&&window.Tutorial.active) return; if(!$("season").classList.contains("active")) return;
   if(e.key==="ArrowLeft") swipeBtn(-1); else if(e.key==="ArrowRight") swipeBtn(1); });
+/* Enter = the primary action of whatever is on screen */
+document.addEventListener("keydown", e=>{
+  if(e.key!=="Enter") return;
+  if(window.Tutorial && Tutorial.active) return;                                   // tutorial owns its keys
+  const a=document.activeElement; if(a&&(a.tagName==="BUTTON"||a.tagName==="A")) return;  // native click handles it
+  if($("runway-veil").classList.contains("show")){ e.preventDefault(); GAME.skipRunway(); return; }
+  if($("brief-veil").classList.contains("show")){ e.preventDefault();
+    if($("env-wrap").style.display!=="none" && !$("envelope").classList.contains("open")) Briefing.open();
+    else if($("brief").style.display!=="none") Briefing.done();
+    return; }
+  if($("veil").classList.contains("show")){ e.preventDefault(); GAME.next(); return; }
+  if($("reveal").classList.contains("active")){ e.preventDefault(); GAME.restart(); return; }
+  if($("intro").classList.contains("active")){ e.preventDefault(); GAME.begin(); }
+});
 
 /* ---------------- scoring (hidden): the four-panel economy ----------------
    I ideal · L larger bodies · E non-white · T intersectional (both).
