@@ -861,7 +861,10 @@ function scoreCast(cast){
   const whip=Math.abs(L-G.prev.L)+Math.abs(E-G.prev.E);
   const firstPlus=(L>0 && !G.everPlus);
   const newDistinct=(L>=1 && E>=1 && T<Math.min(L,E));
-  let dBoard = 2 + 1.5*I + 2.2*S - 3*divMult*Div + (e.boardBias||0);   // a star soothes the owners — and stars only come in the ideal
+  /* The Board is the binding constraint: with -6 per diverse body, no cast pleases all three
+     panels at once — except a token cast carried by a booked star (fame buys tolerance),
+     or when the trend event halves the penalty. Tokenism stays the cheapest path. */
+  let dBoard = 1 + 1.2*I + 2.5*S - 6*divMult*Div + (e.boardBias||0);
   let dWalks = (L>=1) ? (L===1? 5 : (L===2? 8 : 9))
              : (M>=2 ? 0 : (M===1 ? -4 : -8));                 // mid-size softens the anger but doesn't satisfy
   let dCensus= (E===0)? -8 : (E===1? 5 : (E===2? 8 : 9));
