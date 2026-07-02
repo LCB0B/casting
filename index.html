@@ -1069,8 +1069,8 @@ function reveal(){
       <p class="src" style="border-top:1px solid var(--line); padding-top:12px">If this subject touches you personally: in the US the National Alliance for Eating Disorders runs a free, clinician-staffed helpline — <strong>1-866-662-1235</strong>, weekdays.</p>`;
   } else if(end.kind==="token"){
     picto=pictoToken(); h=`You did it. <em>Sort of.</em>`; sub=`Diversity arrived — concentrated onto a few bodies.`;
-    body=`<div class="punch"><div class="big">${end.OR.toFixed(1)}×</div><div class="cap">On your runway a larger body was ${end.OR.toFixed(1)}× more likely to be non-white than white. The real industry runs at 4.5×.</div></div>${charts}
-      <p class="verdict">You brought diversity in — but you made a few bodies carry all of it at once: the same models held the size <em>and</em> the colour. That's the paper's finding, reproduced by your own hand. Representation became a quota met by the fewest possible people. It counts on paper. It isn't the same as change.</p>${src}`;
+    lead=`You brought diversity in — but you made a few bodies carry all of it at once: the same models held the size <em>and</em> the colour. That's the paper's finding, reproduced by your own hand. Representation became a quota met by the fewest possible people. It counts on paper. It isn't the same as change.`;
+    body=`<div class="punch"><div class="big">${end.OR.toFixed(1)}×</div><div class="cap">On your runway a larger body was ${end.OR.toFixed(1)}× more likely to be non-white than white. The real industry runs at 4.5×.</div></div>${charts}${src}`;
   } else {
     cls="good"; picto=pictoEveryWalk(); h=`Every <em>walk</em>`; sub=`You made ${G.hist.length} show${G.hist.length===1?"":"s"} — and introduced diversity honestly.`;
     body=`<div class="punch good"><div class="big" style="color:var(--ink)">${end.OR.toFixed(1)}×</div><div class="cap">A larger body was just ${end.OR.toFixed(1)}× more likely to be non-white than white — no concentration. The industry runs at 4.5×.</div></div>${charts}
