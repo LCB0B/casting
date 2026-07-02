@@ -174,6 +174,7 @@
   .rv-h{font-family:var(--serif); font-weight:900; font-size:clamp(46px,16vw,86px); line-height:.88; margin:0 0 20px; word-break:break-word}
   .rv-h em{font-style:italic; font-weight:500}
   .rv-fared{font-family:var(--serif); font-style:italic; font-weight:500; font-size:clamp(19px,5.8vw,27px); line-height:1.28; margin:0; max-width:24ch}
+  .rv-lead{font-family:var(--ui); font-size:14px; line-height:1.55; max-width:52ch; margin:18px auto 0; text-align:left}
   .rv-scrollhint{font-family:var(--ui); font-weight:700; font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:var(--ink3); margin-top:26px}
   .parade{border:1px solid var(--ink); background:var(--stage); overflow:hidden; margin-bottom:18px; position:relative}
   .parade .pcap{position:absolute; top:8px; left:12px; z-index:2; font-family:var(--ui); font-weight:700; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:#d4d2cc}
@@ -1046,7 +1047,7 @@ function reveal(){
   const actions=`<div class="end-actions"><button class="btn" onclick="GAME.restart()">Cast again <span class="ar">→</span></button>
     <a class="btn line" href="https://www.pnas.org/doi/10.1073/pnas.2602380123" target="_blank" rel="noopener" style="text-decoration:none">Read the paper <span class="ar">→</span></a></div>`;
 
-  let cls="", picto="", h="", sub="", body="";
+  let cls="", picto="", h="", sub="", body="", lead="";
   Sfx.ending(end.kind==="everywalk"?"win":"lose");   // lament for fired/usual/token, something almost sacred for the real thing
   if(end.kind==="fired"){
     cls="fired";
@@ -1057,8 +1058,8 @@ function reveal(){
     body=`<p class="verdict">${why[2]}</p>${charts}${src}`;
   } else if(end.kind==="standard"){
     picto=pictoStandard(); h=`Business as <em>usual</em>`; sub=`You survived ${G.hist.length} show${G.hist.length===1?"":"s"}. Nothing changed.`;
-    body=`<div class="punch"><div class="big">${gap}<span style="font-size:.4em"> BMI</span></div><div class="cap">The gap between your runway's median body and the average person held at ~${gap} BMI points — “diversity” season after season, and the body never moved.</div></div>${charts}
-      <p class="verdict">You kept your job by keeping the runway thin and white and feeding the coalitions the bare minimum. The press called it timeless. But this is the engine the study is about — a runway that sells an unreachable body to everyone watching, and the documented cost is real: disordered eating and body dysmorphia, landing hardest on the youngest.</p>${src}
+    lead=`You kept your job by keeping the runway thin and white and feeding the coalitions the bare minimum. The press called it timeless. But this is the engine the study is about — a runway that sells an unreachable body to everyone watching, and the documented cost is real: disordered eating and body dysmorphia, landing hardest on the youngest.`;
+    body=`<div class="punch"><div class="big">${gap}<span style="font-size:.4em"> BMI</span></div><div class="cap">The gap between your runway's median body and the average person held at ~${gap} BMI points — “diversity” season after season, and the body never moved.</div></div>${charts}${src}
       <p class="src" style="border-top:1px solid var(--line); padding-top:12px">If this subject touches you personally: in the US the National Alliance for Eating Disorders runs a free, clinician-staffed helpline — <strong>1-866-662-1235</strong>, weekdays.</p>`;
   } else if(end.kind==="token"){
     picto=pictoToken(); h=`You did it. <em>Sort of.</em>`; sub=`Diversity arrived — concentrated onto a few bodies.`;
@@ -1071,7 +1072,7 @@ function reveal(){
   }
   $("reveal-inner").innerHTML=`<div class="${cls}">
     <div class="rv-kick"><span class="kick">${B}</span><span class="kick">The record</span></div>
-    <div class="rv-hero"><h2 class="rv-h">${h}</h2><p class="rv-fared">${sub}</p><div class="rv-scrollhint">↓ the full record</div></div>
+    <div class="rv-hero"><h2 class="rv-h">${h}</h2><p class="rv-fared">${sub}</p>${lead?`<p class="rv-lead">${lead}</p>`:""}<div class="rv-scrollhint">↓ the full record</div></div>
     <div class="picto">${picto}</div>${parade}${body}${actions}</div>`;
 }
 
