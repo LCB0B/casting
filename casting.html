@@ -32,8 +32,6 @@
   .slogan{font-family:var(--serif); font-style:italic; font-weight:500; font-size:clamp(15px,4.6vw,20px); margin:14px 0 0}
   .premise{font-size:15px; max-width:42ch; margin:28px 0 0}
   .name-row{margin:24px 0 0; display:flex; flex-direction:column; gap:12px}
-  .name-row input{font-family:var(--serif); font-weight:700; font-size:22px; letter-spacing:.04em; text-transform:uppercase; padding:0 0 8px; border:none; border-bottom:1.5px solid var(--ink); background:transparent; color:var(--ink); width:100%; outline:none}
-  .name-row input::placeholder{color:var(--ink3); text-transform:none; font-style:italic; font-weight:500; letter-spacing:.01em}
   .intro-strip{display:flex; gap:0; height:120px; align-items:flex-end; justify-content:center; margin-top:30px; opacity:.92}
   .intro-strip .figwrap{width:50px}
   .past{margin-top:24px}
@@ -272,11 +270,9 @@
   <!-- INTRO -->
   <section id="intro" class="screen active">
     <div class="intro-kick"><span class="kick">A casting game</span><span class="kick">est. 2026</span></div>
-    <h1 class="masthead" id="brand-preview">MAISON <span class="amp">&amp;</span></h1>
+    <h1 class="masthead" id="brand-preview">MAISON</h1>
     <p class="slogan">fashion for every body</p>
-    <p class="premise">You cast the shows. You decide which bodies walk — and so does the runway's idea of beauty. The house lives or dies by who you pick.</p>
     <div class="name-row">
-      <input id="brand-input" maxlength="16" placeholder="name the house" autocomplete="off" aria-label="Name the house">
       <button class="btn" id="begin-btn" onclick="GAME.begin()">Open the house <span class="ar">→</span></button>
     </div>
     <div class="intro-strip" id="intro-strip"></div>
@@ -357,7 +353,7 @@ const MSTYLES = ["crop","side","buzz"];
 const SKINS = ["#F6D9BE","#ECC09A","#D9A579","#BE8456","#9A6238","#79492B","#5A3420"];
 const OUTFITS = ["#C5234B","#1F6F8B","#D87A1F","#4E7A33","#6A3FA0","#1E2A78","#0B7C72","#D81E78","#262524","#C79A2E","#9C1C3C","#2E8B7F",
   "#1A1918","#262524","#3B3936","#57544F","#8A867F"];   // fashion wears a lot of black & grey
-const HOUSE_FALLBACK = ["MAISON LUMEN","ATELIER NÓR","HOUSE OF VÉLA","STUDIO ÉCLAT","MAISON SERA"];
+const HOUSES = ["GOCCI","BRADA","PALIENCIAGO","CECILE","ARNAMI","BOLCE & GOBONO"];
 const POP_BMI = 29;          // real-population reference (US adult average, ~BMI 29)
 const FLOOR = 18.5;          // Milan 2006 rule
 
@@ -910,7 +906,8 @@ function renderIntroStrip(){
   [makeModel({_ideal:true}),makeModel({_ideal:true}),makeModel({plus:true,nonWhite:true}),makeModel({_ideal:true}),makeModel({nonWhite:true})]
     .forEach(m=>h.insertAdjacentHTML("beforeend",figWrap(m)));
 }
-function begin(){ const raw=$("brand-input").value.trim(); G.brand=(raw||pick(HOUSE_FALLBACK)).toUpperCase(); show("season"); renderSeason(); Briefing.show(()=>Tutorial.maybeStart()); }
+function rollHouse(){ G.brand=pick(HOUSES); $("brand-preview").innerHTML=G.brand.replace(/&/g,'<span class="amp">&amp;</span>'); }
+function begin(){ show("season"); renderSeason(); Briefing.show(()=>Tutorial.maybeStart()); }
 
 /* ---------------- appointment briefing: animated welcome before the tutorial ---------------- */
 const Briefing=(function(){
@@ -953,10 +950,8 @@ function restart(){
     stack:[],booked:[],curEvent:null,_lastEvent:null, since:{nonWhite:0,plus:0,intersx:0},
     everPlus:false,allCast:[],hist:[],milanSeen:false,
     cum:{total:0,nonWhite:0,plus:0,plusNonWhite:0,plusWhite:0,nonplusNonWhite:0,nonplusWhite:0,regions:new Set(),seasonsWithPlus:0}, firedBy:null,_end:false,_busy:false,_recorded:false });
-  renderIntroStrip(); renderPast(); $("brand-input").value=G.brand==="HOUSE"?"":G.brand; show("intro");
+  renderIntroStrip(); renderPast(); rollHouse(); show("intro");
 }
-document.addEventListener("input", e=>{ if(e.target&&e.target.id==="brand-input"){ const v=e.target.value.trim().toUpperCase();
-  $("brand-preview").innerHTML=v?v.replace(/&/g,'<span class="amp">&amp;</span>'):'MAISON <span class="amp">&amp;</span>'; }});
 
 /* ---------------- first-run tutorial (spotlight coachmarks) ----------------
    A one-time onboarding overlay: a dimming scrim with a cut-out "hole" around the
@@ -1105,7 +1100,7 @@ const Tutorial = (function(){
 window.Tutorial = Tutorial;
 
 window.GAME={ begin, swipe:swipeBtn, undo:undoPass, next, reveal, restart, skipRunway };
-renderIntroStrip(); renderPast();
+renderIntroStrip(); renderPast(); rollHouse();
 </script>
 </body>
 </html>
