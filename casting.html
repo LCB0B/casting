@@ -26,7 +26,6 @@
 
   /* intro */
   #intro{justify-content:center}
-  .intro-kick{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--ink); padding-bottom:8px; margin-bottom:28px}
   .masthead{font-family:var(--serif); font-weight:900; font-size:clamp(40px,15vw,82px); line-height:.86; margin:0; word-break:break-word}
   .masthead .amp{font-style:italic; font-weight:500}
   .slogan{font-family:var(--serif); font-style:italic; font-weight:500; font-size:clamp(15px,4.6vw,20px); margin:14px 0 0}
@@ -41,6 +40,7 @@
   .btn{display:inline-flex; align-items:center; justify-content:space-between; gap:14px; background:var(--ink); color:var(--paper); border:none; padding:14px 20px; font-weight:800; font-size:12px; letter-spacing:.22em; text-transform:uppercase; transition:opacity .2s, transform .15s; width:100%}
   .btn:hover{opacity:.86}.btn:active{transform:scale(.99)}.btn:disabled{opacity:.25; cursor:not-allowed}
   .btn .ar{font-family:var(--serif); font-size:18px}
+  .btn.center{justify-content:center; gap:10px}
   .btn.line{background:transparent; color:var(--ink); border:1.5px solid var(--ink)}
   .btn.line:hover{background:var(--ink); color:var(--paper); opacity:1}
 
@@ -269,11 +269,10 @@
 
   <!-- INTRO -->
   <section id="intro" class="screen active">
-    <div class="intro-kick"><span class="kick">A casting game</span><span class="kick">est. 2026</span></div>
-    <h1 class="masthead" id="brand-preview">MAISON</h1>
+    <h1 class="masthead">Casting</h1>
     <p class="slogan">fashion for every body</p>
     <div class="name-row">
-      <button class="btn" id="begin-btn" onclick="GAME.begin()">Open the house <span class="ar">→</span></button>
+      <button class="btn center" id="begin-btn" onclick="GAME.begin()">Play <span class="ar">→</span></button>
     </div>
     <div class="intro-strip" id="intro-strip"></div>
     <div class="past" id="past"></div>
@@ -906,7 +905,7 @@ function renderIntroStrip(){
   [makeModel({_ideal:true}),makeModel({_ideal:true}),makeModel({plus:true,nonWhite:true}),makeModel({_ideal:true}),makeModel({nonWhite:true})]
     .forEach(m=>h.insertAdjacentHTML("beforeend",figWrap(m)));
 }
-function rollHouse(){ G.brand=pick(HOUSES); $("brand-preview").innerHTML=G.brand.replace(/&/g,'<span class="amp">&amp;</span>'); }
+function rollHouse(){ G.brand=pick(HOUSES); }   // kept secret until the letter arrives
 function begin(){ show("season"); renderSeason(); Briefing.show(()=>Tutorial.maybeStart()); }
 
 /* ---------------- appointment briefing: animated welcome before the tutorial ---------------- */
