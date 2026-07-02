@@ -6,12 +6,12 @@
 <title>House of Casting</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,700;0,6..96,900;1,6..96,400;1,6..96,500&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#F4F3EF; --panel:#FBFAF8; --ink:#141312; --ink2:#8C8884; --ink3:#B7B3AD;
     --line:#E1DFD9; --hair:#CFCCC5; --accent:#E6007E; --good:#3E7E46; --stage:#100F0E;
-    --serif:'Bodoni Moda',Georgia,serif; --ui:'Archivo',system-ui,sans-serif;
+    --serif:'Archivo',system-ui,sans-serif; --ui:'Archivo',system-ui,sans-serif;   /* one face everywhere — Bodoni retired */
   }
   *{box-sizing:border-box}
   html,body{margin:0; height:100%}
@@ -757,7 +757,7 @@ function pictoFired(who){
   if(who==="board") return `<svg viewBox="0 0 120 96" width="124" aria-hidden="true">
     <line x1="6" y1="40" x2="114" y2="40" stroke="var(--ink2)" stroke-width="1.5" stroke-dasharray="5 4"/>
     <circle cx="60" cy="56" r="17" fill="none" stroke="var(--accent)" stroke-width="3"/>
-    <text x="60" y="63" text-anchor="middle" font-family="Bodoni Moda, serif" font-weight="900" font-size="20" fill="var(--accent)">$</text>
+    <text x="60" y="63" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="20" fill="var(--accent)">$</text>
     <path d="M44 76 L50 82 L56 76 M64 76 L70 82 L76 76" fill="none" stroke="var(--ink3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="M54 84 L60 92 L66 84" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const icon = who==="walks"
