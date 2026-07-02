@@ -1,4 +1,4 @@
-# House of Casting
+# Casting
 
 A single-file browser game about casting fashion shows — and about what the runway's
 idea of beauty costs. You name a house and, season after season, swipe through an endless
