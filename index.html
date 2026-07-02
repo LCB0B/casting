@@ -1051,7 +1051,7 @@ function reveal(){
     cls="fired";
     const why={ board:["Replaced",`The Board let you go. Look ${ROMAN[G.season]} was your last.`,"The collection stopped selling and the owners panicked — you pushed the runway further than the house could bank."],
                 walks:["Boycotted","You lost. A body coalition called a public boycott: season after season your runway stayed too thin.","They quoted your own slogan back at you — “fashion for every body.”"],
-                census:["Boycotted",`The Census walked out. Look ${ROMAN[G.season]} was your last.`,"A representation boycott ended your tenure: your runway stayed too white for too long. “The world doesn't look like this,” they said."] }[end.who];
+                census:["Boycotted","You lost. A representation boycott ended your tenure: your runway stayed too white for too long.","“The world doesn't look like this,” they said."] }[end.who];
     picto=pictoFired(end.who); h=`<em>${why[0]}</em>`; sub=why[1];
     body=`<p class="verdict">${why[2]}</p>${charts}${src}`;
   } else if(end.kind==="standard"){
