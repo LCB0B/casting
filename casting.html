@@ -51,7 +51,7 @@
 
   .gauges{display:grid; grid-template-columns:repeat(4,1fr); gap:0; margin:8px 0 2px}
   .gauge{text-align:center}
-  .gauge-svg{width:100%; max-width:122px; height:auto; display:block; margin:0 auto}
+  .gauge-svg{width:100%; height:auto; display:block; margin:0 auto}
   .needle{transition:transform 1.05s cubic-bezier(.33,1.15,.45,1)}
   .gauge-cap{font-family:var(--ui); font-weight:700; font-size:8.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin-top:-3px}
 
@@ -455,16 +455,16 @@ function figWrap(m){ const d=(-Math.random()*3).toFixed(2); return `<div class="
 /* ---------------- gauges ---------------- */
 function gaugeArc(){
   /* full half-circle of filled sectors — five pizza slices from red to green */
-  const cx=50,cy=50,r=42;
+  const cx=50,cy=50,r=48;
   const C=["#CC6F5E","#DD9A63","#E3C45F","#A7C063","#5FA567"];
   const pt=t=>{const a=(180-t*180)*Math.PI/180; return (cx+r*Math.cos(a)).toFixed(1)+" "+(cy-r*Math.sin(a)).toFixed(1);};
   return C.map((c,i)=>`<path d="M ${cx} ${cy} L ${pt(i/5)} A ${r} ${r} 0 0 1 ${pt((i+1)/5)} Z" fill="${c}" stroke="var(--paper)" stroke-width="1"/>`).join("");
 }
 const needleAngle=v=>((clamp(v)-50)/50)*90;
 function gaugeHTML(key,label,value,idp){
-  return `<div class="gauge"><svg viewBox="0 0 100 58" class="gauge-svg">${gaugeArc()}
+  return `<div class="gauge"><svg viewBox="0 0 100 56" class="gauge-svg">${gaugeArc()}
     <g class="needle" id="${idp}-${key}" transform="rotate(${needleAngle(value).toFixed(1)} 50 50)">
-      <polygon points="48.7,50 51.3,50 50.5,14 49.5,14" fill="var(--ink)"/></g>
+      <polygon points="48.6,50 51.4,50 50.5,9 49.5,9" fill="var(--ink)"/></g>
     <circle cx="50" cy="50" r="4.6" fill="var(--accent)"/><circle cx="50" cy="50" r="1.9" fill="#fff"/></svg>
     ${label?`<div class="gauge-cap">${label}</div>`:""}</div>`;
 }
