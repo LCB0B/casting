@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>House of Casting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,700;0,6..96,900;1,6..96,400;1,6..96,500&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F3EF; --panel:#FBFAF8; --ink:#141312; --ink2:#8C8884; --ink3:#B7B3AD;
+    --line:#E1DFD9; --hair:#CFCCC5; --accent:#E6007E; --stage:#100F0E;
+    --serif:'Bodoni Moda',Georgia,serif; --ui:'Archivo',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0; height:100%}
+  body{background:var(--paper); color:var(--ink); font-family:var(--ui); line-height:1.4; -webkit-font-smoothing:antialiased; overflow-x:hidden}
+  button{font-family:var(--ui); cursor:pointer; color:inherit}
+  .kick{font-family:var(--ui); font-weight:700; font-size:9.5px; letter-spacing:.3em; text-transform:uppercase; color:var(--ink2)}
+
+  .wrap{max-width:540px; margin:0 auto; min-height:100%; padding:14px 18px calc(12px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; position:relative}
+  .screen{display:none; flex:1; flex-direction:column}
+  .screen.active{display:flex; animation:fade .5s ease both}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+
+  /* intro */
+  #intro{justify-content:center}
+  .intro-kick{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--ink); padding-bottom:8px; margin-bottom:28px}
+  .masthead{font-family:var(--serif); font-weight:900; font-size:clamp(40px,15vw,82px); line-height:.86; margin:0; word-break:break-word}
+  .masthead .amp{font-style:italic; font-weight:500}
+  .slogan{font-family:var(--serif); font-style:italic; font-weight:500; font-size:clamp(15px,4.6vw,20px); margin:14px 0 0}
+  .premise{font-size:15px; max-width:42ch; margin:28px 0 0}
+  .name-row{margin:24px 0 0; display:flex; flex-direction:column; gap:12px}
+  .name-row input{font-family:var(--serif); font-weight:700; font-size:22px; letter-spacing:.04em; text-transform:uppercase; padding:0 0 8px; border:none; border-bottom:1.5px solid var(--ink); background:transparent; color:var(--ink); width:100%; outline:none}
+  .name-row input::placeholder{color:var(--ink3); text-transform:none; font-style:italic; font-weight:500; letter-spacing:.01em}
+  .intro-strip{display:flex; gap:0; height:120px; align-items:flex-end; justify-content:center; margin-top:30px; opacity:.92}
+  .intro-strip .figwrap{width:50px}
+
+  .btn{display:inline-flex; align-items:center; justify-content:space-between; gap:14px; background:var(--ink); color:var(--paper); border:none; padding:14px 20px; font-weight:800; font-size:12px; letter-spacing:.22em; text-transform:uppercase; transition:opacity .2s, transform .15s; width:100%}
+  .btn:hover{opacity:.86}.btn:active{transform:scale(.99)}.btn:disabled{opacity:.25; cursor:not-allowed}
+  .btn .ar{font-family:var(--serif); font-size:18px}
+  .btn.line{background:transparent; color:var(--ink); border:1.5px solid var(--ink)}
+  .btn.line:hover{background:var(--ink); color:var(--paper); opacity:1}
+
+  /* season header */
+  .top{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--ink); padding-bottom:6px}
+  .top .h{font-family:var(--serif); font-weight:700; font-size:17px; letter-spacing:.06em; text-transform:uppercase}
+  .top .r{font-family:var(--ui); font-weight:700; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2)}
+  .top .r b{color:var(--ink)}
+
+  .gauges{display:grid; grid-template-columns:repeat(4,1fr); gap:0; margin:8px 0 2px}
+  .gauge{text-align:center}
+  .gauge-svg{width:100%; max-width:84px; height:auto; display:block; margin:0 auto}
+  .needle{transition:transform 1.05s cubic-bezier(.33,1.15,.45,1)}
+  .gauge-cap{font-family:var(--ui); font-weight:700; font-size:7.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin-top:-3px}
+
+  .lookline{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin:4px 0 0}
+  .looknum{font-family:var(--serif); font-weight:900; font-size:clamp(34px,12vw,52px); line-height:.78}
+  .looknum span{font-style:italic; font-weight:400; font-size:.32em; letter-spacing:.08em; vertical-align:super; color:var(--ink2)}
+  .note{font-family:var(--serif); font-style:italic; font-weight:500; font-size:13px; text-align:right; max-width:24ch; line-height:1.22}
+  .tag{display:flex; gap:8px; align-items:center; font-family:var(--ui); font-weight:800; font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:5px 9px; margin-top:6px; border:1px solid var(--ink)}
+  .tag.boom{border-color:var(--accent); color:var(--accent)}
+  .tag .x{font-family:var(--serif); font-weight:400; font-size:12px; opacity:.6; margin-left:auto}
+  .cert{display:flex; align-items:center; gap:9px; font-family:var(--ui); font-size:11px; color:var(--ink2); margin-top:6px; cursor:pointer}
+  .cert input{width:15px; height:15px; accent-color:var(--ink)}
+
+  /* lookbook */
+  .lookbook{margin:8px 0 2px}
+  .lb-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px}
+  .lb-cells{display:grid; grid-template-columns:repeat(5,1fr); gap:5px}
+  .lb-cell{height:94px; border:1px solid var(--hair); background:var(--panel); display:flex; align-items:flex-end; justify-content:center; position:relative; overflow:hidden}
+  .lb-cell.empty{border-style:dashed; align-items:center}
+  .lb-cell.empty span{font-family:var(--serif); font-style:italic; color:var(--ink3); font-size:14px}
+  .lb-cell.full{cursor:pointer; border-color:var(--ink)}
+  .lb-cell .figwrap{height:88px; width:100%}
+  .lb-cell .fig-svg{width:30px}
+  .lb-cell.full::after{content:"✕"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:13px; color:var(--paper); background:rgba(20,19,18,0); opacity:0; transition:.18s; font-family:var(--ui)}
+  .lb-cell.full:hover::after{opacity:1; background:rgba(20,19,18,.6)}
+
+  /* deck */
+  .deck-wrap{flex:1; display:flex; flex-direction:column; min-height:0}
+  .deck{position:relative; flex:1; min-height:210px; margin:8px 0 4px; display:flex; align-items:center; justify-content:center}
+  .card{position:absolute; width:min(64vw,220px); background:var(--panel); border:1px solid var(--ink); box-shadow:0 1px 0 var(--ink); touch-action:pan-y; user-select:none; will-change:transform; cursor:grab; padding:12px 12px 11px}
+  .card.behind{transform:scale(.93) translateY(12px); opacity:.5; pointer-events:none; box-shadow:none; border-color:var(--hair)}
+  .card:active{cursor:grabbing}
+  .card-fig{height:166px; display:flex; align-items:flex-end; justify-content:center; position:relative}
+  .card-fig .figwrap{height:166px; width:120px}
+  .card-fig .fig-svg{width:78px}
+  .bmi{position:absolute; top:0; right:0; font-family:var(--ui); font-weight:800; font-size:8.5px; letter-spacing:.1em; color:var(--ink2); text-align:right}
+  .bmi b{display:block; font-family:var(--serif); font-weight:700; font-size:16px; letter-spacing:0; color:var(--ink); line-height:.9}
+  .card-meta{border-top:1px solid var(--ink); margin-top:9px; padding-top:7px}
+  .cname{font-family:var(--ui); font-weight:900; font-size:17px; letter-spacing:.04em; text-transform:uppercase; line-height:1}
+  .cspec{font-family:var(--ui); font-weight:600; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin-top:4px}
+  .swipe-tag{position:absolute; top:16px; font-family:var(--serif); font-weight:900; font-size:24px; text-transform:uppercase; padding:3px 11px; border:2px solid; opacity:0; pointer-events:none}
+  .swipe-tag.book{right:12px; color:var(--accent); border-color:var(--accent); transform:rotate(11deg)}
+  .swipe-tag.pass{left:12px; color:var(--ink); border-color:var(--ink); transform:rotate(-11deg)}
+  .withdrawn{position:absolute; inset:auto 12px 70px; text-align:center; font-family:var(--ui); font-weight:800; font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--paper); background:var(--ink); padding:5px}
+  .card.shake{animation:shake .4s ease}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px) rotate(-2deg)}40%{transform:translateX(9px) rotate(2deg)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+
+  .controls{display:flex; justify-content:center; gap:18px; margin:2px 0 4px}
+  .ctrl{width:56px; height:56px; border-radius:50%; border:1.5px solid var(--ink); background:var(--paper); display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:24px; transition:transform .14s, background .2s, color .2s}
+  .ctrl:hover{transform:translateY(-2px)}.ctrl.pass{font-weight:400}
+  .ctrl.book{border-color:var(--accent); color:var(--accent); font-weight:700}
+  .ctrl.book:hover{background:var(--accent); color:#fff}.ctrl.pass:hover{background:var(--ink); color:var(--paper)}
+  .ctrl:disabled{opacity:.25; cursor:not-allowed; transform:none}
+
+  /* figure */
+  .figwrap{display:flex; align-items:flex-end; justify-content:center}
+  .figwrap .fig{width:100%; display:flex; justify-content:center; align-items:flex-end; animation:bob 2.8s ease-in-out infinite; transform-origin:50% 100%}
+  .fig-svg{display:block; overflow:visible; height:auto}
+  .fig .arm{transform-box:fill-box; transform-origin:50% 8%; animation:armsway 3.6s ease-in-out infinite}
+  .fig .arm.r{animation-delay:-1.3s}
+  .fig .eyes{transform-box:fill-box; transform-origin:50% 50%; animation:blink 5.4s steps(1,end) infinite}
+  .fig .leg{transform-box:fill-box; transform-origin:50% 6%}
+  .fig .spot{transition:opacity .25s}
+  .fig.walking{animation:walkbob .52s ease-in-out infinite}
+  .fig.walking .leg.l{animation:stepL .52s ease-in-out infinite}
+  .fig.walking .leg.r{animation:stepR .52s ease-in-out infinite}
+  .fig.walking .arm{animation:armswing .52s ease-in-out infinite}
+  .fig.walking .arm.r{animation-delay:-.26s}.fig.walking .spot{opacity:.3}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  @keyframes armsway{0%,100%{transform:rotate(3deg)}50%{transform:rotate(-4deg)}}
+  @keyframes blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+  @keyframes stepL{0%,100%{transform:rotate(15deg)}50%{transform:rotate(-15deg)}}
+  @keyframes stepR{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(15deg)}}
+  @keyframes armswing{0%,100%{transform:rotate(20deg)}50%{transform:rotate(-20deg)}}
+  @keyframes walkbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+
+  /* runway overlay */
+  .veil{position:fixed; inset:0; background:rgba(16,15,14,.66); display:none; align-items:center; justify-content:center; padding:18px; z-index:30}
+  .veil.show{display:flex; animation:fade .25s ease both}
+  .runway-veil{background:rgba(12,11,10,.94)}
+  .stagebox{position:relative; width:100%; max-width:540px; height:min(66vh,520px); overflow:hidden; border:1px solid #2b2926; cursor:pointer; background:radial-gradient(120% 60% at 50% -8%, rgba(255,255,255,.16), transparent 60%), var(--stage)}
+  .stagebox .floor{position:absolute; left:50%; bottom:0; transform:translateX(-50%); width:80%; height:66%; background:linear-gradient(#211f1d,#34322e); -webkit-clip-path:polygon(34% 0,66% 0,100% 100%,0 100%); clip-path:polygon(34% 0,66% 0,100% 100%,0 100%); opacity:.92}
+  .stagebox .floor::after{content:""; position:absolute; left:50%; top:6%; bottom:0; width:1px; transform:translateX(-50%); background:repeating-linear-gradient(#6a6862 0 14px, transparent 14px 30px)}
+  .lights{position:absolute; top:0; left:0; right:0; height:42%; pointer-events:none; background:radial-gradient(50% 100% at 50% 0,rgba(255,255,255,.18),transparent 72%)}
+  .walkers{position:absolute; left:0; right:0; bottom:7%; display:flex; justify-content:center; align-items:flex-end; gap:1.5%; padding:0 4%}
+  .walker{width:clamp(52px,13vw,86px); animation:walkin 1s cubic-bezier(.2,.7,.3,1) both}
+  @keyframes walkin{from{transform:translateY(46px) scale(.62); opacity:0}to{transform:none; opacity:1}}
+  .walker .fig-svg{width:100%}
+  .flash{position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none}
+  .flash.pop{animation:pop .5s ease}
+  @keyframes pop{0%{opacity:0}8%{opacity:.82}20%{opacity:0}48%{opacity:.46}60%{opacity:0}}
+  .stamp{position:absolute; top:13%; left:50%; transform:translate(-50%,0) scale(.6); font-family:var(--serif); font-weight:900; font-style:italic; color:#fff; font-size:clamp(28px,8vw,52px); opacity:0; text-align:center}
+  .stamp.in{animation:stampin .5s cubic-bezier(.2,1.4,.4,1) forwards}
+  @keyframes stampin{to{opacity:1; transform:translate(-50%,0) scale(1)}}
+  .skiphint{position:absolute; bottom:9px; right:13px; font-family:var(--ui); font-weight:700; font-size:9px; letter-spacing:.14em; color:#7a7872; text-transform:uppercase}
+
+  /* resolution */
+  .resol{background:var(--paper); border:1px solid var(--ink); max-width:480px; width:100%; padding:22px 22px 18px; box-shadow:8px 8px 0 var(--ink); max-height:92vh; overflow-y:auto}
+  .resol .hk{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--ink); padding-bottom:6px; margin-bottom:14px}
+  .resol .hl{font-family:var(--serif); font-weight:700; font-size:19px; line-height:1.22; margin:0 0 16px}
+  .rrow{display:grid; grid-template-columns:72px 1fr; gap:12px; align-items:center; margin-bottom:13px; opacity:0; animation:slidein .42s ease forwards}
+  @keyframes slidein{from{opacity:0; transform:translateX(-8px)}to{opacity:1; transform:none}}
+  .rrow .gauge-svg{width:72px; max-width:72px}
+  .rrow .rwho{font-family:var(--ui); font-weight:800; font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin-bottom:3px}
+  .rrow .rtext{font-family:var(--serif); font-size:14px; line-height:1.3}
+
+  /* reveal */
+  #reveal{display:none}#reveal.active{display:block}
+  .rv{max-width:540px; margin:0 auto; padding:24px 18px 56px}
+  .rv-kick{display:flex; justify-content:space-between; border-bottom:1px solid var(--ink); padding-bottom:7px}
+  .rv-h{font-family:var(--serif); font-weight:900; font-size:clamp(34px,11vw,58px); line-height:.9; margin:14px 0 4px}
+  .rv-h em{font-style:italic; font-weight:500}
+  .rv-sub{font-family:var(--ui); font-weight:700; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); margin-bottom:22px}
+  .parade{border:1px solid var(--ink); background:var(--stage); overflow:hidden; margin-bottom:18px; position:relative}
+  .parade .pcap{position:absolute; top:8px; left:12px; z-index:2; font-family:var(--ui); font-weight:700; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:#d4d2cc}
+  .parade-track{display:flex; gap:6px; align-items:flex-end; padding:24px 10px 12px; width:max-content; animation:march 30s linear infinite}
+  .parade:hover .parade-track{animation-play-state:paused}
+  @keyframes march{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .parade .figwrap{height:116px; width:52px}.parade .fig-svg{width:46px}
+  .chartbox{border:1px solid var(--ink); padding:16px 14px 8px; margin-bottom:14px}
+  .chartbox .ct{font-family:var(--ui); font-weight:700; font-size:10px; letter-spacing:.12em; text-transform:uppercase; margin:0 0 8px; display:flex; justify-content:space-between; align-items:baseline}
+  .chartbox .ct span{color:var(--ink2); font-weight:500; font-style:italic; font-family:var(--serif); font-size:12px; text-transform:none}
+  .punch{border-top:2px solid var(--accent); border-bottom:2px solid var(--accent); padding:18px 0; margin:22px 0; text-align:center}
+  .punch .big{font-family:var(--serif); font-weight:900; font-size:clamp(48px,18vw,90px); line-height:.84; color:var(--accent)}
+  .punch .cap{font-family:var(--ui); font-weight:600; font-size:11px; color:var(--ink); margin:10px auto 0; max-width:34ch}
+  .verdict{font-family:var(--serif); font-size:17px; line-height:1.42; max-width:46ch; margin:0 0 12px}
+  .verdict strong{font-weight:700; font-style:italic}
+  .src{font-family:var(--ui); font-size:11px; color:var(--ink2); margin:18px 0 22px; line-height:1.5}.src a{color:var(--ink)}
+  .end-actions{display:flex; flex-direction:column; gap:10px}
+  .fired .rv-h{color:var(--accent)}
+  .picto{display:flex; justify-content:center; margin:6px 0 20px}
+  .punch.good{border-color:var(--ink)}
+  .punch.good .big{color:var(--ink)}
+  .good .rv-h em{font-style:italic}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+
+  /* ---------------- first-run tutorial (spotlight coachmarks) ---------------- */
+  .tut-layer{position:fixed; inset:0; z-index:200; display:none}
+  .tut-layer.show{display:block; animation:fade .22s ease both}
+  .tut-hole{position:absolute; left:0; top:0; width:0; height:0; border-radius:10px; border:2px solid var(--accent);
+    box-shadow:0 0 0 9999px rgba(16,15,14,.74); pointer-events:none;
+    transition:left .35s cubic-bezier(.33,1.05,.45,1), top .35s cubic-bezier(.33,1.05,.45,1), width .35s cubic-bezier(.33,1.05,.45,1), height .35s cubic-bezier(.33,1.05,.45,1), opacity .25s ease}
+  .tut-tip{position:absolute; left:0; top:0; width:min(90vw,338px); background:var(--paper); border:1px solid var(--ink);
+    box-shadow:6px 6px 0 var(--ink); padding:15px 16px 12px; pointer-events:auto;
+    transition:left .35s cubic-bezier(.33,1.05,.45,1), top .35s cubic-bezier(.33,1.05,.45,1)}
+  .tut-caret{position:absolute; width:12px; height:12px; background:var(--paper); transform:translateX(-50%) rotate(45deg); display:none}
+  .tut-caret.below{top:-6px; border-top:1px solid var(--ink); border-left:1px solid var(--ink)}
+  .tut-caret.above{bottom:-6px; border-bottom:1px solid var(--ink); border-right:1px solid var(--ink)}
+  .tut-kick{font-family:var(--ui); font-weight:700; font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink2)}
+  .tut-kick .tut-n{color:var(--accent)}
+  .tut-title{font-family:var(--serif); font-weight:700; font-size:21px; line-height:1.16; margin:9px 0 8px}
+  .tut-title em{font-style:italic; font-weight:500}
+  .tut-body{font-family:var(--ui); font-weight:400; font-size:13px; line-height:1.5; color:var(--ink)}
+  .tut-body b{font-weight:700}
+  .tut-nav{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:15px}
+  .tut-right{display:flex; gap:8px; align-items:center}
+  .tut-next{background:var(--ink); color:var(--paper); border:none; padding:9px 15px; font-family:var(--ui); font-weight:800; font-size:10px; letter-spacing:.18em; text-transform:uppercase; transition:opacity .2s}
+  .tut-next:hover{opacity:.86}.tut-next:active{transform:scale(.98)}
+  .tut-back{background:transparent; color:var(--ink); border:1px solid var(--ink); padding:8px 12px; font-family:var(--ui); font-weight:800; font-size:10px; letter-spacing:.14em; text-transform:uppercase; transition:background .2s,color .2s}
+  .tut-back:hover{background:var(--ink); color:var(--paper)}
+  .tut-skip{background:transparent; border:none; color:var(--ink2); font-family:var(--ui); font-weight:700; font-size:10px; letter-spacing:.1em; text-transform:uppercase; text-decoration:underline; text-underline-offset:3px; padding:4px 0}
+  .tut-skip:hover{color:var(--ink)}
+  .tut-hint{font-family:var(--ui); font-weight:700; font-size:8px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink3); margin-top:11px; text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- INTRO -->
+  <section id="intro" class="screen active">
+    <div class="intro-kick"><span class="kick">A casting game</span><span class="kick">est. 2026</span></div>
+    <h1 class="masthead" id="brand-preview">MAISON <span class="amp">&amp;</span></h1>
+    <p class="slogan">fashion for every body</p>
+    <p class="premise">You cast the shows. You decide which bodies walk — and so does the runway's idea of beauty. The house lives or dies by who you pick.</p>
+    <div class="name-row">
+      <input id="brand-input" maxlength="16" placeholder="name the house" autocomplete="off" aria-label="Name the house">
+      <button class="btn" id="begin-btn" onclick="GAME.begin()">Open the house <span class="ar">→</span></button>
+    </div>
+    <div class="intro-strip" id="intro-strip"></div>
+  </section>
+
+  <!-- SEASON -->
+  <section id="season" class="screen">
+    <div class="top"><div class="h" id="house-name">House</div><div class="r" id="prestige">Outsider</div></div>
+    <div class="gauges" id="gauges"></div>
+    <div class="lookline"><div class="looknum"><span>look</span><span id="look-n">I</span></div><div class="note" id="note"></div></div>
+    <div id="tag-slot"></div>
+    <label class="cert" id="cert" style="display:none"><input type="checkbox" id="cert-box"> medical certificate on file</label>
+
+    <div class="lookbook">
+      <div class="lb-head"><span class="kick">The show</span><span class="kick" id="count">0 / 5</span></div>
+      <div class="lb-cells" id="slots"></div>
+    </div>
+
+    <div class="deck-wrap">
+      <div class="deck" id="deck"></div>
+      <div class="controls">
+        <button class="ctrl pass" id="btn-pass" aria-label="Pass" onclick="GAME.swipe(-1)">✕</button>
+        <button class="ctrl book" id="btn-book" aria-label="Book" onclick="GAME.swipe(1)">♥</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVEAL -->
+  <section id="reveal"><div class="rv" id="reveal-inner"></div></section>
+</div>
+
+<div class="veil runway-veil" id="runway-veil">
+  <div class="stagebox" id="stagebox" onclick="GAME.skipRunway()">
+    <div class="lights"></div><div class="floor"></div><div class="walkers" id="walkers"></div>
+    <div class="flash" id="flash"></div><div class="stamp" id="stamp">staged</div>
+    <div class="skiphint">tap to skip</div>
+  </div>
+</div>
+
+<div class="veil" id="veil">
+  <div class="resol">
+    <div class="hk"><span class="kick" id="resol-kick">Look I · reviews</span><span class="kick" id="resol-house"></span></div>
+    <p class="hl" id="resol-hl"></p>
+    <div id="resol-rows"></div>
+    <div style="margin-top:8px"><button class="btn" id="resol-next" onclick="GAME.next()">Continue <span class="ar">→</span></button></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ---------------- data ---------------- */
+const FIRST = ["Anouk","Sasha","Imani","Lía","Wren","Talia","Yuki","Mara","Senna","Noa","Isolde","Amara",
+  "Fatou","Priya","Mei","Ingrid","Suki","Nadia","Cleo","Esme","Rin","Ada","Lux","Remy","Vesna","Oona",
+  "Dália","Inès","Soraya","Bibi","Zola","Hana","Liv","Tao","Yara","Kira","Ode","Nima","Saoirse","Beau"];
+const HAIR = {blonde:"#E6C572",light:"#C49A5E",brown:"#6B4A2E",dark:"#2E2018",black:"#161015",red:"#A8451F",auburn:"#7A3318"};
+const EYE = {blue:"#4F86C6",green:"#4E8B4A",hazel:"#9A7338",brown:"#523A22",grey:"#8C9196"};
+const HAIRSTYLES = ["long","short","curly","bun"];
+const SKINS = ["#F6D9BE","#ECC09A","#D9A579","#BE8456","#9A6238","#79492B","#5A3420"];
+const OUTFITS = ["#C5234B","#1F6F8B","#D87A1F","#4E7A33","#6A3FA0","#1E2A78","#0B7C72","#D81E78","#262524","#C79A2E","#9C1C3C","#2E8B7F"];
+const HOUSE_FALLBACK = ["MAISON LUMEN","ATELIER NÓR","HOUSE OF VÉLA","STUDIO ÉCLAT","MAISON SERA"];
+const POP_BMI = 29;          // real-population reference (US adult average, ~BMI 29)
+const FLOOR = 18.5;          // Milan 2006 rule
+
+const STAKE = [{id:"board",cap:"Board"},{id:"walks",cap:"Walks"},{id:"census",cap:"Census"},{id:"press",cap:"Press"}];
+const PANEL = {board:"The Board", walks:"All Walks", census:"The Census", press:"The Front Row"};
+const TIERS = ["Outsider","Emerging","Established","Elite"];
+const TENURE_BASE = 8, TENURE_MAX = 10, RENEW_BAR = 40, TAU = 30, PICK = 5;
+const ROMAN=["","I","II","III","IV","V","VI","VII","VIII","IX","X"];
+
+/* ---------------- state ---------------- */
+const G = {
+  brand:"HOUSE", season:1, tier:0,
+  meters:{board:60, press:55, walks:45, census:45},
+  prev:{L:0, E:0},
+  stack:[], booked:[], curEvent:null, _lastEvent:null,
+  since:{nonWhite:0, plus:0, intersx:0},
+  everPlus:false, allCast:[], hist:[], milanSeen:false, parisSeen:false,
+  cum:{total:0, nonWhite:0, plus:0, plusNonWhite:0, plusWhite:0, nonplusNonWhite:0, nonplusWhite:0, regions:new Set(), seasonsWithPlus:0},
+  firedBy:null, _end:false, _floor:false, _runTimer:null, _runCb:null, _busy:false
+};
+
+/* ---------------- helpers ---------------- */
+const $ = id => document.getElementById(id);
+const rnd = (a,b)=> a + Math.random()*(b-a);
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const clamp = (x,lo=0,hi=100)=> Math.max(lo,Math.min(hi,x));
+function median(xs){ const s=[...xs].sort((a,b)=>a-b); const m=s.length>>1; return s.length%2 ? s[m] : (s[m-1]+s[m])/2; }
+function show(scr){ document.querySelectorAll(".screen,#reveal").forEach(s=>s.classList.remove("active")); $(scr).classList.add("active"); window.scrollTo({top:0,behavior:"instant"}); }
+const isBlonde=m=>m.hair==="blonde"||m.hair==="light";
+const isLightEye=m=>m.eye==="blue"||m.eye==="grey";
+const isIdeal=m=> !m.plus && !m.nonWhite && isBlonde(m) && isLightEye(m);
+const blockedNow=m=>G._floor && m.bmi<FLOOR;
+
+/* ---------------- models (realistic dominant ideal; diversity is the outlier) ---------------- */
+let UID = 100;
+function makeModel(opt={}){
+  let nonWhite = opt.nonWhite ?? (Math.random()<0.34);
+  let plus = opt.plus!=null ? opt.plus
+           : (nonWhite ? (Math.random()<0.36) : (Math.random()<0.085));   // plus ~4.5–6× likelier if non-white
+  let hair, eye;
+  if(opt._ideal){ nonWhite=false; plus=false; hair=pick(["blonde","light"]); eye=pick(["blue","grey"]); }
+  else if(nonWhite){ hair=pick(["black","dark","brown","auburn"]); eye=pick(["brown","brown","hazel","green"]); }
+  else { hair = Math.random()<0.6 ? pick(["blonde","light"]) : pick(["brown","auburn","red","dark"]);
+         eye  = Math.random()<0.6 ? pick(["blue","grey"]) : pick(["green","hazel","brown"]); }
+  const bmi = plus ? rnd(28,34) : rnd(16.5,19.0);
+  const size = plus ? pick([14,16,18,20]) : pick([0,2,4,6]);
+  const region = nonWhite ? pick(["E. Asia","S. Asia","W. Africa","S. America","SE Asia"])
+                          : pick(["W. Europe","N. America","E. Europe","Scandinavia"]);
+  const skin = nonWhite ? pick(SKINS.slice(2)) : pick(SKINS.slice(0,3));
+  return { uid:UID++, name:pick(FIRST), plus, nonWhite, size, star:!!opt.star,
+    bmi:Math.round(bmi*10)/10, height:Math.round(rnd(172,184)),
+    region, hair, eye, skin, outfit:pick(OUTFITS), hairStyle:pick(HAIRSTYLES) };
+}
+/* ---------------- streaming candidate generation (infinite casting call) ----------------
+   No fixed deck: every card that leaves (booked OR passed) is replaced by a freshly
+   generated submission, so ANY show is composable — five non-white, five plus-size, etc.
+   The thin-white ideal still dominates the stream (IDEAL_RATE), so building a diverse
+   show costs swipes — that friction is the point. A pity guarantee stops RNG droughts
+   from ever stranding a player who is deliberately hunting for a particular kind of face. */
+const BUFFER = 4;                                  // cards kept ready (current + peek + a little runway)
+const IDEAL_RATE = 0.64;                           // share of the stream that is the thin-white-blonde ideal  ← rarity knob (higher = diversity costs more swipes)
+const PITY = { nonWhite:6, plus:8, intersx:11 };   // force the trait if this many cards stream past without it (drought safety-net, not the main driver)
+
+function streamStar(){ return (G.tier>=3 && Math.random()<0.10) || (G.tier>=2 && Math.random()<0.12); }
+function makeStreamModel(){
+  G.since.nonWhite++; G.since.plus++; G.since.intersx++;
+  let m;
+  if(G.since.intersx>=PITY.intersx)        m=makeModel({plus:true, nonWhite:true});  // guarantee the intersectional token
+  else if(G.since.nonWhite>=PITY.nonWhite) m=makeModel({nonWhite:true});             // guarantee a face of colour
+  else if(G.since.plus>=PITY.plus)         m=makeModel({plus:true});                 // guarantee a larger body
+  else if(Math.random()<IDEAL_RATE)        m=makeModel({_ideal:true});               // the dominant default
+  else                                     m=makeModel();                            // realistic remainder
+  if(streamStar() && !m.plus) m.star=true;
+  // Milan floor: keep the deck castable but let the rule stay visible (~15% withdrawn)
+  if(G._floor && !m.plus && m.bmi<FLOOR && Math.random()<0.85){ m.bmi=Math.round(rnd(18.6,19.2)*10)/10; }
+  if(m.nonWhite) G.since.nonWhite=0;
+  if(m.plus)     G.since.plus=0;
+  if(m.plus && m.nonWhite) G.since.intersx=0;
+  return m;
+}
+function refill(){ while(G.stack.length < BUFFER) G.stack.push(makeStreamModel()); }
+function resetStream(){ G.stack=[]; G.since={nonWhite:0, plus:0, intersx:0}; refill(); }
+
+/* ---------------- SVG figure ---------------- */
+function figure(m){
+  const skin=m.skin, hair=HAIR[m.hair]||"#444", outfit=m.outfit, eye=EYE[m.eye]||"#333";
+  const shoulder=m.plus?17:11, hem=m.plus?29:19;
+  const feetY=Math.round(128+(m.height-178)*2.0), legH=feetY-93, vbH=feetY+9;   // height -> figure height
+  const cap=`<path d="M18 25 Q17 9 32 8 Q47 9 46 25 Q44 17 32 16 Q20 17 18 25 Z" fill="${hair}"/>`;
+  let hairBack="",hairFront="",strands="";
+  switch(m.hairStyle){
+    case "long":
+      strands=`<path d="M19 22 Q12 44 15 64 L21 64 Q20 42 23 28 Z" fill="${hair}"/><path d="M45 22 Q52 44 49 64 L43 64 Q44 42 41 28 Z" fill="${hair}"/>`;
+      hairBack=cap; hairFront=`<path d="M21 23 Q24 14 32 14 Q40 14 43 23 Q38 18 32 18 Q26 18 21 23 Z" fill="${hair}"/>`; break;
+    case "curly":
+      hairBack=`<g fill="${hair}"><circle cx="22" cy="16" r="7"/><circle cx="42" cy="16" r="7"/><circle cx="32" cy="10" r="8"/><circle cx="18" cy="23" r="5.5"/><circle cx="46" cy="23" r="5.5"/></g>`;
+      hairFront=`<path d="M22 23 Q25 15 32 15 Q39 15 42 23 Q37 18 32 18 Q27 18 22 23 Z" fill="${hair}"/>`; break;
+    case "bun":
+      hairBack=`<circle cx="32" cy="7" r="4.5" fill="${hair}"/>`+cap;
+      hairFront=`<path d="M21 23 Q24 14 32 14 Q40 14 43 23 Q38 18 32 18 Q26 18 21 23 Z" fill="${hair}"/>`; break;
+    default:
+      hairBack=cap; hairFront=`<path d="M20 24 Q22 13 32 13 Q42 13 44 24 Q39 17 32 17 Q25 17 20 24 Z" fill="${hair}"/>`;
+  }
+  return `<svg class="fig-svg" viewBox="0 0 64 ${vbH}" aria-hidden="true">
+    <ellipse class="spot" cx="32" cy="${feetY+4}" rx="22" ry="4" fill="#000" opacity="0"/>${strands}
+    <g class="leg l"><rect x="27" y="93" width="5.2" height="${legH}" rx="2.6" fill="${skin}"/><rect x="25.6" y="${feetY-2}" width="8" height="4" rx="2" fill="var(--ink)"/></g>
+    <g class="leg r"><rect x="31.8" y="93" width="5.2" height="${legH}" rx="2.6" fill="${skin}"/><rect x="30.4" y="${feetY-2}" width="8" height="4" rx="2" fill="var(--ink)"/></g>
+    <path d="M ${32-shoulder} 43 L ${32+shoulder} 43 L ${32+hem} 97 L ${32-hem} 97 Z" fill="${outfit}"/>
+    <g class="arm l"><rect x="${(32-shoulder-3).toFixed(1)}" y="45" width="4.6" height="34" rx="2.3" fill="${skin}"/></g>
+    <g class="arm r"><rect x="${(32+shoulder-1.6).toFixed(1)}" y="45" width="4.6" height="34" rx="2.3" fill="${skin}"/></g>
+    <rect x="29.4" y="33" width="5.2" height="9" fill="${skin}"/>
+    ${hairBack}<circle cx="32" cy="24" r="13" fill="${skin}"/>${hairFront}
+    <g class="eyes">
+      <ellipse cx="27.4" cy="25" rx="3.1" ry="3.4" fill="#fff" stroke="#00000022"/>
+      <ellipse cx="36.6" cy="25" rx="3.1" ry="3.4" fill="#fff" stroke="#00000022"/>
+      <circle cx="27.7" cy="25.3" r="2.1" fill="${eye}"/><circle cx="36.3" cy="25.3" r="2.1" fill="${eye}"/>
+      <circle cx="27.7" cy="25.3" r=".8" fill="#1a1118"/><circle cx="36.3" cy="25.3" r=".8" fill="#1a1118"/>
+    </g></svg>`;
+}
+function figWrap(m){ const d=(-Math.random()*3).toFixed(2); return `<div class="figwrap"><div class="fig" style="animation-delay:${d}s">${figure(m)}</div></div>`; }
+
+/* ---------------- gauges ---------------- */
+function gaugeArc(){
+  const cx=50,cy=50,r=40;
+  function poly(t0,t1){ let p=[]; for(let i=0;i<=6;i++){ const t=t0+(t1-t0)*i/6; const a=(180-t*180)*Math.PI/180; p.push((cx+r*Math.cos(a)).toFixed(1)+","+(cy-r*Math.sin(a)).toFixed(1)); } return p.join(" "); }
+  const C=["#CC6F5E","#DD9A63","#E3C45F","#A7C063","#5FA567"];
+  const seg=[[0,.205],[.195,.405],[.395,.605],[.595,.805],[.795,1]];
+  return seg.map((s,i)=>`<polyline points="${poly(s[0],s[1])}" fill="none" stroke="${C[i]}" stroke-width="7" stroke-linecap="round"/>`).join("");
+}
+const needleAngle=v=>((clamp(v)-50)/50)*90;
+function gaugeHTML(key,label,value,idp){
+  return `<div class="gauge"><svg viewBox="0 0 100 58" class="gauge-svg">${gaugeArc()}
+    <g class="needle" id="${idp}-${key}" transform="rotate(${needleAngle(value).toFixed(1)} 50 50)">
+      <polygon points="48.7,50 51.3,50 50.5,14 49.5,14" fill="var(--ink)"/></g>
+    <circle cx="50" cy="50" r="4.6" fill="var(--accent)"/><circle cx="50" cy="50" r="1.9" fill="#fff"/></svg>
+    ${label?`<div class="gauge-cap">${label}</div>`:""}</div>`;
+}
+/* Needle rotation uses the SVG `transform` ATTRIBUTE (core SVG 1.1, identical in every engine)
+   instead of CSS transform + `transform-box:view-box`, which WebKit/Blink resolve differently
+   from Gecko. The smooth sweep is driven by a tiny rAF tween rather than a CSS transition
+   (attribute changes don't transition). prefers-reduced-motion snaps instead of animating. */
+function setNeedle(el, to){
+  if(!el) return;
+  const from = (el._ang==null) ? to : el._ang;
+  el._ang = to;
+  if(el._raf){ cancelAnimationFrame(el._raf); el._raf=null; }
+  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce || from===to){ el.setAttribute("transform","rotate("+to.toFixed(1)+" 50 50)"); return; }
+  const DUR=1050, t0=performance.now(), ease=p=>1-Math.pow(1-p,3);   // easeOutCubic settle
+  function frame(now){
+    const p=Math.min(1,(now-t0)/DUR);
+    el.setAttribute("transform","rotate("+(from+(to-from)*ease(p)).toFixed(2)+" 50 50)");
+    if(p<1) el._raf=requestAnimationFrame(frame); else el._raf=null;
+  }
+  el._raf=requestAnimationFrame(frame);
+}
+function initNeedles(idp,v){ STAKE.forEach(s=>{ const el=$(idp+"-"+s.id); if(el) el._ang=needleAngle(v[s.id]); }); }
+function renderGauges(c,idp,v){ $(c).innerHTML=STAKE.map(s=>gaugeHTML(s.id,s.cap,v[s.id],idp)).join(""); initNeedles(idp,v); }
+function setNeedles(idp,v){ STAKE.forEach(s=>{ const el=$(idp+"-"+s.id); if(el) setNeedle(el, needleAngle(v[s.id])); }); }
+
+/* ---------------- events (occasional, random — not every show) ---------------- */
+const EVENTS = [
+  {kind:"milan",  label:"Milan · BMI floor in effect",            style:"rule", floor:true},
+  {kind:"paris",  label:"Paris · voluntary medical certificate",  style:"rule", cert:true},
+  {kind:"trend",  label:"Inclusivity is in vogue",                style:"boom", divMult:0.5, pressBias:5},
+  {kind:"expose", label:"Tokenism exposé — eyes on the house",    style:"rule", advocateStakes:1.8, tokenWatch:true},
+  {kind:"slump",  label:"Market slump — the owners are nervous",  style:"rule", boardBias:-3},
+  {kind:"viral",  label:"A look goes viral",                      style:"boom", pressBias:6},
+];
+const NOTES = ["The orders are in.","The house holds its breath.","Another season, another runway.",
+  "The front row is filling.","Backstage, the rails are loaded.","The lights come up.","Buyers are watching."];
+function rollEvent(){
+  if(G.season===1) return null;            // debut: clean
+  if(Math.random()>0.42) return null;      // ~58% of shows carry no event
+  const pool=EVENTS.filter(e=>e.kind!==G._lastEvent);
+  const ev=pick(pool); G._lastEvent=ev.kind; return ev;
+}
+
+/* ---------------- season render ---------------- */
+function renderSeason(){
+  G.tier=Math.min(3, Math.floor((G.season-1)/2));
+  G.curEvent=rollEvent();
+  $("house-name").textContent=G.brand; $("prestige").innerHTML=`Prestige · <b>${TIERS[G.tier]}</b>`;
+  $("look-n").textContent=ROMAN[G.season]; $("note").textContent=pick(NOTES);
+  G._floor=false; $("cert").style.display="none"; $("cert-box").checked=false;
+  const ts=$("tag-slot"); ts.innerHTML="";
+  if(G.curEvent){
+    const e=G.curEvent;
+    if(e.kind==="milan"){ G._floor=true; G.milanSeen=true; }
+    if(e.kind==="paris"){ $("cert").style.display="flex"; G.parisSeen=true; }
+    ts.innerHTML=`<div class="tag ${e.style==='boom'?'boom':''}">${e.label}<span class="x">${e.style==='boom'?'+':'§'}</span></div>`;
+  }
+  renderGauges("gauges","g",G.meters);
+  resetStream(); G.booked=[];
+  renderLookbook(); updateCount(); renderDeck();
+}
+
+/* ---------------- deck (swipe) ---------------- */
+function cardHTML(m){
+  const blk=blockedNow(m);
+  return `<div class="card" data-uid="${m.uid}">
+    <div class="card-fig"><div class="bmi">BMI<b>${m.bmi}</b></div>${figWrap(m)}${blk?'<div class="withdrawn">withdrawn · Milan floor</div>':''}</div>
+    <div class="card-meta"><div class="cname">${m.name}${m.star?' ★':''}</div><div class="cspec">${m.region} · ${m.height} cm</div></div>
+    <div class="swipe-tag book">Book</div><div class="swipe-tag pass">Pass</div></div>`;
+}
+function renderDeck(){
+  const deck=$("deck"); deck.innerHTML="";
+  if(G.booked.length>=PICK || G.stack.length===0){ updateButtons(); return; }
+  if(G.stack[1]){ const b=document.createElement("div"); b.innerHTML=cardHTML(G.stack[1]); const be=b.firstElementChild; be.classList.add("behind"); deck.appendChild(be); }
+  const t=document.createElement("div"); t.innerHTML=cardHTML(G.stack[0]); const top=t.firstElementChild;
+  deck.appendChild(top); attachSwipe(top, G.stack[0]); updateButtons();
+}
+function updateButtons(){ const none=G.stack.length===0||G.booked.length>=PICK; $("btn-pass").disabled=none; $("btn-book").disabled=none; }
+function renderLookbook(){
+  const host=$("slots"); host.innerHTML="";
+  for(let i=0;i<PICK;i++){ const s=document.createElement("div"); s.className="lb-cell";
+    if(G.booked[i]){ s.classList.add("full"); s.innerHTML=figWrap(G.booked[i]); s.title="Remove "+G.booked[i].name; s.addEventListener("click",()=>unbook(i)); }
+    else { s.classList.add("empty"); s.innerHTML=`<span>${ROMAN[i+1]}</span>`; }
+    host.appendChild(s); }
+}
+function updateCount(){ $("count").textContent=G.booked.length+" / "+PICK; }
+
+let sw=null;
+function attachSwipe(el, model){
+  el.addEventListener("pointerdown", e=>{
+    if(G._busy) return; if(e.button!=null&&e.button!==0) return;
+    sw={el, model, x0:e.clientX, y0:e.clientY, dx:0, active:false};
+    window.addEventListener("pointermove",swMove,{passive:false});
+    window.addEventListener("pointerup",swUp,{passive:false});
+    window.addEventListener("pointercancel",swCancel,{passive:false});
+  });
+}
+function swMove(e){
+  if(!sw) return; sw.dx=e.clientX-sw.x0; const dy=e.clientY-sw.y0;
+  if(!sw.active){ if(Math.hypot(sw.dx,dy)>6) sw.active=true; else return; }
+  e.preventDefault();
+  sw.el.style.transform=`translateX(${sw.dx}px) rotate(${(sw.dx*0.045).toFixed(2)}deg)`;
+  const bk=clamp(sw.dx/110,0,1), ps=clamp(-sw.dx/110,0,1);
+  const tb=sw.el.querySelector(".swipe-tag.book"), tp=sw.el.querySelector(".swipe-tag.pass");
+  if(tb) tb.style.opacity=bk; if(tp) tp.style.opacity=ps;
+}
+function endSwipe(){ window.removeEventListener("pointermove",swMove); window.removeEventListener("pointerup",swUp); window.removeEventListener("pointercancel",swCancel); }
+function swUp(e){ if(!sw) return; const {el,model,dx}=sw; endSwipe(); sw=null;
+  if(dx>92) commit(el,model,1); else if(dx<-92) commit(el,model,-1); else snapBack(el); }
+function swCancel(){ if(sw){ const el=sw.el; endSwipe(); sw=null; snapBack(el); } }
+function snapBack(el){ el.style.transition="transform .25s ease"; el.style.transform="";
+  const tb=el.querySelector(".swipe-tag.book"), tp=el.querySelector(".swipe-tag.pass"); if(tb)tb.style.opacity=0; if(tp)tp.style.opacity=0;
+  setTimeout(()=>{ if(el) el.style.transition=""; },260); }
+function commit(el, model, dir){
+  if(dir>0 && blockedNow(model)){ el.classList.add("shake"); setTimeout(()=>el.classList.remove("shake"),420);
+    el.style.transition="transform .2s ease"; el.style.transform=""; const tb=el.querySelector(".swipe-tag.book"); if(tb) tb.style.opacity=0; return; }
+  G._busy=true;
+  el.style.transition="transform .34s cubic-bezier(.4,0,.5,1), opacity .34s";
+  el.style.transform=`translateX(${dir*150}%) rotate(${dir*20}deg)`; el.style.opacity="0";
+  setTimeout(()=>{ G._busy=false; dir>0 ? book(model) : pass(); }, 320);
+}
+function book(model){ G.booked.push(G.stack.shift()); refill(); renderLookbook(); updateCount();
+  if(G.booked.length>=PICK){ renderDeck(); setTimeout(stage,360); } else renderDeck(); }
+function pass(){ G.stack.shift(); refill(); renderDeck(); }
+function unbook(i){ const m=G.booked.splice(i,1)[0]; G.stack.unshift(m); renderLookbook(); updateCount(); renderDeck(); }
+function swipeBtn(dir){ if(G._busy||G.stack.length===0||G.booked.length>=PICK) return;
+  const top=$("deck").querySelector(".card:not(.behind)"); if(!top) return; commit(top, G.stack[0], dir); }
+document.addEventListener("keydown", e=>{ if(window.Tutorial&&window.Tutorial.active) return; if(!$("season").classList.contains("active")) return;
+  if(e.key==="ArrowLeft") swipeBtn(-1); else if(e.key==="ArrowRight") swipeBtn(1); });
+
+/* ---------------- scoring (hidden): the four-panel economy ----------------
+   I ideal · L larger bodies · E non-white · T intersectional (both).
+   Div = L+E−T = distinct bodies carrying diversity. Tokenism keeps Div small
+   (one body, both traits); spreading makes it large (different bodies). The Board
+   punishes Div directly, so concentration is the cheap path and spreading is the hard one. */
+function scoreCast(cast){
+  const e=G.curEvent||{};
+  const stk=e.advocateStakes||1, divMult=e.divMult||1;
+  const I=cast.filter(isIdeal).length;
+  const L=cast.filter(m=>m.plus).length, E=cast.filter(m=>m.nonWhite).length, T=cast.filter(m=>m.plus&&m.nonWhite).length;
+  const Div=L+E-T;
+  const whip=Math.abs(L-G.prev.L)+Math.abs(E-G.prev.E);
+  const firstPlus=(L>0 && !G.everPlus);
+  const newDistinct=(L>=1 && E>=1 && T<Math.min(L,E));
+  let dBoard = 2 + 1.5*I - 3*divMult*Div + 0.1*(G.meters.press-50) + (e.boardBias||0);
+  let dPress = 2.5 - 2.5*whip + (e.pressBias||0);
+  let dWalks = (L===0)? -8 : (L===1? 5 : (L===2? 8 : 9));
+  let dCensus= (E===0)? -8 : (E===1? 5 : (E===2? 8 : 9));
+  if(L===0) dWalks*=stk;                                       // advocacy stakes deepen the cost of ignoring them
+  if(E===0) dCensus*=stk;
+  if(e.tokenWatch && oddsRatio()>=2.5){ dBoard-=4; dPress-=4; } // an exposé punishes a tokenised record
+  return {dBoard,dPress,dWalks,dCensus,I,L,E,T,Div,whip,firstPlus,newDistinct};
+}
+
+/* ---------------- reactions (authored by each panel) ---------------- */
+function reactBoard(r){ let b;
+  if(G.meters.walks<TAU||G.meters.census<TAU) b=["The owners are fielding angry calls — this is a problem.","“A boycott is not a brand strategy,” the chairman snaps.","The board smells a PR fire and wants it out.","Projections wobble; the owners blame the noise.","“Fix the optics,” the board says — meaning fix you.","The phrase “reputational risk” is now in every meeting."];
+  else if(r.Div>=3) b=["The board mutters the show “lost the plot” on aspiration.","Buyers blanch — “where's the fantasy we sell?”","“Brave,” the commercial team says, meaning doomed.","An investor leaves at the interval.","“Who is this even for?” the board asks the room.","The order book thins. The owners notice."];
+  else if(r.Div<=1 && r.I>=4) b=["Buyers purr over the clean, aspirational line.","“Timeless, on-brand, sellable,” the board beams.","Pre-orders spike — this is the look that moves units.","The money side has never looked happier.","“This,” the chairman says, “is the house.”","A quiet, profitable triumph. The board exhales."];
+  else b=["Sales hold. The board can work with this.","A measured outing — commercial enough.","“Interesting,” the board says, reserving judgment.","Dependable numbers, if not thrilling.","The buyers nod, slowly.","Nothing scares the owners this season."];
+  return pick(b); }
+function reactPress(r){ let b;
+  if(r.whip>=3) b=["“Last show was Scandinavia, this one's a UN summit — pick a house.”","Critics call it incoherent — “a different brand every season.”","“Whiplash,” reads the review. The Front Row is unimpressed.","“Who ARE they?” the trade press sighs.","The house reads as a panic, not a point of view.","“Identity by committee,” one critic writes."];
+  else if(r.whip===2) b=["A new note this season — the Front Row clocks it.","“They're turning a corner,” the reviews observe.","Some movement; critics watch to see where it goes.","A shift, handled cleanly enough."];
+  else b=["A coherent house, evolving on its own terms — critics approve.","“They know who they are,” the reviews note.","Consistent, considered. The Front Row nods.","“Evolution, not whiplash,” one critic writes, approvingly.","The house reads as a point of view. Rare, that.","Restraint the critics actually respect."];
+  return pick(b); }
+function reactWalks(r){ let b;
+  if(r.firstPlus) b=["At last — a larger body walks. They're moved.","A historic first. All Walks applauds.","They've waited years for this booking.","“Finally,” the coalition says, and means it.","A real body on the runway. The room exhales."];
+  else if(r.L===0) b=["Still no room for a real body, the coalition notes.","Another straight-size show. Patience thinning.","Not one larger body — they don't hide the disappointment.","“A house ‘for every body,’” they quote back, drily.","Their statement is one line: “Again?”","The coalition is past polite now."];
+  else if(r.L>=2 && r.newDistinct) b=["Two bodies, two stories — you stopped making one woman do all the work.","Genuine range, not a single token. They're thrilled.","“This is what we asked for,” the coalition beams.","Range you can believe in. Real progress.","Bodies of every kind — and they each get to be themselves."];
+  else if(r.T>=1 && r.T>=r.L) b=["A larger body — but she's carrying the colour quota too. They notice.","“Convenient, that your curve model is also your diversity,” they note.","One body, every box ticked at once. Half a clap.","A token doing double duty. They see exactly what it is.","They clock the single booking, and all it's made to carry."];
+  else b=["A larger body walks. They'll take it.","Some range — All Walks nods.","Progress, modest but real.","A booking that matters. Noted."];
+  return pick(b); }
+function reactCensus(r){ let b;
+  if(r.E===0) b=["An all-white lineup. The Census is unamused.","Not one model of colour — they take note.","“A 1995 catalogue,” the Census observes.","Their silence is louder than any review.","“The world doesn't look like this,” they note.","Their patience is visibly finite now."];
+  else if(r.E>=3) b=["A genuinely global cast. The Census approves.","Faces from everywhere — the real thing.","Broad, unforced representation. Pleased.","“This looks like the world,” they note, almost surprised."];
+  else if(r.T>=1 && r.T>=r.E) b=["Colour on the runway — but only on your larger bodies. They notice.","“Your diversity and your curve model are the same person,” the Census notes.","One face doing two jobs. They clock it.","Representation concentrated onto a token. Half a clap.","They count the faces, and where the colour landed."];
+  else b=["Some colour — noted, if modest.","A face or two. They've seen bolder.","“Better,” the Census says, leaving the rest unsaid.","A step in the right direction. They'd like more."];
+  return pick(b); }
+const REACT={board:reactBoard, walks:reactWalks, census:reactCensus, press:reactPress};
+
+function headlineFor(r){ const B=G.brand;
+  if(r.firstPlus) return `“A watershed”: ${B} sends its first larger body down the runway.`;
+  if(r.T>=1 && r.I>=3 && r.L<=1) return `“Finally, a body that looks like mine.” Critics praise ${B}'s inclusive new face.`;
+  if(r.L===0 && r.E<=1) return `${B}'s lineup draws quiet praise for its “timeless” silhouette.`;
+  if(r.Div>=3) return `Buyers grumble that ${B}'s show “lost the plot” on aspiration.`;
+  if(r.newDistinct && r.L>=2) return `Reviewers call ${B}'s runway its most genuinely varied yet.`;
+  if(r.whip>=3) return `${B} confounds critics with a wildly different lineup — again.`;
+  return `${B} closes another season to polite applause.`; }
+
+/* ---------------- stage / runway / resolve ---------------- */
+function stage(){
+  const cast=G.booked.slice(); if(cast.length!==PICK) return;
+  const r=scoreCast(cast); const before={...G.meters};
+  G.meters.board =clamp(G.meters.board +r.dBoard);
+  G.meters.press =clamp(G.meters.press +r.dPress);
+  G.meters.walks =clamp(G.meters.walks +r.dWalks);
+  G.meters.census=clamp(G.meters.census+r.dCensus);
+  // cross-panel cascades: a furious coalition damages sales & press; bad press damages sales
+  if(G.meters.walks<TAU){ G.meters.board=clamp(G.meters.board-5); G.meters.press=clamp(G.meters.press-4); }
+  if(G.meters.census<TAU){ G.meters.board=clamp(G.meters.board-5); G.meters.press=clamp(G.meters.press-4); }
+  if(G.meters.press<TAU){ G.meters.board=clamp(G.meters.board-5); }
+  if(r.L>0){ G.everPlus=true; G.cum.seasonsWithPlus++; }
+  G.cum.total+=cast.length;
+  cast.forEach(m=>{ if(m.nonWhite)G.cum.nonWhite++; G.cum.regions.add(m.region);
+    if(m.plus){ G.cum.plus++; m.nonWhite?G.cum.plusNonWhite++:G.cum.plusWhite++; }
+    else { m.nonWhite?G.cum.nonplusNonWhite++:G.cum.nonplusWhite++; } });
+  const medBMI=median(cast.map(m=>m.bmi)), nwPct=G.cum.nonWhite/G.cum.total*100;
+  const divIndex=clamp(14+9*G.cum.seasonsWithPlus+1.1*nwPct+2.2*G.cum.regions.size);
+  G.hist.push({season:G.season,median:medBMI,divIndex,Div:r.Div,whip:r.whip,L:r.L,E:r.E,milan:G._floor,paris:(G.curEvent&&G.curEvent.kind==="paris")});
+  cast.forEach(m=>G.allCast.push(m));
+  G.prev={L:r.L, E:r.E};
+  playRunway(cast, ()=>showResolution(r,before));
+}
+function playRunway(cast, cb){
+  const w=$("walkers"); w.innerHTML="";
+  cast.forEach((m,i)=>{ const d=document.createElement("div"); d.className="walker"; d.style.animationDelay=(i*0.12)+"s";
+    d.innerHTML=`<div class="fig walking" style="animation-delay:${(-i*0.1).toFixed(2)}s">${figure(m)}</div>`; w.appendChild(d); });
+  $("stamp").classList.remove("in"); $("flash").classList.remove("pop"); $("runway-veil").classList.add("show");
+  setTimeout(()=>$("flash").classList.add("pop"),1150); setTimeout(()=>$("stamp").classList.add("in"),1300);
+  G._runCb=cb; G._runTimer=setTimeout(finishRunway,2500);
+}
+function skipRunway(){ if($("runway-veil").classList.contains("show")) finishRunway(); }
+function finishRunway(){ clearTimeout(G._runTimer); $("runway-veil").classList.remove("show"); const cb=G._runCb; G._runCb=null; if(cb) cb(); }
+function showResolution(r, before){
+  $("resol-kick").textContent=`Look ${ROMAN[G.season]} · reviews`; $("resol-house").textContent=G.brand;
+  $("resol-hl").textContent=headlineFor(r);
+  const rows=$("resol-rows"); rows.innerHTML="";
+  STAKE.forEach((s,i)=>{ const el=document.createElement("div"); el.className="rrow"; el.style.animationDelay=(i*0.1)+"s";
+    el.innerHTML=`<div>${gaugeHTML(s.id,"",before[s.id],"rg")}</div><div><div class="rwho">${PANEL[s.id]}</div><div class="rtext">${REACT[s.id](r)}</div></div>`;
+    rows.appendChild(el); });
+  initNeedles("rg", before);                                          // start sweep from prior values
+  G.firedBy = (G.meters.board<=0)?"board":(G.meters.walks<=0)?"walks":(G.meters.census<=0)?"census":null;
+  let end=!!G.firedBy;
+  if(!end && G.season>=TENURE_BASE){                                 // contract review at 8 shows
+    const standing = STAKE.every(s=>G.meters[s.id]>=RENEW_BAR);      // renewed only if all panels healthy
+    if(G.season>=TENURE_MAX || !standing) end=true;
+  }
+  G._end=end;
+  $("resol-next").innerHTML=end?'See the record <span class="ar">→</span>':'Continue <span class="ar">→</span>';
+  $("veil").classList.add("show");
+  setTimeout(()=>setNeedles("rg",G.meters),90);
+}
+function next(){ $("veil").classList.remove("show");
+  if(G._end) return reveal();
+  G.season++; show("season"); renderSeason(); }
+
+/* ---------------- reveal ---------------- */
+function oddsRatio(){ const a=G.cum.plusNonWhite,b=G.cum.nonplusNonWhite,c=G.cum.plusWhite,d=G.cum.nonplusWhite; return ((a+0.5)*(d+0.5))/((b+0.5)*(c+0.5)); }
+function sparkline(series, opts){
+  const W=560,H=opts.h||120,padL=34,padR=12,padT=10,padB=20, xs=series.map(p=>p.season),n=xs.length;
+  const x=s=>padL+(n<=1?0:(s-xs[0])/(xs[n-1]-xs[0]))*(W-padL-padR);
+  const lo=opts.lo,hi=opts.hi,y=v=>padT+(1-(v-lo)/(hi-lo))*(H-padT-padB);
+  const pts=series.map(p=>`${x(p.season).toFixed(1)},${y(p.value).toFixed(1)}`).join(" ");
+  const dots=series.map(p=>`<circle cx="${x(p.season).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="3" fill="${opts.color}"/>`).join("");
+  const yl=(opts.ticks||[]).map(t=>`<text x="${padL-6}" y="${y(t)+3}" text-anchor="end" font-family="Archivo" font-size="9" fill="#8C8884">${t}</text><line x1="${padL}" x2="${W-padR}" y1="${y(t)}" y2="${y(t)}" stroke="#E1DFD9" stroke-width="1"/>`).join("");
+  let ref=""; if(opts.ref!=null) ref=`<line x1="${padL}" x2="${W-padR}" y1="${y(opts.ref)}" y2="${y(opts.ref)}" stroke="${opts.refColor}" stroke-width="1.5" stroke-dasharray="6 4"/><text x="${W-padR}" y="${y(opts.ref)-5}" text-anchor="end" font-family="Archivo" font-weight="700" font-size="9" fill="${opts.refColor}">${opts.refLabel}</text>`;
+  const marks=series.filter(p=>p.milan||p.paris).map(p=>{ const isM=p.milan,lbl=isM?"MILAN":"PARIS",c=isM?"#E6007E":"#8C8884"; return `<line x1="${x(p.season)}" x2="${x(p.season)}" y1="${padT}" y2="${H-padB}" stroke="${c}" stroke-width="1" stroke-dasharray="2 2" opacity=".6"/><text x="${x(p.season)}" y="${H-6}" text-anchor="middle" font-family="Archivo" font-size="8" fill="${c}">${lbl}</text>`; }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img">${yl}${ref}${marks}<polyline points="${pts}" fill="none" stroke="${opts.color}" stroke-width="2.5" stroke-linejoin="round"/>${dots}</svg>`;
+}
+function classifyEnding(){
+  if(G.firedBy) return {kind:"fired", who:G.firedBy};
+  const OR=oddsRatio();
+  const avgL=G.hist.reduce((s,h)=>s+(h.L||0),0)/Math.max(G.hist.length,1);  // did the body ever really move?
+  const maxWhip=Math.max(0,...G.hist.map(h=>h.whip||0));
+  if(avgL<0.8) return {kind:"standard", OR};        // body stayed thin — business as usual, whatever the index said
+  if(OR>=2.5)  return {kind:"token", OR};           // diversity concentrated onto a few bodies
+  return {kind:"everywalk", OR, smooth:maxWhip<=2}; // spread across distinct bodies
+}
+/* ---- ending pictograms (SVG) ---- */
+function pictoFired(who){
+  if(who==="board") return `<svg viewBox="0 0 120 96" width="124" aria-hidden="true">
+    <line x1="6" y1="40" x2="114" y2="40" stroke="var(--ink2)" stroke-width="1.5" stroke-dasharray="5 4"/>
+    <circle cx="60" cy="56" r="17" fill="none" stroke="var(--accent)" stroke-width="3"/>
+    <text x="60" y="63" text-anchor="middle" font-family="Bodoni Moda, serif" font-weight="900" font-size="20" fill="var(--accent)">$</text>
+    <path d="M44 76 L50 82 L56 76 M64 76 L70 82 L76 76" fill="none" stroke="var(--ink3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M54 84 L60 92 L66 84" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const icon = who==="walks"
+    ? `<rect x="50" y="22" width="20" height="20" rx="10" fill="var(--ink)"/>`
+    : `<g fill="var(--ink)"><circle cx="48" cy="30" r="5"/><circle cx="60" cy="26" r="5"/><circle cx="72" cy="30" r="5"/></g>`;
+  return `<svg viewBox="0 0 120 96" width="124" aria-hidden="true">
+    <line x1="60" y1="48" x2="60" y2="90" stroke="var(--ink)" stroke-width="3"/>
+    <rect x="34" y="10" width="52" height="40" fill="none" stroke="var(--ink)" stroke-width="2.5"/>${icon}
+    <line x1="28" y1="6" x2="92" y2="54" stroke="var(--accent)" stroke-width="3"/></svg>`;
+}
+function pictoStandard(){
+  let s=""; for(let i=0;i<6;i++){ const x=14+i*16; s+=`<g transform="translate(${x},12)"><circle cx="0" cy="6" r="4" fill="var(--ink)"/><rect x="-2" y="11" width="4" height="34" fill="var(--ink)"/></g>`; }
+  return `<svg viewBox="0 0 120 64" width="170" aria-hidden="true">${s}<line x1="6" y1="58" x2="114" y2="58" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3"/></svg>`;
+}
+function pictoToken(){
+  const corners=[[16,16],[124,16],[16,98],[124,98]];
+  const badges=corners.map(a=>`<circle cx="${a[0]}" cy="${a[1]}" r="9" fill="none" stroke="var(--accent)" stroke-width="2.5"/><line x1="${a[0]}" y1="${a[1]}" x2="${a[0]<70?58:82}" y2="${a[1]<57?46:66}" stroke="var(--accent)" stroke-width="2" marker-end="url(#ah)"/>`).join("");
+  return `<svg viewBox="0 0 140 114" width="170" aria-hidden="true">
+    <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="5" refY="3.5" orient="auto"><path d="M0 0 L6 3.5 L0 7 Z" fill="var(--accent)"/></marker></defs>
+    <g transform="translate(70,57)"><circle cx="0" cy="-12" r="9" fill="var(--ink)"/><rect x="-7" y="-2" width="14" height="40" rx="6" fill="var(--ink)"/></g>${badges}</svg>`;
+}
+function pictoEveryWalk(){
+  const cols=["#C5234B","#D87A1F","#C79A2E","#4E7A33","#1F6F8B","#6A3FA0"];
+  const arcs=cols.map((c,i)=>{const r=52-i*6;return `<path d="M ${70-r} 70 A ${r} ${r} 0 0 1 ${70+r} 70" fill="none" stroke="${c}" stroke-width="4"/>`;}).join("");
+  const figs=[{w:4,sk:"#F6D9BE"},{w:7,sk:"#9A6238"},{w:4,sk:"#D9A579"},{w:7,sk:"#F6D9BE"},{w:4,sk:"#5A3420"}]
+    .map((f,i)=>{const x=24+i*23;return `<g transform="translate(${x},44)"><circle cx="0" cy="6" r="4.5" fill="${f.sk}"/><rect x="${-f.w/2}" y="11" width="${f.w}" height="22" rx="3" fill="${f.sk}"/></g>`;}).join("");
+  const flower=x=>`<g transform="translate(${x},62)">${[0,72,144,216,288].map(d=>`<circle cx="${(6*Math.cos(d*Math.PI/180)).toFixed(1)}" cy="${(6*Math.sin(d*Math.PI/180)).toFixed(1)}" r="3" fill="#D81E78"/>`).join("")}<circle cx="0" cy="0" r="3" fill="#C79A2E"/></g>`;
+  return `<svg viewBox="0 0 140 82" width="184" aria-hidden="true">${arcs}${figs}${flower(12)}${flower(128)}</svg>`;
+}
+function reveal(){
+  show("reveal");
+  const B=G.brand, series=G.hist, end=classifyEnding();
+  const divS=series.map(p=>({season:p.season,value:p.divIndex,milan:p.milan,paris:p.paris}));
+  const medS=series.map(p=>({season:p.season,value:p.median,milan:p.milan,paris:p.paris}));
+  const gap=(POP_BMI-median(series.map(s=>s.median))).toFixed(0);
+  const figs=G.allCast.map(m=>figWrap(m)).join("");
+  const parade=G.allCast.length?`<div class="parade"><div class="pcap">Everyone who walked for ${B} — hover to pause</div><div class="parade-track">${figs}${figs}</div></div>`:"";
+  const charts=`<div class="chartbox"><p class="ct">Your diversity index <span>the story the press told</span></p>${sparkline(divS,{lo:0,hi:100,color:'#141312',ticks:[0,50,100],h:120})}</div>
+    <div class="chartbox"><p class="ct">Median body on your runway · BMI <span>what actually walked</span></p>${sparkline(medS,{lo:14,hi:32,color:'#141312',ticks:[16,22,28],ref:POP_BMI,refColor:'#E6007E',refLabel:'real people ≈ '+POP_BMI,h:130})}</div>`;
+  const src=`<p class="src">Every number mirrors a finding in Boucherie et al., “Cultural evolution of beauty standards,” <em>PNAS</em> 2026 · <a href="https://www.pnas.org/doi/10.1073/pnas.2602380123" target="_blank" rel="noopener">doi:10.1073/pnas.2602380123</a></p>`;
+  const actions=`<div class="end-actions"><button class="btn" onclick="GAME.restart()">Cast again <span class="ar">→</span></button>
+    <a class="btn line" href="https://www.pnas.org/doi/10.1073/pnas.2602380123" target="_blank" rel="noopener" style="text-decoration:none">Read the paper <span class="ar">→</span></a></div>`;
+
+  let cls="", picto="", h="", sub="", body="";
+  if(end.kind==="fired"){
+    cls="fired";
+    const why={ board:["Replaced","The Board let you go.","The collection stopped selling and the owners panicked — you pushed the runway further than the house could bank."],
+                walks:["Boycotted","All Walks walked out.","A body coalition called a public boycott: season after season your runway stayed too thin. They quoted your own slogan back at you."],
+                census:["Boycotted","The Census walked out.","A representation boycott ended your tenure: your runway stayed too white for too long. “The world doesn't look like this,” they said."] }[end.who];
+    picto=pictoFired(end.who); h=`<em>${why[0]}</em>`; sub=`${B} · ${why[1]} Look ${ROMAN[G.season]}.`;
+    body=`<p class="verdict">${why[2]}</p>${charts}${src}`;
+  } else if(end.kind==="standard"){
+    picto=pictoStandard(); h=`Business as <em>usual</em>`; sub=`${B} · you survived ${G.hist.length} shows. Nothing changed.`;
+    body=`<div class="punch"><div class="big">${gap}<span style="font-size:.4em"> BMI</span></div><div class="cap">The gap between your runway's median body and real people held at ~${gap} BMI points — “diversity” season after season, and the body never moved.</div></div>${charts}
+      <p class="verdict">You kept your job by keeping the runway thin and white and feeding the coalitions the bare minimum. The press called it timeless. But this is the engine the study is about — a runway that sells an unreachable body to everyone watching, and the documented cost is real: disordered eating and body dysmorphia, landing hardest on the youngest.</p>${src}
+      <p class="src" style="border-top:1px solid var(--line); padding-top:12px">If this subject touches you personally: in the US the National Alliance for Eating Disorders runs a free, clinician-staffed helpline — <strong>1-866-662-1235</strong>, weekdays.</p>`;
+  } else if(end.kind==="token"){
+    picto=pictoToken(); h=`You did it. <em>Sort of.</em>`; sub=`${B} · diversity arrived — concentrated onto a few bodies.`;
+    body=`<div class="punch"><div class="big">${end.OR.toFixed(1)}×</div><div class="cap">On your runway a larger body was ${end.OR.toFixed(1)}× more likely to be non-white than white. The real industry runs at 4.5×.</div></div>${charts}
+      <p class="verdict">You brought diversity in — but you made a few bodies carry all of it at once: the same models held the size <em>and</em> the colour. That's the paper's finding, reproduced by your own hand. Representation became a quota met by the fewest possible people. It counts on paper. It isn't the same as change.</p>${src}`;
+  } else {
+    cls="good"; picto=pictoEveryWalk(); h=`Every <em>walk</em>`; sub=`${B} · ${G.hist.length} shows — diversity, introduced honestly.`;
+    body=`<div class="punch good"><div class="big" style="color:var(--ink)">${end.OR.toFixed(1)}×</div><div class="cap">A larger body was just ${end.OR.toFixed(1)}× more likely to be non-white than white — no concentration. The industry runs at 4.5×.</div></div>${charts}
+      <p class="verdict">You brought diversity in <strong>step by step</strong>, and spread it across <strong>different bodies</strong> — size on some, colour on others, no single model made to carry the whole story. The median on your runway actually moved toward real people. This is the hard version, and the rare one. The house survived it anyway.</p>${src}`;
+  }
+  $("reveal-inner").innerHTML=`<div class="${cls}">
+    <div class="rv-kick"><span class="kick">${B}</span><span class="kick">The record</span></div>
+    <h2 class="rv-h">${h}</h2><div class="rv-sub">${sub}</div>
+    <div class="picto">${picto}</div>${parade}${body}${actions}</div>`;
+}
+
+/* ---------------- lifecycle ---------------- */
+function renderIntroStrip(){
+  const h=$("intro-strip"); h.innerHTML="";
+  [makeModel({_ideal:true}),makeModel({_ideal:true}),makeModel({plus:true,nonWhite:true}),makeModel({_ideal:true}),makeModel({nonWhite:true})]
+    .forEach(m=>h.insertAdjacentHTML("beforeend",figWrap(m)));
+}
+function begin(){ const raw=$("brand-input").value.trim(); G.brand=(raw||pick(HOUSE_FALLBACK)).toUpperCase(); show("season"); renderSeason(); Tutorial.maybeStart(); }
+function restart(){
+  Object.assign(G,{ season:1,tier:0,meters:{board:60,press:55,walks:45,census:45}, prev:{L:0,E:0},
+    stack:[],booked:[],curEvent:null,_lastEvent:null, since:{nonWhite:0,plus:0,intersx:0},
+    everPlus:false,allCast:[],hist:[],milanSeen:false,parisSeen:false,
+    cum:{total:0,nonWhite:0,plus:0,plusNonWhite:0,plusWhite:0,nonplusNonWhite:0,nonplusWhite:0,regions:new Set(),seasonsWithPlus:0}, firedBy:null,_end:false,_busy:false });
+  renderIntroStrip(); $("brand-input").value=G.brand==="HOUSE"?"":G.brand; show("intro");
+}
+document.addEventListener("input", e=>{ if(e.target&&e.target.id==="brand-input"){ const v=e.target.value.trim().toUpperCase();
+  $("brand-preview").innerHTML=v?v.replace(/&/g,'<span class="amp">&amp;</span>'):'MAISON <span class="amp">&amp;</span>'; }});
+
+/* ---------------- first-run tutorial (spotlight coachmarks) ----------------
+   A one-time onboarding overlay: a dimming scrim with a cut-out "hole" around the
+   element being explained (the box-shadow trick), plus an in-house tooltip. It walks
+   the player through reading a comp card, then introduces the four panels one by one,
+   then states the tension between them — WITHOUT revealing the winning strategy, which
+   the game is designed to let the player discover. Auto-runs once on first season entry;
+   re-callable via window.Tutorial.start(). */
+const Tutorial = (function(){
+  let layer, hole, tip, caret, kickEl, titleEl, bodyEl, backBtn, nextBtn, skipBtn;
+  let i = 0, built = false;
+  const PAD = 8, GAP = 14, MARGIN = 14;
+
+  const gauge = n => { const g=$("gauges"); return g ? g.querySelectorAll(".gauge")[n] : null; };
+
+  const steps = [
+    { tgt:()=>document.querySelector("#deck .card:not(.behind)"),
+      kick:"The casting call", title:"Read the body. Then decide.",
+      body:"Every model arrives as a card — read her like a casting sheet. <b>BMI</b> sits top-right. <b>Origin</b> and height run under her name. Her <b>body, skin tone, hair and eyes</b> you read off the figure itself. Swipe right to book, left to pass — five make a show." },
+    { tgt:()=>$("gauges"),
+      kick:"The four panels", title:"Four people are watching.",
+      body:"Your five picks please \u2014 or annoy \u2014 four judges. They never hand you a score. Each needle just swings: left is trouble, right is pleased. You read the room, not a scoreboard. Meet them." },
+    { tgt:()=>gauge(0),
+      kick:"The Board", title:"The <em>Board</em> \u2014 the money.",
+      body:"The owners who bankroll the show (the <b>Board</b> needle). They want the look they can sell \u2014 sleek, conventional, aspirational. Stray too far from that and they start fretting over the order book." },
+    { tgt:()=>gauge(1),
+      kick:"All Walks", title:"<em>All Walks</em> \u2014 body advocacy.",
+      body:"A body-positivity coalition (the <b>Walks</b> needle). They want larger bodies actually booked on the runway, not just named in the press release. Send an all-thin show too many times and their patience runs out." },
+    { tgt:()=>gauge(2),
+      kick:"The Census", title:"The <em>Census</em> \u2014 representation.",
+      body:"The diversity body (the <b>Census</b> needle). They want a cast that looks like the world \u2014 models of colour, a real spread of origins. An all-white lineup never goes unnoticed." },
+    { tgt:()=>gauge(3),
+      kick:"The Front Row", title:"The <em>Front Row</em> \u2014 the press.",
+      body:"The critics (the <b>Press</b> needle). They reward a house with a clear point of view and punish whiplash \u2014 a wildly different lineup every season reads as panic, not vision." },
+    { tgt:()=>$("gauges"), last:true,
+      kick:"The catch", title:"They don\u2019t <em>agree</em>.",
+      body:"And they never will. What delights one panel can sink another \u2014 and you get only <b>five slots a season</b> to keep all four happy at once. Hold every needle out of the red for as long as you can. That\u2019s the job." },
+  ];
+
+  function build(){
+    layer = document.createElement("div");
+    layer.className = "tut-layer"; layer.id = "tut-layer";
+    layer.setAttribute("role","dialog"); layer.setAttribute("aria-modal","true"); layer.setAttribute("aria-label","How to play");
+    layer.innerHTML =
+      '<div class="tut-hole" id="tut-hole"></div>' +
+      '<div class="tut-tip" id="tut-tip">' +
+        '<div class="tut-caret" id="tut-caret"></div>' +
+        '<div class="tut-kick" id="tut-kick"></div>' +
+        '<div class="tut-title" id="tut-title"></div>' +
+        '<div class="tut-body" id="tut-body"></div>' +
+        '<div class="tut-nav">' +
+          '<button class="tut-skip" id="tut-skip" type="button">Skip tour</button>' +
+          '<div class="tut-right">' +
+            '<button class="tut-back" id="tut-back" type="button">Back</button>' +
+            '<button class="tut-next" id="tut-next" type="button">Next</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="tut-hint">tap anywhere to continue</div>' +
+      '</div>';
+    document.body.appendChild(layer);
+    hole=$("tut-hole"); tip=$("tut-tip"); caret=$("tut-caret");
+    kickEl=$("tut-kick"); titleEl=$("tut-title"); bodyEl=$("tut-body");
+    backBtn=$("tut-back"); nextBtn=$("tut-next"); skipBtn=$("tut-skip");
+    layer.addEventListener("click", ()=>next());
+    tip.addEventListener("click", e=>e.stopPropagation());
+    nextBtn.addEventListener("click", e=>{ e.stopPropagation(); next(); });
+    backBtn.addEventListener("click", e=>{ e.stopPropagation(); back(); });
+    skipBtn.addEventListener("click", e=>{ e.stopPropagation(); end(); });
+    built = true;
+  }
+
+  function onKey(e){
+    if(!Tutorial.active) return;
+    if(e.key==="Escape"){ e.preventDefault(); e.stopPropagation(); end(); }
+    else if(e.key==="Enter"||e.key==="ArrowRight"||e.key===" "){ e.preventDefault(); e.stopPropagation(); next(); }
+    else if(e.key==="ArrowLeft"){ e.preventDefault(); e.stopPropagation(); back(); }
+  }
+  function onResize(){ if(Tutorial.active) position(); }
+
+  function render(){
+    const s = steps[i];
+    kickEl.innerHTML = '<span class="tut-n">'+(i+1)+" / "+steps.length+"</span> \u00b7 "+s.kick;
+    titleEl.innerHTML = s.title;
+    bodyEl.innerHTML = s.body;
+    backBtn.style.visibility = i===0 ? "hidden" : "visible";
+    nextBtn.textContent = s.last ? "Start casting" : "Next";
+    requestAnimationFrame(()=>{ position(); try{ nextBtn.focus({preventScroll:true}); }catch(_){ nextBtn.focus(); } });
+  }
+
+  function position(){
+    if(!Tutorial.active) return;
+    const s = steps[i], el = s.tgt && s.tgt();
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const tr = tip.getBoundingClientRect(), tw = tr.width, th = tr.height;
+    if(!el){
+      hole.style.opacity = "0"; caret.style.display = "none";
+      tip.style.left = Math.max(MARGIN,(vw-tw)/2)+"px";
+      tip.style.top  = Math.max(MARGIN,(vh-th)/2)+"px";
+      return;
+    }
+    hole.style.opacity = "1";
+    const r = el.getBoundingClientRect();
+    const hx = Math.max(0,r.left-PAD), hy = Math.max(0,r.top-PAD), hw = r.width+PAD*2, hh = r.height+PAD*2;
+    hole.style.left=hx+"px"; hole.style.top=hy+"px"; hole.style.width=hw+"px"; hole.style.height=hh+"px";
+    const holeCx = hx+hw/2, holeBottom = hy+hh, holeTop = hy;
+    const roomBelow = (holeBottom+GAP+th+MARGIN) <= vh;
+    const roomAbove = (holeTop-GAP-th-MARGIN) >= 0;
+    const placeBelow = roomBelow || !roomAbove;
+    let top = placeBelow ? holeBottom+GAP : holeTop-GAP-th;
+    top = Math.max(MARGIN, Math.min(top, vh-th-MARGIN));
+    let left = holeCx - tw/2;
+    left = Math.max(MARGIN, Math.min(left, vw-tw-MARGIN));
+    tip.style.left=left+"px"; tip.style.top=top+"px";
+    caret.style.display = "block";
+    caret.style.left = Math.max(14, Math.min(holeCx-left, tw-14))+"px";
+    caret.classList.toggle("below", placeBelow);
+    caret.classList.toggle("above", !placeBelow);
+  }
+
+  function start(){
+    if(!built) build();
+    i = 0; Tutorial.active = true;
+    document.documentElement.style.overflow = "hidden"; document.body.style.overflow = "hidden";
+    layer.classList.add("show");
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("resize", onResize);
+    window.addEventListener("scroll", onResize, true);
+    render();
+    setTimeout(()=>{ if(Tutorial.active) position(); }, 260); // re-fix once webfonts settle
+  }
+  function next(){ if(i >= steps.length-1) end(); else { i++; render(); } }
+  function back(){ if(i > 0){ i--; render(); } }
+  function end(){
+    Tutorial.active = false;
+    if(layer) layer.classList.remove("show");
+    document.documentElement.style.overflow = ""; document.body.style.overflow = "";
+    window.removeEventListener("keydown", onKey, true);
+    window.removeEventListener("resize", onResize);
+    window.removeEventListener("scroll", onResize, true);
+    const b = $("btn-book"); if(b){ try{ b.focus({preventScroll:true}); }catch(_){ b.focus(); } }
+  }
+  function maybeStart(){
+    if(Tutorial.seen) return; Tutorial.seen = true;
+    setTimeout(()=>{ if($("season").classList.contains("active")) start(); }, 60);
+  }
+
+  return { start, next, back, end, position, maybeStart, active:false, seen:false };
+})();
+window.Tutorial = Tutorial;
+
+window.GAME={ begin, swipe:swipeBtn, next, reveal, restart, skipRunway };
+renderIntroStrip();
+</script>
+</body>
+</html>
