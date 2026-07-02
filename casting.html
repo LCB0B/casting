@@ -146,12 +146,10 @@
   .walker{width:clamp(52px,13vw,86px); animation:walkin 1s cubic-bezier(.2,.7,.3,1) both}
   @keyframes walkin{from{transform:translateY(46px) scale(.62); opacity:0}to{transform:none; opacity:1}}
   .walker .fig-svg{width:100%}
-  .flash{position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none}
-  .flash.pop{animation:pop .5s ease}
-  @keyframes pop{0%{opacity:0}8%{opacity:.82}20%{opacity:0}48%{opacity:.46}60%{opacity:0}}
-  .stamp{position:absolute; top:13%; left:50%; transform:translate(-50%,0) scale(.6); font-family:var(--serif); font-weight:900; font-style:italic; color:#fff; font-size:clamp(28px,8vw,52px); opacity:0; text-align:center}
-  .stamp.in{animation:stampin .5s cubic-bezier(.2,1.4,.4,1) forwards}
-  @keyframes stampin{to{opacity:1; transform:translate(-50%,0) scale(1)}}
+  .pflash{position:absolute; width:76px; height:76px; border-radius:50%; pointer-events:none; z-index:3;
+    background:radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(255,255,255,.35) 42%, transparent 70%);
+    opacity:0; animation:pburst .38s ease-out forwards}
+  @keyframes pburst{0%{opacity:0; transform:scale(.2)} 14%{opacity:1; transform:scale(1)} 100%{opacity:0; transform:scale(1.6)}}
   .skiphint{position:absolute; bottom:9px; right:13px; font-family:var(--ui); font-weight:700; font-size:9px; letter-spacing:.14em; color:#7a7872; text-transform:uppercase}
 
   /* resolution */
@@ -307,7 +305,6 @@
 <div class="veil runway-veil" id="runway-veil">
   <div class="stagebox" id="stagebox" onclick="GAME.skipRunway()">
     <div class="lights"></div><div class="floor"></div><div class="walkers" id="walkers"></div>
-    <div class="flash" id="flash"></div><div class="stamp" id="stamp">staged</div>
     <div class="skiphint">tap to skip</div>
   </div>
 </div>
@@ -493,7 +490,7 @@ const Sfx=(function(){
     deal(){ noise(.05,.028,2400); },
     deny(){ tone(160,.16,"square",.035); },
     envelope(){ noise(.32,.05,1200); tone(520,.2,"sine",.028,.15,780); },
-    flash(){ noise(.05,.08,3200); noise(.05,.055,3200,.12); noise(.04,.045,3200,.22); },
+    snap(){ noise(.04,.07,3400); },
     walk(){ tone(392,.12,"sine",.05); tone(494,.12,"sine",.05,.12); tone(587,.18,"sine",.05,.24); },
     good(){ tone(523,.12,"sine",.055); tone(659,.12,"sine",.055,.1); tone(784,.22,"sine",.055,.2); },
     bad(){ tone(233,.3,"sawtooth",.04); tone(175,.4,"sawtooth",.04,.12); },
@@ -880,8 +877,14 @@ function playRunway(cast, cb){
   const w=$("walkers"); w.innerHTML="";
   cast.forEach((m,i)=>{ const d=document.createElement("div"); d.className="walker"; d.style.animationDelay=(i*0.12)+"s";
     d.innerHTML=`<div class="fig walking" style="animation-delay:${(-i*0.1).toFixed(2)}s">${figure(m)}</div>`; w.appendChild(d); });
-  $("stamp").classList.remove("in"); $("flash").classList.remove("pop"); $("runway-veil").classList.add("show"); Sfx.walk();
-  setTimeout(()=>{ $("flash").classList.add("pop"); Sfx.flash(); },1150); setTimeout(()=>$("stamp").classList.add("in"),1300);
+  $("runway-veil").classList.add("show"); Sfx.walk();
+  const box=$("stagebox"); box.querySelectorAll(".pflash").forEach(e=>e.remove());
+  for(let i=0;i<8;i++) setTimeout(()=>{                       // paparazzi from the dark: random spots, shutter clicks
+    if(!$("runway-veil").classList.contains("show")) return;
+    const f=document.createElement("div"); f.className="pflash";
+    f.style.left=(4+Math.random()*84)+"%"; f.style.top=(14+Math.random()*70)+"%";
+    box.appendChild(f); Sfx.snap(); setTimeout(()=>f.remove(),450);
+  }, 320+Math.random()*1900);
   G._runCb=cb; G._runTimer=setTimeout(finishRunway,2500);
 }
 function skipRunway(){ if($("runway-veil").classList.contains("show")) finishRunway(); }
