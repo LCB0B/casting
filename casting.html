@@ -1019,9 +1019,7 @@ const Tutorial = (function(){
     const b = $("btn-book"); if(b){ try{ b.focus({preventScroll:true}); }catch(_){ b.focus(); } }
   }
   function maybeStart(){
-    let stored=false; try{ stored=localStorage.getItem("hoc_tut")==="1"; }catch(_){}
-    if(Tutorial.seen || stored) return;
-    Tutorial.seen = true; try{ localStorage.setItem("hoc_tut","1"); }catch(_){}
+    if(Tutorial.seen) return; Tutorial.seen = true;   // once per page load — a reload brings it back
     setTimeout(()=>{ if($("season").classList.contains("active")) start(); }, 60);
   }
 
