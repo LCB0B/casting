@@ -221,8 +221,6 @@
   .env-front{position:absolute; inset:0; background:var(--panel); border:1.5px solid var(--ink); z-index:2;
     -webkit-clip-path:polygon(0 0,50% 36%,100% 0,100% 100%,0 100%); clip-path:polygon(0 0,50% 36%,100% 0,100% 100%,0 100%);
     display:flex; align-items:flex-end; justify-content:center; padding-bottom:16px}
-  .env-to{text-align:center; line-height:1.7; letter-spacing:.22em}
-  .env-to b{display:block; font-size:12px; color:var(--ink); letter-spacing:.14em}
   .env-flap{position:absolute; inset:0 0 auto 0; height:53%; background:var(--paper); border:1.5px solid var(--ink); z-index:3;
     -webkit-clip-path:polygon(0 0,100% 0,50% 100%); clip-path:polygon(0 0,100% 0,50% 100%);
     transform-origin:top; transition:transform .5s ease, opacity .25s ease .3s}
@@ -316,7 +314,7 @@
     <div class="envelope" id="envelope" onclick="Briefing.open()">
       <div class="env-back"></div>
       <div class="env-letter"></div>
-      <div class="env-front"><div class="env-to kick" id="env-to"></div></div>
+      <div class="env-front"></div>
       <div class="env-flap"></div>
       <div class="env-seal" id="env-seal"></div>
       <div class="env-hint kick">tap to open</div>
@@ -1091,7 +1089,6 @@ const Briefing=(function(){
     const B=escHTML(G.brand);
     $("brief").classList.remove("done"); $("brief").style.display="none";
     $("env-wrap").style.display="flex"; $("envelope").classList.remove("open");
-    $("env-to").innerHTML=`to \u00b7 the new casting director<br><b>${B}</b>`;
     $("env-seal").textContent=(G.brand[0]||"M").toUpperCase();
     $("brief-veil").classList.add("show");
     autoT=setTimeout(open, 3200);                             // opens itself if the player just watches
