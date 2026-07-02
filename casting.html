@@ -53,7 +53,11 @@
   .gauge{text-align:center}
   .gauge-svg{width:100%; height:auto; display:block; margin:0 auto}
   .needle{transition:transform 1.05s cubic-bezier(.33,1.15,.45,1)}
-  .gauge-cap{font-family:var(--ui); font-weight:700; font-size:8.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin-top:-3px}
+  .gauge-cap{font-family:var(--ui); font-weight:700; font-size:8.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin-top:-3px; transform-origin:50% 50%}
+  .gauge-cap.warn{color:#C97A1F; font-weight:800}
+  .gauge-cap.red{color:#C22B1F; font-weight:800}
+  .gauge-cap.crit{color:#C22B1F; font-weight:900; animation:capblink .95s ease-in-out infinite}
+  @keyframes capblink{0%,100%{transform:scale(1); opacity:1}50%{transform:scale(1.16); opacity:.7}}
 
   .tag{display:flex; gap:8px; align-items:center; font-family:var(--ui); font-weight:800; font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:5px 9px; margin-top:6px; border:1px solid var(--ink)}
   .tag.boom{border-color:var(--accent); color:var(--accent)}
@@ -582,12 +586,13 @@ function gaugeArc(){
     return `<path d="M ${pt(t0,R)} A ${R} ${R} 0 0 1 ${pt(t1,R)} L ${pt(t1,Ri)} A ${Ri} ${Ri} 0 0 0 ${pt(t0,Ri)} Z" fill="${c}" stroke="var(--paper)" stroke-width="1"/>`;}).join("");
 }
 const needleAngle=v=>((clamp(v)-50)/50)*90;
+const capClass=v=> v<15?" crit":(v<30?" red":(v<45?" warn":""));   // caption heats up as the panel sours
 function gaugeHTML(key,label,value,idp){
   return `<div class="gauge"><svg viewBox="0 0 100 56" class="gauge-svg">${gaugeArc()}
     <g class="needle" id="${idp}-${key}" transform="rotate(${needleAngle(value).toFixed(1)} 50 50)">
       <polygon points="48.6,50 51.4,50 50.5,9 49.5,9" fill="var(--ink)"/></g>
     <circle cx="50" cy="50" r="4.2" fill="var(--accent)"/></svg>
-    ${label?`<div class="gauge-cap">${label}</div>`:""}</div>`;
+    ${label?`<div class="gauge-cap${capClass(value)}">${label}</div>`:""}</div>`;
 }
 /* Needle rotation uses the SVG `transform` ATTRIBUTE (core SVG 1.1, identical in every engine)
    instead of CSS transform + `transform-box:view-box`, which WebKit/Blink resolve differently
