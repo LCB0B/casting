@@ -297,7 +297,8 @@ const EYE = {blue:"#4F86C6",green:"#4E8B4A",hazel:"#9A7338",brown:"#523A22",grey
 const HAIRSTYLES = ["long","short","curly","bun"];
 const MSTYLES = ["crop","side","buzz"];
 const SKINS = ["#F6D9BE","#ECC09A","#D9A579","#BE8456","#9A6238","#79492B","#5A3420"];
-const OUTFITS = ["#C5234B","#1F6F8B","#D87A1F","#4E7A33","#6A3FA0","#1E2A78","#0B7C72","#D81E78","#262524","#C79A2E","#9C1C3C","#2E8B7F"];
+const OUTFITS = ["#C5234B","#1F6F8B","#D87A1F","#4E7A33","#6A3FA0","#1E2A78","#0B7C72","#D81E78","#262524","#C79A2E","#9C1C3C","#2E8B7F",
+  "#1A1918","#262524","#3B3936","#57544F","#8A867F"];   // fashion wears a lot of black & grey
 const HOUSE_FALLBACK = ["MAISON LUMEN","ATELIER NÓR","HOUSE OF VÉLA","STUDIO ÉCLAT","MAISON SERA"];
 const POP_BMI = 29;          // real-population reference (US adult average, ~BMI 29)
 const FLOOR = 18.5;          // Milan 2006 rule
@@ -453,11 +454,11 @@ function figWrap(m){ const d=(-Math.random()*3).toFixed(2); return `<div class="
 
 /* ---------------- gauges ---------------- */
 function gaugeArc(){
-  const cx=50,cy=50,r=40;
-  function poly(t0,t1){ let p=[]; for(let i=0;i<=6;i++){ const t=t0+(t1-t0)*i/6; const a=(180-t*180)*Math.PI/180; p.push((cx+r*Math.cos(a)).toFixed(1)+","+(cy-r*Math.sin(a)).toFixed(1)); } return p.join(" "); }
+  /* full half-circle of filled sectors — five pizza slices from red to green */
+  const cx=50,cy=50,r=42;
   const C=["#CC6F5E","#DD9A63","#E3C45F","#A7C063","#5FA567"];
-  const seg=[[0,.205],[.195,.405],[.395,.605],[.595,.805],[.795,1]];
-  return seg.map((s,i)=>`<polyline points="${poly(s[0],s[1])}" fill="none" stroke="${C[i]}" stroke-width="7" stroke-linecap="round"/>`).join("");
+  const pt=t=>{const a=(180-t*180)*Math.PI/180; return (cx+r*Math.cos(a)).toFixed(1)+" "+(cy-r*Math.sin(a)).toFixed(1);};
+  return C.map((c,i)=>`<path d="M ${cx} ${cy} L ${pt(i/5)} A ${r} ${r} 0 0 1 ${pt((i+1)/5)} Z" fill="${c}" stroke="var(--paper)" stroke-width="1"/>`).join("");
 }
 const needleAngle=v=>((clamp(v)-50)/50)*90;
 function gaugeHTML(key,label,value,idp){
