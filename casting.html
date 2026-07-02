@@ -386,9 +386,12 @@ const Sfx=(function(){
     src.connect(f).connect(g).connect(c.destination); src.start(t0); }
   /* --- tiny ambient loop: two chords, a muted pulse, the odd sparkle. whisper-quiet. --- */
   let mTimer=null, mStep=0, mNext=0, mWanted=false;
-  const SPB=60/112/2;                                        // one eighth note at 112bpm
-  const PENT=[523.3,587.3,659.3,784,880];
-  const CHORDS=[[110,220,261.6,329.6,493.9],[87.31,174.6,261.6,349.2,440]];   // Am9 / Fmaj7
+  const SPB=60/118/2;                                        // one eighth note at 118bpm
+  const CHORDS=[                                             // I V vi IV, one bar each — the uplifting classic
+    [130.8,261.6,329.6,392,587.3],   // Cadd9
+    [98,196,246.9,293.7,392],        // G
+    [110,220,261.6,329.6,392],       // Am7
+    [87.31,174.6,220,261.6,349.2]];  // Fmaj7
   function mKick(t){ const o=ctx.createOscillator(),g=ctx.createGain();
     o.type="sine"; o.frequency.setValueAtTime(105,t); o.frequency.exponentialRampToValueAtTime(48,t+.09);
     env(g,t,.002,.11,.045); o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+.16); }
@@ -401,10 +404,12 @@ const Sfx=(function(){
     o.type=type||"triangle"; o.frequency.value=fr; env(g,t,dur*.4,dur,peak);
     o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+dur*1.7); }
   function mPlay(st,t){
+    const ch=CHORDS[(st>>3)&3];                              // new chord every bar
     if(st%4===0) mKick(t);
     if(st%4===2) mHat(t);
-    if(st%16===0){ const ch=CHORDS[(st>>4)&1]; mNote(ch[0],t,SPB*14,.026); for(let i=1;i<ch.length;i++) mNote(ch[i],t,SPB*14,.012); }
-    if(st%8===6 && Math.random()<.7) mNote(PENT[Math.floor(Math.random()*PENT.length)],t,SPB*2,.015,"sine");
+    if(st%8===0){ mNote(ch[0],t,SPB*7,.028); for(let i=1;i<ch.length;i++) mNote(ch[i],t,SPB*7,.013); }
+    if((st%8===3||st%8===6) && Math.random()<.8)             // chord-tone arpeggio, an octave up
+      mNote(ch[1+Math.floor(Math.random()*(ch.length-1))]*2,t,SPB*1.8,.015,"sine");
   }
   function musicStart(){ mWanted=true; if(!on) return; const c=ac(); if(!c||mTimer) return;
     mStep=0; mNext=c.currentTime+.1;
