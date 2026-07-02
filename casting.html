@@ -51,9 +51,9 @@
 
   .gauges{display:grid; grid-template-columns:repeat(4,1fr); gap:0; margin:8px 0 2px}
   .gauge{text-align:center}
-  .gauge-svg{width:100%; max-width:84px; height:auto; display:block; margin:0 auto}
+  .gauge-svg{width:100%; max-width:112px; height:auto; display:block; margin:0 auto}
   .needle{transition:transform 1.05s cubic-bezier(.33,1.15,.45,1)}
-  .gauge-cap{font-family:var(--ui); font-weight:700; font-size:7.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin-top:-3px}
+  .gauge-cap{font-family:var(--ui); font-weight:700; font-size:8.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin-top:-3px}
 
   .lookline{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin:4px 0 0}
   .looknum{font-family:var(--serif); font-weight:900; font-size:clamp(34px,12vw,52px); line-height:.78}
@@ -92,6 +92,8 @@
   .card-meta{border-top:1px solid var(--ink); margin-top:9px; padding-top:7px}
   .cname{font-family:var(--ui); font-weight:900; font-size:17px; letter-spacing:.04em; text-transform:uppercase; line-height:1}
   .cspec{font-family:var(--ui); font-weight:600; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin-top:4px}
+  .bmibar{display:block; width:100%; height:auto; margin-top:8px}
+  .bmibar .bmit{font-family:var(--ui); font-weight:700; font-size:7px; letter-spacing:.07em; text-transform:uppercase; fill:var(--ink2)}
   .swipe-tag{position:absolute; top:16px; font-family:var(--serif); font-weight:900; font-size:24px; text-transform:uppercase; padding:3px 11px; border:2px solid; opacity:0; pointer-events:none}
   .swipe-tag.book{right:12px; color:var(--accent); border-color:var(--accent); transform:rotate(11deg)}
   .swipe-tag.pass{left:12px; color:var(--ink); border-color:var(--ink); transform:rotate(-11deg)}
@@ -152,19 +154,24 @@
   .resol{background:var(--paper); border:1px solid var(--ink); max-width:480px; width:100%; padding:22px 22px 18px; box-shadow:8px 8px 0 var(--ink); max-height:92vh; overflow-y:auto}
   .resol .hk{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--ink); padding-bottom:6px; margin-bottom:14px}
   .resol .hl{font-family:var(--serif); font-weight:700; font-size:19px; line-height:1.22; margin:0 0 16px}
-  .rrow{display:grid; grid-template-columns:72px 1fr; gap:12px; align-items:center; margin-bottom:13px; opacity:0; animation:slidein .42s ease forwards}
+  .rrow{display:grid; grid-template-columns:88px 1fr; gap:12px; align-items:center; margin-bottom:13px; opacity:0; animation:slidein .42s ease forwards}
   @keyframes slidein{from{opacity:0; transform:translateX(-8px)}to{opacity:1; transform:none}}
-  .rrow .gauge-svg{width:72px; max-width:72px}
+  .rrow .gauge-svg{width:88px; max-width:88px}
   .rrow .rwho{font-family:var(--ui); font-weight:800; font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin-bottom:3px}
   .rrow .rtext{font-family:var(--serif); font-size:14px; line-height:1.3}
+  .rdelta{display:inline-block; font-family:var(--ui); font-weight:800; font-size:9px; letter-spacing:.06em; padding:1.5px 6px; border:1px solid; margin-left:7px; vertical-align:middle; text-transform:none}
+  .rdelta.up{color:#3E7E46; border-color:#3E7E46}
+  .rdelta.down{color:var(--accent); border-color:var(--accent)}
 
   /* reveal */
   #reveal{display:none}#reveal.active{display:block}
   .rv{max-width:540px; margin:0 auto; padding:24px 18px 56px}
   .rv-kick{display:flex; justify-content:space-between; border-bottom:1px solid var(--ink); padding-bottom:7px}
-  .rv-h{font-family:var(--serif); font-weight:900; font-size:clamp(34px,11vw,58px); line-height:.9; margin:14px 0 4px}
+  .rv-hero{display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; min-height:46vh; padding:30px 0 32px; border-bottom:1px solid var(--line); margin-bottom:26px}
+  .rv-h{font-family:var(--serif); font-weight:900; font-size:clamp(46px,16vw,86px); line-height:.88; margin:0 0 20px; word-break:break-word}
   .rv-h em{font-style:italic; font-weight:500}
-  .rv-sub{font-family:var(--ui); font-weight:700; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); margin-bottom:22px}
+  .rv-fared{font-family:var(--serif); font-style:italic; font-weight:500; font-size:clamp(19px,5.8vw,27px); line-height:1.28; margin:0; max-width:24ch}
+  .rv-scrollhint{font-family:var(--ui); font-weight:700; font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:var(--ink3); margin-top:26px}
   .parade{border:1px solid var(--ink); background:var(--stage); overflow:hidden; margin-bottom:18px; position:relative}
   .parade .pcap{position:absolute; top:8px; left:12px; z-index:2; font-family:var(--ui); font-weight:700; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:#d4d2cc}
   .parade-track{display:flex; gap:6px; align-items:flex-end; padding:24px 10px 12px; width:max-content; animation:march 30s linear infinite}
@@ -250,7 +257,7 @@
       <div class="deck" id="deck"></div>
       <div class="controls">
         <button class="ctrl pass" id="btn-pass" aria-label="Pass" onclick="GAME.swipe(-1)">✕</button>
-        <button class="ctrl book" id="btn-book" aria-label="Book" onclick="GAME.swipe(1)">♥</button>
+        <button class="ctrl book" id="btn-book" aria-label="Book" onclick="GAME.swipe(1)">✓</button>
       </div>
     </div>
   </section>
@@ -283,9 +290,12 @@
 const FIRST = ["Anouk","Sasha","Imani","Lía","Wren","Talia","Yuki","Mara","Senna","Noa","Isolde","Amara",
   "Fatou","Priya","Mei","Ingrid","Suki","Nadia","Cleo","Esme","Rin","Ada","Lux","Remy","Vesna","Oona",
   "Dália","Inès","Soraya","Bibi","Zola","Hana","Liv","Tao","Yara","Kira","Ode","Nima","Saoirse","Beau"];
+const MALE = ["Matteo","Kofi","Ravi","Otis","Sven","Emil","Dae","Nuno","Tariq","Casper","Leon","Idris",
+  "Bram","Yusuf","Anders","Kenji","Ezra","Luca","Rasmus","Omar","Joaquín","Nils","Adé","Theo","Jalen","Søren"];
 const HAIR = {blonde:"#E6C572",light:"#C49A5E",brown:"#6B4A2E",dark:"#2E2018",black:"#161015",red:"#A8451F",auburn:"#7A3318"};
 const EYE = {blue:"#4F86C6",green:"#4E8B4A",hazel:"#9A7338",brown:"#523A22",grey:"#8C9196"};
 const HAIRSTYLES = ["long","short","curly","bun"];
+const MSTYLES = ["crop","side","buzz"];
 const SKINS = ["#F6D9BE","#ECC09A","#D9A579","#BE8456","#9A6238","#79492B","#5A3420"];
 const OUTFITS = ["#C5234B","#1F6F8B","#D87A1F","#4E7A33","#6A3FA0","#1E2A78","#0B7C72","#D81E78","#262524","#C79A2E","#9C1C3C","#2E8B7F"];
 const HOUSE_FALLBACK = ["MAISON LUMEN","ATELIER NÓR","HOUSE OF VÉLA","STUDIO ÉCLAT","MAISON SERA"];
@@ -325,6 +335,7 @@ const blockedNow=m=>G._floor && m.bmi<FLOOR;
 /* ---------------- models (realistic dominant ideal; diversity is the outlier) ---------------- */
 let UID = 100;
 function makeModel(opt={}){
+  const sex = opt.sex ?? (Math.random()<0.25 ? "male" : "female");   // cosmetic only — men feed the same panels
   let nonWhite = opt.nonWhite ?? (Math.random()<0.34);
   let plus = opt.plus!=null ? opt.plus
            : (nonWhite ? (Math.random()<0.36) : (Math.random()<0.085));   // plus ~4.5–6× likelier if non-white
@@ -338,9 +349,19 @@ function makeModel(opt={}){
   const region = nonWhite ? pick(["E. Asia","S. Asia","W. Africa","S. America","SE Asia"])
                           : pick(["W. Europe","N. America","E. Europe","Scandinavia"]);
   const skin = nonWhite ? pick(SKINS.slice(2)) : pick(SKINS.slice(0,3));
-  return { uid:UID++, name:pick(FIRST), plus, nonWhite, size, star:!!opt.star,
-    bmi:Math.round(bmi*10)/10, height:Math.round(rnd(172,184)),
-    region, hair, eye, skin, outfit:pick(OUTFITS), hairStyle:pick(HAIRSTYLES) };
+  /* Clothes are NOT gender-coded: anyone can walk in a dress, pants or shorts, sleeved or
+     sleeveless — only a mild lean by sex. Hairstyles cross over both ways too. */
+  const r=Math.random();
+  const garb = sex==="male" ? (r<0.15?"dress":r<0.60?"pants":"shorts")
+                            : (r<0.34?"dress":r<0.68?"pants":"shorts");
+  const sleeves = pick(["none","short","long"]);
+  const outfit = pick(OUTFITS);
+  const outfit2 = Math.random()<0.55 ? pick(OUTFITS) : outfit;    // bottoms can clash or match
+  const hairStyle = sex==="male" ? pick(Math.random()<0.8?MSTYLES:HAIRSTYLES)
+                                 : pick(Math.random()<0.1?MSTYLES:HAIRSTYLES);
+  return { uid:UID++, name:pick(sex==="male"?MALE:FIRST), sex, garb, sleeves, plus, nonWhite, size, star:!!opt.star,
+    bmi:Math.round(bmi*10)/10, height:Math.round(sex==="male"?rnd(177,190):rnd(172,184)),
+    region, hair, eye, skin, outfit, outfit2, hairStyle };
 }
 /* ---------------- streaming candidate generation (infinite casting call) ----------------
    No fixed deck: every card that leaves (booked OR passed) is replaced by a freshly
@@ -375,11 +396,31 @@ function resetStream(){ G.stack=[]; G.since={nonWhite:0, plus:0, intersx:0}; ref
 /* ---------------- SVG figure ---------------- */
 function figure(m){
   const skin=m.skin, hair=HAIR[m.hair]||"#444", outfit=m.outfit, eye=EYE[m.eye]||"#333";
-  const shoulder=m.plus?17:11, hem=m.plus?29:19;
+  const garb=m.garb||"dress", bottom=m.outfit2||outfit;        // garb + sleeves, not sex, decide the clothes
+  const dress=garb==="dress", pants=garb==="pants";
+  const shoulder=(m.plus?17:11)+(m.sex==="male"?1:0);          // sexes differ only subtly in frame
+  const hem=dress?(m.plus?29:19):(m.plus?23:13);
+  const hemY=dress?97:93;                                      // a dress falls over the legs; a top stops at the waist
+  const legW=pants?6.4:5.2, legFill=pants?bottom:skin;         // pants colour the whole leg
+  const lx=pants?26:27, rx=pants?31.6:31.8;
+  const shortsH=m.plus?19:16;
+  const shortsAt=x=>garb==="shorts"?`<rect x="${(x-0.7).toFixed(1)}" y="93" width="${(legW+1.4).toFixed(1)}" height="${shortsH}" rx="2.4" fill="${bottom}"/>`:"";
+  const slH=m.sleeves==="long"?34:15;
+  const sleeveAt=x=>(m.sleeves&&m.sleeves!=="none")?`<rect x="${x}" y="45" width="4.6" height="${slH}" rx="2.3" fill="${outfit}"/>`:"";
+  const alx=(32-shoulder-3).toFixed(1), arx=(32+shoulder-1.6).toFixed(1);
   const feetY=Math.round(128+(m.height-178)*2.0), legH=feetY-93, vbH=feetY+9;   // height -> figure height
   const cap=`<path d="M18 25 Q17 9 32 8 Q47 9 46 25 Q44 17 32 16 Q20 17 18 25 Z" fill="${hair}"/>`;
+  const crop=`<path d="M19 23 Q18 9 32 8 Q46 9 45 23 Q42 14 32 14 Q22 14 19 23 Z" fill="${hair}"/>`;
   let hairBack="",hairFront="",strands="";
   switch(m.hairStyle){
+    case "crop":
+      hairBack=crop;
+      hairFront=`<path d="M21 22 Q24 14 32 14 Q40 14 43 22 Q38 17 32 17 Q26 17 21 22 Z" fill="${hair}"/>`; break;
+    case "side":
+      hairBack=crop;
+      hairFront=`<path d="M20 23 Q21 13 33 12 Q43 13 44 22 Q35 15 27 18 Q22 20 20 23 Z" fill="${hair}"/>`; break;
+    case "buzz":  /* close crop: drawn in FRONT of the head or the circle swallows it */
+      hairFront=`<path d="M19.5 20 Q20.5 10.5 32 10 Q43.5 10.5 44.5 20 Q40 14.5 32 14 Q24 14.5 19.5 20 Z" fill="${hair}" opacity=".92"/>`; break;
     case "long":
       strands=`<path d="M19 22 Q12 44 15 64 L21 64 Q20 42 23 28 Z" fill="${hair}"/><path d="M45 22 Q52 44 49 64 L43 64 Q44 42 41 28 Z" fill="${hair}"/>`;
       hairBack=cap; hairFront=`<path d="M21 23 Q24 14 32 14 Q40 14 43 23 Q38 18 32 18 Q26 18 21 23 Z" fill="${hair}"/>`; break;
@@ -394,11 +435,11 @@ function figure(m){
   }
   return `<svg class="fig-svg" viewBox="0 0 64 ${vbH}" aria-hidden="true">
     <ellipse class="spot" cx="32" cy="${feetY+4}" rx="22" ry="4" fill="#000" opacity="0"/>${strands}
-    <g class="leg l"><rect x="27" y="93" width="5.2" height="${legH}" rx="2.6" fill="${skin}"/><rect x="25.6" y="${feetY-2}" width="8" height="4" rx="2" fill="var(--ink)"/></g>
-    <g class="leg r"><rect x="31.8" y="93" width="5.2" height="${legH}" rx="2.6" fill="${skin}"/><rect x="30.4" y="${feetY-2}" width="8" height="4" rx="2" fill="var(--ink)"/></g>
-    <path d="M ${32-shoulder} 43 L ${32+shoulder} 43 L ${32+hem} 97 L ${32-hem} 97 Z" fill="${outfit}"/>
-    <g class="arm l"><rect x="${(32-shoulder-3).toFixed(1)}" y="45" width="4.6" height="34" rx="2.3" fill="${skin}"/></g>
-    <g class="arm r"><rect x="${(32+shoulder-1.6).toFixed(1)}" y="45" width="4.6" height="34" rx="2.3" fill="${skin}"/></g>
+    <g class="leg l"><rect x="${lx}" y="93" width="${legW}" height="${legH}" rx="2.6" fill="${legFill}"/>${shortsAt(lx)}<rect x="25.6" y="${feetY-2}" width="8" height="4" rx="2" fill="var(--ink)"/></g>
+    <g class="leg r"><rect x="${rx}" y="93" width="${legW}" height="${legH}" rx="2.6" fill="${legFill}"/>${shortsAt(rx)}<rect x="30.4" y="${feetY-2}" width="8" height="4" rx="2" fill="var(--ink)"/></g>
+    <path d="M ${32-shoulder} 43 L ${32+shoulder} 43 L ${32+hem} ${hemY} L ${32-hem} ${hemY} Z" fill="${outfit}"/>
+    <g class="arm l"><rect x="${alx}" y="45" width="4.6" height="34" rx="2.3" fill="${skin}"/>${sleeveAt(alx)}</g>
+    <g class="arm r"><rect x="${arx}" y="45" width="4.6" height="34" rx="2.3" fill="${skin}"/>${sleeveAt(arx)}</g>
     <rect x="29.4" y="33" width="5.2" height="9" fill="${skin}"/>
     ${hairBack}<circle cx="32" cy="24" r="13" fill="${skin}"/>${hairFront}
     <g class="eyes">
@@ -487,11 +528,25 @@ function renderSeason(){
 }
 
 /* ---------------- deck (swipe) ---------------- */
+/* Tiny BMI context scale: most players have no feel for raw BMI numbers, so the card
+   shows where this body sits between the industry floor (18.5) and a real person (~29). */
+function bmiBar(m){
+  const LO=15, HI=34, X=v=>4+(clamp(v,LO,HI)-LO)/(HI-LO)*192;
+  const xm=X(m.bmi).toFixed(1), xf=X(FLOOR).toFixed(1), xp=X(POP_BMI).toFixed(1);
+  const col=m.bmi<FLOOR?"var(--accent)":"var(--ink)";
+  return `<svg class="bmibar" viewBox="0 0 200 23" aria-hidden="true">
+    <line x1="4" x2="196" y1="7" y2="7" stroke="var(--hair)" stroke-width="1.5"/>
+    <line x1="${xf}" x2="${xf}" y1="3" y2="11" stroke="var(--ink2)" stroke-width="1"/>
+    <line x1="${xp}" x2="${xp}" y1="3" y2="11" stroke="var(--ink2)" stroke-width="1"/>
+    <text x="${xf}" y="21" text-anchor="middle" class="bmit">${FLOOR} · floor</text>
+    <text x="${xp}" y="21" text-anchor="middle" class="bmit">${POP_BMI} · real people</text>
+    <circle cx="${xm}" cy="7" r="3.4" fill="${col}"/></svg>`;
+}
 function cardHTML(m){
   const blk=blockedNow(m);
   return `<div class="card" data-uid="${m.uid}">
     <div class="card-fig"><div class="bmi">BMI<b>${m.bmi}</b></div>${figWrap(m)}${blk?'<div class="withdrawn">withdrawn · Milan floor</div>':''}</div>
-    <div class="card-meta"><div class="cname">${m.name}${m.star?' ★':''}</div><div class="cspec">${m.region} · ${m.height} cm</div></div>
+    <div class="card-meta"><div class="cname">${m.name}${m.star?' ★':''}</div><div class="cspec">${m.region} · ${m.height} cm</div>${bmiBar(m)}</div>
     <div class="swipe-tag book">Book</div><div class="swipe-tag pass">Pass</div></div>`;
 }
 function renderDeck(){
@@ -593,8 +648,8 @@ function reactPress(r){ let b;
 function reactWalks(r){ let b;
   if(r.firstPlus) b=["At last — a larger body walks. They're moved.","A historic first. All Walks applauds.","They've waited years for this booking.","“Finally,” the coalition says, and means it.","A real body on the runway. The room exhales."];
   else if(r.L===0) b=["Still no room for a real body, the coalition notes.","Another straight-size show. Patience thinning.","Not one larger body — they don't hide the disappointment.","“A house ‘for every body,’” they quote back, drily.","Their statement is one line: “Again?”","The coalition is past polite now."];
-  else if(r.L>=2 && r.newDistinct) b=["Two bodies, two stories — you stopped making one woman do all the work.","Genuine range, not a single token. They're thrilled.","“This is what we asked for,” the coalition beams.","Range you can believe in. Real progress.","Bodies of every kind — and they each get to be themselves."];
-  else if(r.T>=1 && r.T>=r.L) b=["A larger body — but she's carrying the colour quota too. They notice.","“Convenient, that your curve model is also your diversity,” they note.","One body, every box ticked at once. Half a clap.","A token doing double duty. They see exactly what it is.","They clock the single booking, and all it's made to carry."];
+  else if(r.L>=2 && r.newDistinct) b=["Two bodies, two stories — you stopped making one model do all the work.","Genuine range, not a single token. They're thrilled.","“This is what we asked for,” the coalition beams.","Range you can believe in. Real progress.","Bodies of every kind — and they each get to be themselves."];
+  else if(r.T>=1 && r.T>=r.L) b=["A larger body — but they're carrying the colour quota too. They notice.","“Convenient, that your curve model is also your diversity,” they note.","One body, every box ticked at once. Half a clap.","A token doing double duty. They see exactly what it is.","They clock the single booking, and all it's made to carry."];
   else b=["A larger body walks. They'll take it.","Some range — All Walks nods.","Progress, modest but real.","A booking that matters. Noted."];
   return pick(b); }
 function reactCensus(r){ let b;
@@ -653,7 +708,9 @@ function showResolution(r, before){
   $("resol-hl").textContent=headlineFor(r);
   const rows=$("resol-rows"); rows.innerHTML="";
   STAKE.forEach((s,i)=>{ const el=document.createElement("div"); el.className="rrow"; el.style.animationDelay=(i*0.1)+"s";
-    el.innerHTML=`<div>${gaugeHTML(s.id,"",before[s.id],"rg")}</div><div><div class="rwho">${PANEL[s.id]}</div><div class="rtext">${REACT[s.id](r)}</div></div>`;
+    const d=Math.round(G.meters[s.id]-before[s.id]);
+    const chip=d===0?"":(d>0?`<span class="rdelta up">▲ +${d}</span>`:`<span class="rdelta down">▼ −${-d}</span>`);
+    el.innerHTML=`<div>${gaugeHTML(s.id,"",before[s.id],"rg")}</div><div><div class="rwho">${PANEL[s.id]}${chip}</div><div class="rtext">${REACT[s.id](r)}</div></div>`;
     rows.appendChild(el); });
   initNeedles("rg", before);                                          // start sweep from prior values
   G.firedBy = (G.meters.board<=0)?"board":(G.meters.walks<=0)?"walks":(G.meters.census<=0)?"census":null;
@@ -748,25 +805,25 @@ function reveal(){
     const why={ board:["Replaced","The Board let you go.","The collection stopped selling and the owners panicked — you pushed the runway further than the house could bank."],
                 walks:["Boycotted","All Walks walked out.","A body coalition called a public boycott: season after season your runway stayed too thin. They quoted your own slogan back at you."],
                 census:["Boycotted","The Census walked out.","A representation boycott ended your tenure: your runway stayed too white for too long. “The world doesn't look like this,” they said."] }[end.who];
-    picto=pictoFired(end.who); h=`<em>${why[0]}</em>`; sub=`${B} · ${why[1]} Look ${ROMAN[G.season]}.`;
+    picto=pictoFired(end.who); h=`<em>${why[0]}</em>`; sub=`${why[1]} Look ${ROMAN[G.season]} was your last.`;
     body=`<p class="verdict">${why[2]}</p>${charts}${src}`;
   } else if(end.kind==="standard"){
-    picto=pictoStandard(); h=`Business as <em>usual</em>`; sub=`${B} · you survived ${G.hist.length} shows. Nothing changed.`;
+    picto=pictoStandard(); h=`Business as <em>usual</em>`; sub=`You survived ${G.hist.length} show${G.hist.length===1?"":"s"}. Nothing changed.`;
     body=`<div class="punch"><div class="big">${gap}<span style="font-size:.4em"> BMI</span></div><div class="cap">The gap between your runway's median body and real people held at ~${gap} BMI points — “diversity” season after season, and the body never moved.</div></div>${charts}
       <p class="verdict">You kept your job by keeping the runway thin and white and feeding the coalitions the bare minimum. The press called it timeless. But this is the engine the study is about — a runway that sells an unreachable body to everyone watching, and the documented cost is real: disordered eating and body dysmorphia, landing hardest on the youngest.</p>${src}
       <p class="src" style="border-top:1px solid var(--line); padding-top:12px">If this subject touches you personally: in the US the National Alliance for Eating Disorders runs a free, clinician-staffed helpline — <strong>1-866-662-1235</strong>, weekdays.</p>`;
   } else if(end.kind==="token"){
-    picto=pictoToken(); h=`You did it. <em>Sort of.</em>`; sub=`${B} · diversity arrived — concentrated onto a few bodies.`;
+    picto=pictoToken(); h=`You did it. <em>Sort of.</em>`; sub=`Diversity arrived — concentrated onto a few bodies.`;
     body=`<div class="punch"><div class="big">${end.OR.toFixed(1)}×</div><div class="cap">On your runway a larger body was ${end.OR.toFixed(1)}× more likely to be non-white than white. The real industry runs at 4.5×.</div></div>${charts}
       <p class="verdict">You brought diversity in — but you made a few bodies carry all of it at once: the same models held the size <em>and</em> the colour. That's the paper's finding, reproduced by your own hand. Representation became a quota met by the fewest possible people. It counts on paper. It isn't the same as change.</p>${src}`;
   } else {
-    cls="good"; picto=pictoEveryWalk(); h=`Every <em>walk</em>`; sub=`${B} · ${G.hist.length} shows — diversity, introduced honestly.`;
+    cls="good"; picto=pictoEveryWalk(); h=`Every <em>walk</em>`; sub=`You made ${G.hist.length} show${G.hist.length===1?"":"s"} — and introduced diversity honestly.`;
     body=`<div class="punch good"><div class="big" style="color:var(--ink)">${end.OR.toFixed(1)}×</div><div class="cap">A larger body was just ${end.OR.toFixed(1)}× more likely to be non-white than white — no concentration. The industry runs at 4.5×.</div></div>${charts}
       <p class="verdict">You brought diversity in <strong>step by step</strong>, and spread it across <strong>different bodies</strong> — size on some, colour on others, no single model made to carry the whole story. The median on your runway actually moved toward real people. This is the hard version, and the rare one. The house survived it anyway.</p>${src}`;
   }
   $("reveal-inner").innerHTML=`<div class="${cls}">
     <div class="rv-kick"><span class="kick">${B}</span><span class="kick">The record</span></div>
-    <h2 class="rv-h">${h}</h2><div class="rv-sub">${sub}</div>
+    <div class="rv-hero"><h2 class="rv-h">${h}</h2><p class="rv-fared">${sub}</p><div class="rv-scrollhint">↓ the full record</div></div>
     <div class="picto">${picto}</div>${parade}${body}${actions}</div>`;
 }
 
@@ -804,7 +861,7 @@ const Tutorial = (function(){
   const steps = [
     { tgt:()=>document.querySelector("#deck .card:not(.behind)"),
       kick:"The casting call", title:"Read the body. Then decide.",
-      body:"Every model arrives as a card — read her like a casting sheet. <b>BMI</b> sits top-right. <b>Origin</b> and height run under her name. Her <b>body, skin tone, hair and eyes</b> you read off the figure itself. Swipe right to book, left to pass — five make a show." },
+      body:"Every model arrives as a card — read it like a casting sheet. <b>BMI</b> sits top-right, with a scale showing where that body sits between the industry floor and a real person. <b>Origin</b> and height run under the name. The <b>body, skin tone, hair and eyes</b> you read off the figure itself. Swipe right to book, left to pass — five make a show." },
     { tgt:()=>$("gauges"),
       kick:"The four panels", title:"Four people are watching.",
       body:"Your five picks please \u2014 or annoy \u2014 four judges. They never hand you a score. Each needle just swings: left is trouble, right is pleased. You read the room, not a scoreboard. Meet them." },
