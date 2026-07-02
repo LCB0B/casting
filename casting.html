@@ -33,9 +33,6 @@
   .name-row{margin:24px 0 0; display:flex; flex-direction:column; gap:12px}
   .intro-strip{display:flex; gap:0; height:120px; align-items:flex-end; justify-content:center; margin-top:30px; opacity:.92}
   .intro-strip .figwrap{width:50px}
-  .past{margin-top:24px}
-  .past-row{display:flex; justify-content:space-between; align-items:baseline; border-top:1px solid var(--line); padding:6px 2px; font-family:var(--ui); font-size:11px; color:var(--ink2)}
-  .past-row b{color:var(--ink); font-weight:800; letter-spacing:.04em}
 
   .btn{display:inline-flex; align-items:center; justify-content:space-between; gap:14px; background:var(--ink); color:var(--paper); border:none; padding:14px 20px; font-weight:800; font-size:12px; letter-spacing:.22em; text-transform:uppercase; transition:opacity .2s, transform .15s; width:100%}
   .btn:hover{opacity:.86}.btn:active{transform:scale(.99)}.btn:disabled{opacity:.25; cursor:not-allowed}
@@ -275,7 +272,6 @@
       <button class="btn center" id="begin-btn" onclick="GAME.begin()">Play <span class="ar">→</span></button>
     </div>
     <div class="intro-strip" id="intro-strip"></div>
-    <div class="past" id="past"></div>
   </section>
 
   <!-- SEASON -->
@@ -371,7 +367,7 @@ const G = {
   since:{nonWhite:0, plus:0, intersx:0},
   everPlus:false, allCast:[], hist:[], milanSeen:false,
   cum:{total:0, nonWhite:0, plus:0, plusNonWhite:0, plusWhite:0, nonplusNonWhite:0, nonplusWhite:0, regions:new Set(), seasonsWithPlus:0},
-  firedBy:null, _end:false, _floor:false, _runTimer:null, _runCb:null, _busy:false, _recorded:false
+  firedBy:null, _end:false, _floor:false, _runTimer:null, _runCb:null, _busy:false
 };
 
 /* ---------------- helpers ---------------- */
@@ -805,21 +801,7 @@ function classifyEnding(){
   if(OR>=2.5)  return {kind:"token", OR};           // diversity concentrated onto a few bodies
   return {kind:"everywalk", OR, smooth:maxWhip<=2}; // spread across distinct bodies
 }
-/* ---- past-house record (localStorage) ---- */
-const ENDING_LBL={standard:"business as usual", token:"tokenised", everywalk:"every walk"};
-const FIRED_LBL={board:"fired by the Board", walks:"boycotted · body size", census:"boycotted · ethnicity"};
 const escHTML=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-function loadPast(){ try{ return JSON.parse(localStorage.getItem("hoc_past")||"[]"); }catch(_){ return []; } }
-function savePast(e){ try{ const p=loadPast(); p.unshift(e); localStorage.setItem("hoc_past", JSON.stringify(p.slice(0,8))); }catch(_){} }
-function renderPast(){
-  const host=$("past"); if(!host) return;
-  const p=loadPast();
-  if(!p.length){ host.innerHTML=""; return; }
-  host.innerHTML=`<div class="kick" style="margin-bottom:4px">House record</div>`+p.slice(0,4).map(e=>{
-    const lbl = e.k==="fired" ? (FIRED_LBL[e.who]||"fired") : (ENDING_LBL[e.k]||e.k);
-    return `<div class="past-row"><b>${escHTML(e.b)}</b><span>${e.n} show${e.n===1?"":"s"} · ${lbl}${e.k==="everywalk"?" ✺":""}</span></div>`;
-  }).join("");
-}
 
 /* ---- ending pictograms (SVG) ---- */
 function pictoFired(who){
@@ -859,7 +841,6 @@ function pictoEveryWalk(){
 function reveal(){
   show("reveal");
   const B=G.brand, series=G.hist, end=classifyEnding();
-  if(!G._recorded){ G._recorded=true; savePast({b:B, n:G.hist.length, k:end.kind, who:end.who||null}); }
   const divS=series.map(p=>({season:p.season,value:p.divIndex,milan:p.milan}));
   const medS=series.map(p=>({season:p.season,value:p.median,milan:p.milan}));
   const gap=(POP_BMI-median(series.map(s=>s.median))).toFixed(0);
@@ -948,8 +929,8 @@ function restart(){
   Object.assign(G,{ season:1,tier:0,meters:{board:60,walks:45,census:45}, prev:{L:0,E:0},
     stack:[],booked:[],curEvent:null,_lastEvent:null, since:{nonWhite:0,plus:0,intersx:0},
     everPlus:false,allCast:[],hist:[],milanSeen:false,
-    cum:{total:0,nonWhite:0,plus:0,plusNonWhite:0,plusWhite:0,nonplusNonWhite:0,nonplusWhite:0,regions:new Set(),seasonsWithPlus:0}, firedBy:null,_end:false,_busy:false,_recorded:false });
-  renderIntroStrip(); renderPast(); rollHouse(); show("intro");
+    cum:{total:0,nonWhite:0,plus:0,plusNonWhite:0,plusWhite:0,nonplusNonWhite:0,nonplusWhite:0,regions:new Set(),seasonsWithPlus:0}, firedBy:null,_end:false,_busy:false });
+  renderIntroStrip(); rollHouse(); show("intro");
 }
 
 /* ---------------- first-run tutorial (spotlight coachmarks) ----------------
@@ -1099,7 +1080,7 @@ const Tutorial = (function(){
 window.Tutorial = Tutorial;
 
 window.GAME={ begin, swipe:swipeBtn, undo:undoPass, next, reveal, restart, skipRunway };
-renderIntroStrip(); renderPast(); rollHouse();
+renderIntroStrip(); rollHouse();
 </script>
 </body>
 </html>
