@@ -393,9 +393,27 @@ const Sfx=(function(){
   /* --- tiny ambient loop: two chords, a muted pulse, the odd sparkle. whisper-quiet. --- */
   let mTimer=null, mStep=0, mNext=0, mWanted=false;
   const SPB=60/116/2;                                        // one eighth note at 116bpm — ballroom tempo
-  const VAMP=[                                               // early-90s house vamp, two minor chords (2 bars each)
-    {root:110,   chord:[220,261.6,329.6,392]},               // Am7
-    {root:146.8, chord:[293.7,349.2,440,523.3]}];            // Dm7
+  const pk=a=>a[Math.floor(Math.random()*a.length)];
+  const CH={                                                 // chord palette in A minor
+    Am:{root:110,   notes:[220,261.6,329.6,392]},   Dm:{root:146.8, notes:[293.7,349.2,440,523.3]},
+    F :{root:87.31, notes:[174.6,220,261.6,329.6]}, G :{root:98,    notes:[196,246.9,293.7,392]},
+    Em:{root:82.41, notes:[164.8,196,246.9,293.7]}, C :{root:130.8, notes:[261.6,329.6,392,523.3]}};
+  const PROGS=[["Am","Am","Dm","G"],["F","G","Am","Em"],["Am","C","F","G"],["Dm","F","Am","G"]];
+  const MEL=[440,523.3,587.3,659.3,784,880];                 // A-minor pentatonic for the lead
+  let curProg=PROGS[0], lastProg=0, melIdx=2, bs=null;       // bar-level state, rolled fresh each bar
+  function newBar(bar){
+    if(bar%4===0 && (bar%16!==0 || true)){                   // new 4-bar progression, avoid repeating the last one
+      let i; do{ i=Math.floor(Math.random()*PROGS.length); }while(i===lastProg && Math.random()<.75);
+      lastProg=i; curProg=PROGS[i]; }
+    const ph=bar%16;
+    bs={ ch:CH[curProg[bar%4]],
+      breakdown: ph===12||ph===13,                           // drums out, pads breathe
+      fill: ph===15,                                         // rising hat roll into the next phrase
+      melOn: (ph>=4&&ph<12)||ph===14,
+      stabs: pk([[2,5],[2,6],[3,6],[2,4,7],[1,5]]),
+      bassPat: pk([[0,3,4,7],[0,4],[0,3,4,6],[0,2,4,7]]),
+      padBar: bar%2===0 };
+  }
   function mKick(t){ const o=ctx.createOscillator(),g=ctx.createGain();
     o.type="sine"; o.frequency.setValueAtTime(105,t); o.frequency.exponentialRampToValueAtTime(48,t+.09);
     env(g,t,.002,.11,.045); o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+.16); }
@@ -404,6 +422,28 @@ const Sfx=(function(){
     const src=ctx.createBufferSource(); src.buffer=b;
     const f=ctx.createBiquadFilter(); f.type="highpass"; f.frequency.value=6500;
     const g=ctx.createGain(); env(g,t,.001,dur||.03,peak||.011); src.connect(f).connect(g).connect(ctx.destination); src.start(t); }
+  function mClap(t,peak){                                    // 909 clap: retriggered noise bursts
+    for(const d of [0,.012,.026]){ const len=Math.floor(ctx.sampleRate*.05), b=ctx.createBuffer(1,len,ctx.sampleRate), dd=b.getChannelData(0);
+      for(let i=0;i<len;i++) dd[i]=Math.random()*2-1;
+      const src=ctx.createBufferSource(); src.buffer=b;
+      const f=ctx.createBiquadFilter(); f.type="bandpass"; f.frequency.value=1400; f.Q.value=1.4;
+      const g=ctx.createGain(); env(g,t+d,.001,.05,peak*(d?0.6:1));
+      src.connect(f).connect(g).connect(ctx.destination); src.start(t+d); } }
+  function mSnare(t,peak){                                   // 909 snare: noise crack + 190Hz thump
+    const len=Math.floor(ctx.sampleRate*.09), b=ctx.createBuffer(1,len,ctx.sampleRate), dd=b.getChannelData(0);
+    for(let i=0;i<len;i++) dd[i]=Math.random()*2-1;
+    const src=ctx.createBufferSource(); src.buffer=b;
+    const f=ctx.createBiquadFilter(); f.type="highpass"; f.frequency.value=1600;
+    const g=ctx.createGain(); env(g,t,.001,.08,peak);
+    src.connect(f).connect(g).connect(ctx.destination); src.start(t);
+    const o=ctx.createOscillator(), g2=ctx.createGain(); o.type="sine"; o.frequency.value=190;
+    env(g2,t,.001,.07,peak*.8); o.connect(g2).connect(ctx.destination); o.start(t); o.stop(t+.1); }
+  function mOrchHit(ch,t){                                   // sharp M1-style orchestral hit
+    for(const n of [ch.root*2,...ch.notes.map(x=>x*2)]){
+      const o=ctx.createOscillator(), f=ctx.createBiquadFilter(), g=ctx.createGain();
+      o.type="sawtooth"; o.frequency.value=n; f.type="lowpass"; f.frequency.setValueAtTime(4200,t);
+      f.frequency.exponentialRampToValueAtTime(600,t+.28);
+      env(g,t,.003,.28,.014); o.connect(f).connect(g).connect(ctx.destination); o.start(t); o.stop(t+.4); } }
   function mNote(fr,t,dur,peak,type){ const o=ctx.createOscillator(),g=ctx.createGain();
     o.type=type||"triangle"; o.frequency.value=fr; env(g,t,dur*.4,dur,peak);
     o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+dur*1.7); }
@@ -415,21 +455,32 @@ const Sfx=(function(){
       o.frequency.value=fr; o.detune.value=det; o.connect(f); o.start(t); o.stop(t+dur*1.7); }
     f.connect(g).connect(ctx.destination); }
   function mPlay(st,t){
-    const V=VAMP[(st>>4)&1];                                 // 2 bars Am7, 2 bars Dm7
-    if(st%4===0) mKick(t);                                   // four on the floor
-    if(st%4===2) mHat(t,.09,.016);                           // open hat on the offbeat
-    else if(st%2===0) mHat(t,.02,.006);                      // whisper ticks between
-    const bp=st%8;                                           // house bass: root with octave pops, saw growl under
-    if(bp===0||bp===4){ mNote(V.root,t,SPB*1.6,.04,"triangle"); mSynth(V.root,t,SPB*1.4,.02,420); }
-    if(bp===3||bp===7) mNote(V.root*2,t,SPB*1.2,.03,"triangle");
-    if(bp===2||bp===5)                                       // syncopated synth stab
-      for(const n of V.chord) mSynth(n,t,SPB*1.15,.011,2400);
-    if(st%16===0){ mSynth(V.root*2,t,SPB*15,.009,950,SPB*4); mSynth(V.root*3,t,SPB*15,.007,950,SPB*4); }  // synth-string pad
+    const bp=st%8; if(bp===0||!bs) newBar(st>>3);
+    const V=bs.ch, jit=()=>.85+Math.random()*.3;             // velocity jitter keeps it human
+    if(!bs.breakdown){
+      if(st%2===0) mKick(t);                                 // 909 four-on-the-floor
+      else mHat(t,.07,.013*jit());                           // open hat on every offbeat
+      if(st%4===2) mClap(t,.02*jit());                       // backbeat clap
+    }
+    if(bs.fill) mSnare(t,.005+bp/8*.02);                     // 909 snare roll into the next phrase
+    if(bp===0 && (st>>3)%4===0 && !bs.breakdown && Math.random()<.5) mOrchHit(bs.ch,t);   // occasional orchestral smash
+    if(!bs.breakdown && bs.bassPat.includes(bp)){            // bass: randomized pattern, octave pops on late steps
+      const oct=(bp>=3&&bp%2===1)?2:1;
+      mNote(V.root*oct,t,SPB*1.5,(oct===1?.04:.03)*jit(),"triangle");
+      if(oct===1) mSynth(V.root,t,SPB*1.3,.018,420); }
+    if(!bs.breakdown && bs.stabs.includes(bp))               // stabs: pattern + filter reroll every bar
+      for(const n of V.notes) mSynth(n,t,SPB*1.15,.01*jit(),2000+Math.random()*900);
+    if(bs.melOn && st%2===1 && Math.random()<.42){           // lead: pentatonic random walk
+      melIdx=Math.max(0,Math.min(MEL.length-1,melIdx+pk([-2,-1,-1,1,1,2])));
+      mSynth(MEL[melIdx],t,SPB*(1.5+Math.random()*1.5),.011*jit(),3000); }
+    if(bp===0 && (bs.padBar||bs.breakdown)){                 // pad every other bar, swelling in breakdowns
+      const p=bs.breakdown?.014:.008;
+      mSynth(V.root*2,t,SPB*15,p,900,SPB*4); mSynth(V.root*3,t,SPB*15,p*.75,900,SPB*4); }
   }
   function musicStart(){ mWanted=true; if(!on) return; const c=ac(); if(!c||mTimer) return;
     mStep=0; mNext=c.currentTime+.1;
     (function tick(){ if(!ctx||!on){ mTimer=null; return; }
-      while(mNext<ctx.currentTime+.35){ mPlay(mStep,mNext); mStep=(mStep+1)%32; mNext+=SPB; }
+      while(mNext<ctx.currentTime+.35){ mPlay(mStep,mNext); mStep=(mStep+1)%128; mNext+=SPB; }
       mTimer=setTimeout(tick,140); })(); }
   function musicStop(){ if(mTimer){ clearTimeout(mTimer); mTimer=null; } }
   document.addEventListener("visibilitychange",()=>{ if(document.hidden) musicStop(); else if(mWanted&&on&&!mTimer) musicStart(); });
