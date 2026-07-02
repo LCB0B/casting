@@ -303,8 +303,8 @@ const HOUSE_FALLBACK = ["MAISON LUMEN","ATELIER NÓR","HOUSE OF VÉLA","STUDIO �
 const POP_BMI = 29;          // real-population reference (US adult average, ~BMI 29)
 const FLOOR = 18.5;          // Milan 2006 rule
 
-const STAKE = [{id:"board",cap:"Board"},{id:"walks",cap:"Walks"},{id:"census",cap:"Census"},{id:"press",cap:"Press"}];
-const PANEL = {board:"The Board", walks:"All Walks", census:"The Census", press:"The Front Row"};
+const STAKE = [{id:"board",cap:"Board"},{id:"walks",cap:"Body size"},{id:"census",cap:"Ethnicity"},{id:"press",cap:"Press"}];
+const PANEL = {board:"The Board", walks:"All Walks · body size", census:"The Census · ethnicity", press:"The Front Row"};
 const TIERS = ["Outsider","Emerging","Established","Elite"];
 const TENURE_BASE = 8, TENURE_MAX = 10, RENEW_BAR = 40, TAU = 30, PICK = 5;
 const ROMAN=["","I","II","III","IV","V","VI","VII","VIII","IX","X"];
@@ -872,10 +872,10 @@ const Tutorial = (function(){
       body:"The owners who bankroll the show (the <b>Board</b> needle). They want the look they can sell \u2014 sleek, conventional, aspirational. Stray too far from that and they start fretting over the order book." },
     { tgt:()=>gauge(1),
       kick:"All Walks", title:"<em>All Walks</em> \u2014 body advocacy.",
-      body:"A body-positivity coalition (the <b>Walks</b> needle). They want larger bodies actually booked on the runway, not just named in the press release. Send an all-thin show too many times and their patience runs out." },
+      body:"A body-positivity coalition (the <b>Body size</b> needle). They want larger bodies actually booked on the runway, not just named in the press release. Send an all-thin show too many times and their patience runs out." },
     { tgt:()=>gauge(2),
       kick:"The Census", title:"The <em>Census</em> \u2014 representation.",
-      body:"The diversity body (the <b>Census</b> needle). They want a cast that looks like the world \u2014 models of colour, a real spread of origins. An all-white lineup never goes unnoticed." },
+      body:"The diversity body (the <b>Ethnicity</b> needle). They want a cast that looks like the world \u2014 models of colour, a real spread of origins. An all-white lineup never goes unnoticed." },
     { tgt:()=>gauge(3),
       kick:"The Front Row", title:"The <em>Front Row</em> \u2014 the press.",
       body:"The critics (the <b>Press</b> needle). They reward a house with a clear point of view and punish whiplash \u2014 a wildly different lineup every season reads as panic, not vision." },
