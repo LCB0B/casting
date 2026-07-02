@@ -384,8 +384,39 @@ const Sfx=(function(){
     const f=c.createBiquadFilter(); f.type="bandpass"; f.frequency.value=fc||1800; f.Q.value=.8;
     const g=c.createGain(); env(g,t0,.005,dur,peak||.05);
     src.connect(f).connect(g).connect(c.destination); src.start(t0); }
+  /* --- tiny ambient loop: two chords, a muted pulse, the odd sparkle. whisper-quiet. --- */
+  let mTimer=null, mStep=0, mNext=0, mWanted=false;
+  const SPB=60/112/2;                                        // one eighth note at 112bpm
+  const PENT=[523.3,587.3,659.3,784,880];
+  const CHORDS=[[110,220,261.6,329.6,493.9],[87.31,174.6,261.6,349.2,440]];   // Am9 / Fmaj7
+  function mKick(t){ const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type="sine"; o.frequency.setValueAtTime(105,t); o.frequency.exponentialRampToValueAtTime(48,t+.09);
+    env(g,t,.002,.11,.045); o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+.16); }
+  function mHat(t){ const len=Math.floor(ctx.sampleRate*.03), b=ctx.createBuffer(1,len,ctx.sampleRate), d=b.getChannelData(0);
+    for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+    const src=ctx.createBufferSource(); src.buffer=b;
+    const f=ctx.createBiquadFilter(); f.type="highpass"; f.frequency.value=6500;
+    const g=ctx.createGain(); env(g,t,.001,.03,.011); src.connect(f).connect(g).connect(ctx.destination); src.start(t); }
+  function mNote(fr,t,dur,peak,type){ const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=type||"triangle"; o.frequency.value=fr; env(g,t,dur*.4,dur,peak);
+    o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+dur*1.7); }
+  function mPlay(st,t){
+    if(st%4===0) mKick(t);
+    if(st%4===2) mHat(t);
+    if(st%16===0){ const ch=CHORDS[(st>>4)&1]; mNote(ch[0],t,SPB*14,.026); for(let i=1;i<ch.length;i++) mNote(ch[i],t,SPB*14,.012); }
+    if(st%8===6 && Math.random()<.7) mNote(PENT[Math.floor(Math.random()*PENT.length)],t,SPB*2,.015,"sine");
+  }
+  function musicStart(){ mWanted=true; if(!on) return; const c=ac(); if(!c||mTimer) return;
+    mStep=0; mNext=c.currentTime+.1;
+    (function tick(){ if(!ctx||!on){ mTimer=null; return; }
+      while(mNext<ctx.currentTime+.35){ mPlay(mStep,mNext); mStep=(mStep+1)%32; mNext+=SPB; }
+      mTimer=setTimeout(tick,140); })(); }
+  function musicStop(){ if(mTimer){ clearTimeout(mTimer); mTimer=null; } }
+  document.addEventListener("visibilitychange",()=>{ if(document.hidden) musicStop(); else if(mWanted&&on&&!mTimer) musicStart(); });
+
   return {
     unlock(){ ac(); },
+    music:musicStart,
     pass(){ noise(.08,.045,900); tone(220,.07,"triangle",.035); },
     book(){ tone(660,.09,"sine",.06); tone(880,.13,"sine",.06,.07); },
     deal(){ noise(.05,.028,2400); },
@@ -395,7 +426,9 @@ const Sfx=(function(){
     walk(){ tone(392,.12,"sine",.05); tone(494,.12,"sine",.05,.12); tone(587,.18,"sine",.05,.24); },
     good(){ tone(523,.12,"sine",.055); tone(659,.12,"sine",.055,.1); tone(784,.22,"sine",.055,.2); },
     bad(){ tone(233,.3,"sawtooth",.04); tone(175,.4,"sawtooth",.04,.12); },
-    toggle(){ on=!on; try{ localStorage.setItem("hoc_snd",on?"1":"0"); }catch(_){} if(on) ac(); return on; },
+    toggle(){ on=!on; try{ localStorage.setItem("hoc_snd",on?"1":"0"); }catch(_){}
+      if(!on) musicStop(); else { ac(); if(mWanted) musicStart(); }
+      return on; },
     get on(){ return on; }
   };
 })();
@@ -914,7 +947,7 @@ function renderIntroStrip(){
     .forEach(m=>h.insertAdjacentHTML("beforeend",figWrap(m)));
 }
 function rollHouse(){ G.brand=pick(HOUSES); }   // kept secret until the letter arrives
-function begin(){ Sfx.unlock(); show("season"); renderSeason(); Briefing.show(()=>Tutorial.maybeStart()); }
+function begin(){ Sfx.unlock(); Sfx.music(); show("season"); renderSeason(); Briefing.show(()=>Tutorial.maybeStart()); }
 
 /* ---------------- appointment briefing: animated welcome before the tutorial ---------------- */
 const Briefing=(function(){
