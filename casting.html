@@ -46,8 +46,9 @@
   .top .h{font-family:var(--ui); font-weight:900; font-size:16px; letter-spacing:.08em; text-transform:uppercase}
   .helpbtn{position:absolute; right:0; top:1px; width:22px; height:22px; border-radius:50%; border:1.2px solid var(--ink2); background:none; color:var(--ink2); font-family:var(--ui); font-weight:800; font-size:11px; line-height:1; padding:0; transition:color .2s, border-color .2s}
   .helpbtn:hover{color:var(--ink); border-color:var(--ink)}
-  .sndbtn{right:30px}
-  .sndbtn.off{opacity:.35; text-decoration:line-through}
+  .sndbtn{position:fixed; top:12px; left:12px; z-index:300; width:26px; height:26px; border-radius:50%; border:1.2px solid var(--ink2); background:var(--paper); color:var(--ink2); font-family:var(--ui); font-weight:800; font-size:12px; line-height:1; padding:0; transition:color .2s, border-color .2s, opacity .2s}
+  .sndbtn:hover{color:var(--ink); border-color:var(--ink)}
+  .sndbtn.off{opacity:.4; text-decoration:line-through}
 
   .gauges{display:grid; grid-template-columns:repeat(3,1fr); gap:0 14px; margin:8px 0 2px; padding:0 20px}
   .gauge{text-align:center}
@@ -264,6 +265,7 @@
 </style>
 </head>
 <body>
+<button class="sndbtn" id="snd-btn" onclick="GAME.sound()" title="Sound on/off" aria-label="Sound on/off">♪</button>
 <div class="wrap">
 
   <!-- INTRO -->
@@ -278,7 +280,7 @@
 
   <!-- SEASON -->
   <section id="season" class="screen">
-    <div class="top"><div class="h" id="house-name">House</div><button class="helpbtn sndbtn" id="snd-btn" onclick="GAME.sound()" title="Sound on/off" aria-label="Sound on/off">♪</button><button class="helpbtn" onclick="Tutorial.start()" title="How to play" aria-label="How to play">?</button></div>
+    <div class="top"><div class="h" id="house-name">House</div><button class="helpbtn" onclick="Tutorial.start()" title="How to play" aria-label="How to play">?</button></div>
     <div class="gauges" id="gauges"></div>
     <div id="tag-slot"></div>
 
@@ -480,11 +482,36 @@ const Sfx=(function(){
       while(mNext<ctx.currentTime+.35){ mPlay(mStep,mNext); mStep=(mStep+1)%128; mNext+=SPB; }
       mTimer=setTimeout(tick,140); })(); }
   function musicStop(){ if(mTimer){ clearTimeout(mTimer); mTimer=null; } }
+  /* --- ending themes (one-shot, ~20s, scheduled up front) --- */
+  function padVoice(f,t,dur,peak){ for(const det of [-5,4]){ const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type="sine"; o.frequency.value=f; o.detune.value=det;
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(peak,t+dur*.35); g.gain.linearRampToValueAtTime(0,t+dur);
+    o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+dur+.1); } }
+  function bell(f,t,dur,peak){ for(const [m,a] of [[1,1],[2,.38],[3,.14]]){ const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type="sine"; o.frequency.value=f*m; env(g,t,.012,dur,peak*a);
+    o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+dur+.3); } }
+  function themeLose(){ const c=ac(); if(!c||!on) return; const t0=c.currentTime+.15;
+    const bass=[110,98,87.31,82.41];                          // the lament: A G F E, falling
+    const chords=[[220,261.6,329.6],[196,246.9,293.7],[174.6,220,261.6],[164.8,207.7,246.9]];
+    bass.forEach((f,i)=>{ const t=t0+i*3.2;
+      padVoice(f,t,3.4,.032); padVoice(f*2,t,3.4,.013);
+      chords[i].forEach((n,j)=> mNote(n,t+.5+j*.85,1.7,.02,"sine")); });
+    padVoice(110,t0+12.8,5.5,.028); bell(220,t0+13.2,4,.018); // it settles, low and unresolved
+  }
+  function themeWin(){ const c=ac(); if(!c||!on) return; const t0=c.currentTime+.15;
+    for(const [f,p] of [[65.41,.03],[98,.026],[130.8,.028],[196,.018],[261.6,.012]])
+      padVoice(f,t0,20,p);                                    // open-fifth drone, swelling like a choir
+    const mel=[261.6,329.6,392,440,523.3,659.3,784,1046.5];   // a slow rising line into the light
+    mel.forEach((f,i)=>{ const t=t0+2.2+i*1.5, last=i===mel.length-1;
+      bell(f,t,last?7:2.4,.026+i*.0025);
+      if(i>=4) padVoice(f/2,t,last?8:2.8,.012); });           // voices join underneath as it climbs
+  }
   document.addEventListener("visibilitychange",()=>{ if(document.hidden) musicStop(); else if(mWanted&&on&&!mTimer) musicStart(); });
 
   return {
     unlock(){ ac(); },
     music:musicStart,
+    ending(k){ musicStop(); mWanted=false; if(k==="win") themeWin(); else themeLose(); },
     pass(){ noise(.08,.045,900); tone(220,.07,"triangle",.035); },
     book(){ tone(660,.09,"sine",.06); tone(880,.13,"sine",.06,.07); },
     deal(){ noise(.05,.028,2400); },
@@ -989,7 +1016,7 @@ function reveal(){
     <a class="btn line" href="https://www.pnas.org/doi/10.1073/pnas.2602380123" target="_blank" rel="noopener" style="text-decoration:none">Read the paper <span class="ar">→</span></a></div>`;
 
   let cls="", picto="", h="", sub="", body="";
-  if(end.kind==="fired") Sfx.bad(); else if(end.kind==="everywalk") Sfx.good();
+  Sfx.ending(end.kind==="everywalk"?"win":"lose");   // lament for fired/usual/token, something almost sacred for the real thing
   if(end.kind==="fired"){
     cls="fired";
     const why={ board:["Replaced","The Board let you go.","The collection stopped selling and the owners panicked — you pushed the runway further than the house could bank."],
