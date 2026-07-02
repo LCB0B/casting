@@ -42,10 +42,10 @@
   .btn.line:hover{background:var(--ink); color:var(--paper); opacity:1}
 
   /* season header */
-  .top{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--ink); padding-bottom:6px}
+  .top{position:relative; text-align:center; border-bottom:1px solid var(--ink); padding-bottom:6px}
   .top .h{font-family:var(--ui); font-weight:900; font-size:16px; letter-spacing:.08em; text-transform:uppercase}
-  .top .r{font-family:var(--ui); font-weight:700; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2)}
-  .top .r b{color:var(--ink)}
+  .helpbtn{position:absolute; right:0; top:1px; width:22px; height:22px; border-radius:50%; border:1.2px solid var(--ink2); background:none; color:var(--ink2); font-family:var(--ui); font-weight:800; font-size:11px; line-height:1; padding:0; transition:color .2s, border-color .2s}
+  .helpbtn:hover{color:var(--ink); border-color:var(--ink)}
 
   .gauges{display:grid; grid-template-columns:repeat(3,1fr); gap:0 14px; margin:8px 0 2px; padding:0 20px}
   .gauge{text-align:center}
@@ -53,10 +53,6 @@
   .needle{transition:transform 1.05s cubic-bezier(.33,1.15,.45,1)}
   .gauge-cap{font-family:var(--ui); font-weight:700; font-size:8.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin-top:-3px}
 
-  .lookline{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin:4px 0 0}
-  .looknum{font-family:var(--serif); font-weight:900; font-size:clamp(34px,12vw,52px); line-height:.78}
-  .looknum span{font-style:italic; font-weight:400; font-size:.32em; letter-spacing:.08em; vertical-align:super; color:var(--ink2)}
-  .note{font-family:var(--serif); font-style:italic; font-weight:500; font-size:13px; text-align:right; max-width:24ch; line-height:1.22}
   .tag{display:flex; gap:8px; align-items:center; font-family:var(--ui); font-weight:800; font-size:9px; letter-spacing:.14em; text-transform:uppercase; padding:5px 9px; margin-top:6px; border:1px solid var(--ink)}
   .tag.boom{border-color:var(--accent); color:var(--accent)}
   .tag .x{font-family:var(--serif); font-weight:400; font-size:12px; opacity:.6; margin-left:auto}
@@ -276,9 +272,8 @@
 
   <!-- SEASON -->
   <section id="season" class="screen">
-    <div class="top"><div class="h" id="house-name">House</div><div class="r" id="prestige">Outsider</div></div>
+    <div class="top"><div class="h" id="house-name">House</div><button class="helpbtn" onclick="Tutorial.start()" title="How to play" aria-label="How to play">?</button></div>
     <div class="gauges" id="gauges"></div>
-    <div class="lookline"><div class="looknum"><span>look</span><span id="look-n">I</span></div><div class="note" id="note"></div></div>
     <div id="tag-slot"></div>
 
     <div class="lookbook">
@@ -354,7 +349,6 @@ const FLOOR = 18.5;          // Milan 2006 rule
 
 const STAKE = [{id:"board",cap:"Board"},{id:"walks",cap:"Body size"},{id:"census",cap:"Ethnicity"}];
 const PANEL = {board:"The Board", walks:"All Walks · body size", census:"The Census · ethnicity"};
-const TIERS = ["Outsider","Emerging","Established","Elite"];
 const TENURE_BASE = 8, TENURE_MAX = 10, RENEW_BAR = 40, TAU = 30, PICK = 5;
 const ROMAN=["","I","II","III","IV","V","VI","VII","VIII","IX","X"];
 
@@ -552,8 +546,6 @@ const EVENTS = [
   {kind:"slump",  label:"Market slump — the owners are nervous",  style:"rule", boardBias:-3},
   {kind:"viral",  label:"A look goes viral — buyers pile in",     style:"boom", boardBias:5},
 ];
-const NOTES = ["The orders are in.","The house holds its breath.","Another season, another runway.",
-  "The front row is filling.","Backstage, the rails are loaded.","The lights come up.","Buyers are watching."];
 function rollEvent(){
   if(G.season===1) return null;            // debut: clean
   if(Math.random()>0.42) return null;      // ~58% of shows carry no event
@@ -565,8 +557,7 @@ function rollEvent(){
 function renderSeason(){
   G.tier=Math.min(3, Math.floor((G.season-1)/2));
   G.curEvent=rollEvent();
-  $("house-name").textContent=G.brand; $("prestige").innerHTML=`Prestige · <b>${TIERS[G.tier]}</b>`;
-  $("look-n").textContent=ROMAN[G.season]; $("note").textContent=pick(NOTES);
+  $("house-name").textContent=G.brand;
   G._floor=false;
   const ts=$("tag-slot"); ts.innerHTML="";
   if(G.curEvent){
@@ -584,13 +575,11 @@ function renderSeason(){
    shows where this body sits between the industry floor (18.5) and the average person (~29). */
 function bmiBar(m){
   const LO=15, HI=34, X=v=>4+(clamp(v,LO,HI)-LO)/(HI-LO)*192;
-  const xm=X(m.bmi).toFixed(1), xf=X(FLOOR).toFixed(1), xp=X(POP_BMI).toFixed(1);
+  const xm=X(m.bmi).toFixed(1), xp=X(POP_BMI).toFixed(1);
   const col=m.bmi<FLOOR?"var(--accent)":"var(--ink)";
   return `<svg class="bmibar" viewBox="0 0 200 23" aria-hidden="true">
     <line x1="4" x2="196" y1="7" y2="7" stroke="var(--hair)" stroke-width="1.5"/>
-    <line x1="${xf}" x2="${xf}" y1="3" y2="11" stroke="var(--ink2)" stroke-width="1"/>
     <line x1="${xp}" x2="${xp}" y1="3" y2="11" stroke="var(--ink2)" stroke-width="1"/>
-    <text x="${xf}" y="21" text-anchor="middle" class="bmit">${FLOOR} · floor</text>
     <text x="${xp}" y="21" text-anchor="middle" class="bmit">${POP_BMI} · avg. person</text>
     <circle cx="${xm}" cy="7" r="3.4" fill="${col}"/></svg>`;
 }
@@ -913,10 +902,10 @@ const Briefing=(function(){
     $("brief").style.display="block";
     $("brief").innerHTML=`
       <div class="bk"><span class="kick">${B}</span><span class="kick">your appointment</span></div>
-      <p class="bl bt" style="animation-delay:.2s">Welcome. You've just been hired as the casting director of <em>${B}</em>.</p>
-      <p class="bl" style="animation-delay:1.2s">Each season, you choose the models who walk for the house — the faces and bodies that will speak for it.</p>
-      <p class="bl" style="animation-delay:2.2s">Keep <b>the Board</b> happy: the money has to keep coming.</p>
-      <p class="bl" style="animation-delay:3.2s">And try not to enrage the advocates — <b>body size</b> and <b>ethnic diversity</b> are watching every lineup you send out.</p>
+      <p class="bl bt" style="animation-delay:.2s">Welcome. You've just been hired as a casting director of <em>${B}</em>.</p>
+      <p class="bl" style="animation-delay:1.2s">Each season, you select the models who will walk for the house.</p>
+      <p class="bl" style="animation-delay:2.2s">To keep your job, keep <b>the Board</b> happy: the money has to keep coming.</p>
+      <p class="bl" style="animation-delay:3.2s">And try not to enrage the advocates. <b>Body size</b> and <b>ethnic diversity</b> associations are watching every lineup you send out.</p>
       <p class="bl bs" style="animation-delay:4.2s">Good luck. Let's see how you shape the world of fashion.</p>
       <button class="btn bl" style="animation-delay:4.9s" onclick="Briefing.done(event)">Take the job <span class="ar">→</span></button>`;
   }
@@ -949,23 +938,20 @@ const Tutorial = (function(){
 
   const steps = [
     { tgt:()=>document.querySelector("#deck .card:not(.behind)"),
-      kick:"The casting call", title:"Read the body. Then decide.",
-      body:"Every model arrives as a card — read it like a casting sheet. <b>BMI</b> sits top-right, with a scale showing where that body sits between the industry floor and the average person. <b>Origin</b> and height run under the name. The <b>body, skin tone, hair and eyes</b> you read off the figure itself. Swipe right to book, left to pass — five make a show." },
+      kick:"The casting call", title:"Select the models.",
+      body:"Every model arrives as a card. <b>BMI</b> sits top right, with a scale showing how that body compares to the rest of the industry. Below: the model's <b>origin</b> and height. Mind the <b>body, skin tone, hair and eyes</b> if you want a representative lineup. Swipe right to book, left to pass. Five make a show." },
     { tgt:()=>$("gauges"),
-      kick:"The three panels", title:"Three panels are watching.",
-      body:"Your five picks please \u2014 or annoy \u2014 three judges. They never hand you a score. Each needle just swings: left is trouble, right is pleased. You read the room, not a scoreboard. Meet them." },
+      kick:"The three panels", title:"Three levels to keep up.",
+      body:"Every time you send out five models, these levels move. <b>Left is trouble, right is pleased.</b>" },
     { tgt:()=>gauge(0),
-      kick:"The Board", title:"The <em>Board</em> \u2014 the money.",
-      body:"The owners who bankroll the show (the <b>Board</b> needle). They want the look they can sell \u2014 sleek, conventional, aspirational. Stray too far and they fret over the order book. A <b>\u2605 star</b> booking always calms them \u2014 but notice who gets to be a star." },
+      kick:"The Board", title:"The <em>Board</em>. The money.",
+      body:"The owners who bankroll the show (the <b>Board</b> needle). They want the look they can sell: sleek, conventional, aspirational." },
     { tgt:()=>gauge(1),
-      kick:"All Walks", title:"<em>All Walks</em> \u2014 body advocacy.",
+      kick:"All Walks", title:"<em>All Walks</em>. Body advocacy.",
       body:"A body-positivity coalition (the <b>Body size</b> needle). They want larger bodies actually booked on the runway, not just named in the press release. Send an all-thin show too many times and their patience runs out." },
-    { tgt:()=>gauge(2),
-      kick:"The Census", title:"The <em>Census</em> \u2014 representation.",
-      body:"The diversity body (the <b>Ethnicity</b> needle). They want a cast that looks like the world \u2014 models of colour, a real spread of origins. An all-white lineup never goes unnoticed." },
-    { tgt:()=>$("gauges"), last:true,
-      kick:"The catch", title:"They don\u2019t <em>agree</em>.",
-      body:"And they never will. What delights one panel can sink another \u2014 and you get only <b>five slots a season</b> to keep all three happy at once. Hold every needle out of the red for as long as you can. That\u2019s the job." },
+    { tgt:()=>gauge(2), last:true,
+      kick:"The Census", title:"The <em>Census</em>. Representation.",
+      body:"The diversity body (the <b>Ethnicity</b> needle). They want a cast that looks like the world: models of colour, a real spread of origins. An all-white lineup never goes unnoticed." },
   ];
 
   function build(){
