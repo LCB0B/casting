@@ -51,7 +51,7 @@
 
   .gauges{display:grid; grid-template-columns:repeat(4,1fr); gap:0; margin:8px 0 2px}
   .gauge{text-align:center}
-  .gauge-svg{width:100%; max-width:112px; height:auto; display:block; margin:0 auto}
+  .gauge-svg{width:100%; max-width:122px; height:auto; display:block; margin:0 auto}
   .needle{transition:transform 1.05s cubic-bezier(.33,1.15,.45,1)}
   .gauge-cap{font-family:var(--ui); font-weight:700; font-size:8.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin-top:-3px}
 
@@ -69,31 +69,31 @@
   .lookbook{margin:8px 0 2px}
   .lb-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px}
   .lb-cells{display:grid; grid-template-columns:repeat(5,1fr); gap:5px}
-  .lb-cell{height:94px; border:1px solid var(--hair); background:var(--panel); display:flex; align-items:flex-end; justify-content:center; position:relative; overflow:hidden}
+  .lb-cell{height:108px; border:1px solid var(--hair); background:var(--panel); display:flex; align-items:flex-end; justify-content:center; position:relative; overflow:hidden}
   .lb-cell.empty{border-style:dashed; align-items:center}
-  .lb-cell.empty span{font-family:var(--serif); font-style:italic; color:var(--ink3); font-size:14px}
+  .lb-cell.empty span{font-family:var(--serif); font-style:italic; color:var(--ink3); font-size:15px}
   .lb-cell.full{cursor:pointer; border-color:var(--ink)}
-  .lb-cell .figwrap{height:88px; width:100%}
-  .lb-cell .fig-svg{width:30px}
+  .lb-cell .figwrap{height:100px; width:100%}
+  .lb-cell .fig-svg{width:34px}
   .lb-cell.full::after{content:"✕"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:13px; color:var(--paper); background:rgba(20,19,18,0); opacity:0; transition:.18s; font-family:var(--ui)}
   .lb-cell.full:hover::after{opacity:1; background:rgba(20,19,18,.6)}
 
   /* deck */
   .deck-wrap{flex:1; display:flex; flex-direction:column; min-height:0}
-  .deck{position:relative; flex:1; min-height:210px; margin:8px 0 4px; display:flex; align-items:center; justify-content:center}
-  .card{position:absolute; width:min(64vw,220px); background:var(--panel); border:1px solid var(--ink); box-shadow:0 1px 0 var(--ink); touch-action:pan-y; user-select:none; will-change:transform; cursor:grab; padding:12px 12px 11px}
+  .deck{position:relative; flex:1; min-height:270px; margin:8px 0 4px; display:flex; align-items:center; justify-content:center}
+  .card{position:absolute; width:min(76vw,268px); background:var(--panel); border:1px solid var(--ink); box-shadow:0 1px 0 var(--ink); touch-action:pan-y; user-select:none; will-change:transform; cursor:grab; padding:14px 14px 13px}
   .card.behind{transform:scale(.93) translateY(12px); opacity:.5; pointer-events:none; box-shadow:none; border-color:var(--hair)}
   .card:active{cursor:grabbing}
-  .card-fig{height:166px; display:flex; align-items:flex-end; justify-content:center; position:relative}
-  .card-fig .figwrap{height:166px; width:120px}
-  .card-fig .fig-svg{width:78px}
-  .bmi{position:absolute; top:0; right:0; font-family:var(--ui); font-weight:800; font-size:8.5px; letter-spacing:.1em; color:var(--ink2); text-align:right}
-  .bmi b{display:block; font-family:var(--serif); font-weight:700; font-size:16px; letter-spacing:0; color:var(--ink); line-height:.9}
-  .card-meta{border-top:1px solid var(--ink); margin-top:9px; padding-top:7px}
-  .cname{font-family:var(--ui); font-weight:900; font-size:17px; letter-spacing:.04em; text-transform:uppercase; line-height:1}
-  .cspec{font-family:var(--ui); font-weight:600; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin-top:4px}
-  .bmibar{display:block; width:100%; height:auto; margin-top:8px}
-  .bmibar .bmit{font-family:var(--ui); font-weight:700; font-size:7px; letter-spacing:.07em; text-transform:uppercase; fill:var(--ink2)}
+  .card-fig{height:212px; display:flex; align-items:flex-end; justify-content:center; position:relative}
+  .card-fig .figwrap{height:212px; width:150px}
+  .card-fig .fig-svg{width:98px}
+  .bmi{position:absolute; top:0; right:0; font-family:var(--ui); font-weight:800; font-size:9.5px; letter-spacing:.1em; color:var(--ink2); text-align:right}
+  .bmi b{display:block; font-family:var(--serif); font-weight:700; font-size:19px; letter-spacing:0; color:var(--ink); line-height:.9}
+  .card-meta{border-top:1px solid var(--ink); margin-top:10px; padding-top:8px}
+  .cname{font-family:var(--ui); font-weight:900; font-size:20px; letter-spacing:.04em; text-transform:uppercase; line-height:1}
+  .cspec{font-family:var(--ui); font-weight:600; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin-top:4px}
+  .bmibar{display:block; width:100%; height:auto; margin-top:9px}
+  .bmibar .bmit{font-family:var(--ui); font-weight:700; font-size:7.5px; letter-spacing:.07em; text-transform:uppercase; fill:var(--ink2)}
   .swipe-tag{position:absolute; top:16px; font-family:var(--serif); font-weight:900; font-size:24px; text-transform:uppercase; padding:3px 11px; border:2px solid; opacity:0; pointer-events:none}
   .swipe-tag.book{right:12px; color:var(--good); border-color:var(--good); transform:rotate(11deg)}
   .swipe-tag.pass{left:12px; color:var(--ink); border-color:var(--ink); transform:rotate(-11deg)}
@@ -101,8 +101,8 @@
   .card.shake{animation:shake .4s ease}
   @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px) rotate(-2deg)}40%{transform:translateX(9px) rotate(2deg)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 
-  .controls{display:flex; justify-content:center; gap:18px; margin:2px 0 4px}
-  .ctrl{width:56px; height:56px; border-radius:50%; border:1.5px solid var(--ink); background:var(--paper); display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:24px; transition:transform .14s, background .2s, color .2s}
+  .controls{display:flex; justify-content:center; gap:26px; margin:2px 0 4px}
+  .ctrl{width:64px; height:64px; border-radius:50%; border:1.5px solid var(--ink); background:var(--paper); display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:27px; transition:transform .14s, background .2s, color .2s}
   .ctrl:hover{transform:translateY(-2px)}.ctrl.pass{font-weight:400}
   .ctrl.book{border-color:var(--good); color:var(--good); font-weight:700}
   .ctrl.book:hover{background:var(--good); color:#fff}.ctrl.pass:hover{background:var(--ink); color:var(--paper)}
