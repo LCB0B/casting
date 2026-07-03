@@ -31,7 +31,7 @@
   .slogan{font-family:var(--serif); font-style:italic; font-weight:500; font-size:clamp(15px,4.6vw,20px); margin:14px 0 0}
   .premise{font-size:15px; max-width:42ch; margin:28px 0 0}
   .name-row{margin:24px 0 0; display:flex; flex-direction:column; gap:12px}
-  .intro-strip{display:flex; gap:0; height:120px; align-items:flex-end; justify-content:center; margin-top:30px; opacity:.92}
+  .intro-strip{display:flex; gap:0; height:120px; align-items:flex-end; justify-content:center; margin-top:30px; opacity:.92; pointer-events:none}
   .intro-strip .figwrap{width:50px}
 
   .btn{display:inline-flex; align-items:center; justify-content:space-between; gap:14px; background:var(--ink); color:var(--paper); border:none; padding:14px 20px; font-weight:800; font-size:12px; letter-spacing:.22em; text-transform:uppercase; transition:opacity .2s, transform .15s; width:100%}
@@ -82,7 +82,7 @@
   /* deck */
   .deck-wrap{flex:1; display:flex; flex-direction:column; min-height:0}
   .deck{position:relative; flex:1; min-height:270px; margin:8px 0 4px; display:flex; align-items:center; justify-content:center}
-  .card{position:absolute; width:min(76vw,268px); background:var(--panel); border:1px solid var(--ink); box-shadow:0 1px 0 var(--ink); touch-action:pan-y; user-select:none; will-change:transform; cursor:grab; padding:14px 14px 13px}
+  .card{position:absolute; width:min(76vw,268px); background:var(--panel); border:1px solid var(--ink); box-shadow:0 1px 0 var(--ink); touch-action:pan-y; -webkit-user-select:none; user-select:none; will-change:transform; cursor:grab; padding:14px 14px 13px}
   .card.behind{transform:scale(.93) translateY(12px); opacity:.5; pointer-events:none; box-shadow:none; border-color:var(--hair)}
   .card:active{cursor:grabbing}
   .card-fig{height:212px; display:flex; align-items:flex-end; justify-content:center; position:relative}
@@ -116,7 +116,7 @@
   /* figure */
   .figwrap{display:flex; align-items:flex-end; justify-content:center}
   .figwrap .fig{width:100%; display:flex; justify-content:center; align-items:flex-end; animation:bob 2.8s ease-in-out infinite; transform-origin:50% 100%}
-  .fig-svg{display:block; overflow:visible; height:auto}
+  .fig-svg{display:block; overflow:visible; height:auto; width:100%}   /* explicit width: Safari sizes viewBox-only SVGs at the 300px default */
   .fig .arm{transform-box:fill-box; transform-origin:50% 8%; animation:armsway 3.6s ease-in-out infinite}
   .fig .arm.r{animation-delay:-1.3s}
   .fig .eyes{transform-box:fill-box; transform-origin:50% 50%; animation:blink 5.4s steps(1,end) infinite}
@@ -170,12 +170,13 @@
   #reveal{display:none}#reveal.active{display:block}
   .rv{max-width:540px; margin:0 auto; padding:24px 18px 56px}
   .rv-kick{display:flex; justify-content:space-between; border-bottom:1px solid var(--ink); padding-bottom:7px}
-  .rv-hero{display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; min-height:46vh; padding:30px 0 32px; border-bottom:1px solid var(--line); margin-bottom:26px}
-  .rv-h{font-family:var(--serif); font-weight:900; font-size:clamp(46px,16vw,86px); line-height:.88; margin:0 0 20px; word-break:break-word}
+  .rv-hero{display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:30px 0 26px; border-bottom:1px solid var(--line); margin-bottom:22px}
+  .rv-h{font-family:var(--serif); font-weight:900; font-size:clamp(46px,16vw,86px); line-height:.88; margin:0 0 18px; word-break:break-word}
   .rv-h em{font-style:italic; font-weight:500}
-  .rv-fared{font-family:var(--serif); font-style:italic; font-weight:500; font-size:clamp(19px,5.8vw,27px); line-height:1.28; margin:0; max-width:24ch}
-  .rv-lead{font-family:var(--ui); font-size:14px; line-height:1.55; max-width:52ch; margin:18px auto 0; text-align:left}
-  .rv-scrollhint{font-family:var(--ui); font-weight:700; font-size:9px; letter-spacing:.22em; text-transform:uppercase; color:var(--ink3); margin-top:26px}
+  .rv-result{font-family:var(--serif); font-weight:900; font-size:clamp(21px,6.4vw,30px); line-height:1.1; margin:0 0 14px}
+  .rv-result.lost{color:var(--accent)}
+  .rv-result.won{color:var(--good)}
+  .rv-lead{font-family:var(--ui); font-size:14px; line-height:1.55; max-width:52ch; margin:0 auto; text-align:left}
   .parade{border:1px solid var(--ink); background:var(--stage); overflow:hidden; margin-bottom:18px; position:relative}
   .parade .pcap{position:absolute; top:8px; left:12px; z-index:2; font-family:var(--ui); font-weight:700; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:#d4d2cc}
   .parade-track{display:flex; gap:6px; align-items:flex-end; padding:24px 10px 12px; width:max-content; animation:march 30s linear infinite}
@@ -188,12 +189,14 @@
   .punch{border-top:2px solid var(--accent); border-bottom:2px solid var(--accent); padding:18px 0; margin:22px 0; text-align:center}
   .punch .big{font-family:var(--serif); font-weight:900; font-size:clamp(48px,18vw,90px); line-height:.84; color:var(--accent)}
   .punch .cap{font-family:var(--ui); font-weight:600; font-size:11px; color:var(--ink); margin:10px auto 0; max-width:34ch}
-  .verdict{font-family:var(--serif); font-size:17px; line-height:1.42; max-width:46ch; margin:0 0 12px}
-  .verdict strong{font-weight:700; font-style:italic}
   .src{font-family:var(--ui); font-size:11px; color:var(--ink2); margin:18px 0 22px; line-height:1.5}.src a{color:var(--ink)}
   .end-actions{display:flex; flex-direction:column; gap:10px}
+  .rv-small{text-align:center; margin:0 0 18px}
+  .rv-small .src{margin:0 auto 12px; max-width:56ch}
+  .btn.small{display:inline-flex; width:auto; padding:8px 14px; font-size:10px; gap:9px}
+  .rv-stats{margin-top:28px; border-top:1px solid var(--line); padding-top:22px}
   .fired .rv-h{color:var(--accent)}
-  .picto{display:flex; justify-content:center; margin:6px 0 20px}
+  .picto{display:flex; justify-content:center; margin:18px 0 0}
   .punch.good{border-color:var(--ink)}
   .punch.good .big{color:var(--ink)}
   .good .rv-h em{font-style:italic}
@@ -364,7 +367,7 @@ const G = {
   meters:{board:60, walks:45, census:45},
   prev:{L:0, E:0},
   stack:[], booked:[], lastPassed:null, accl:0, curEvent:null, _lastEvent:null,
-  since:{nonWhite:0, plus:0, intersx:0},
+  since:{nonWhite:0, plus:0, intersx:0}, gen:0,
   everPlus:false, allCast:[], hist:[], milanSeen:false,
   cum:{total:0, nonWhite:0, plus:0, plusNonWhite:0, plusWhite:0, nonplusNonWhite:0, nonplusWhite:0, regions:new Set(), seasonsWithPlus:0},
   firedBy:null, _end:false, _floor:false, _runTimer:null, _runCb:null, _busy:false
@@ -523,7 +526,7 @@ const Sfx=(function(){
   }
   document.addEventListener("visibilitychange",()=>{ if(document.hidden) musicStop(); else if(mWanted&&on&&!mTimer) musicStart(); });
 
-  return {
+  const api={
     unlock(){ ac(); },
     music:musicStart,
     ending(k){ musicStop(); mWanted=false; const c=ac(); if(c) newThemeOut(); if(k==="win") themeWin(); else themeLose(); },
@@ -541,6 +544,11 @@ const Sfx=(function(){
       return on; },
     get on(){ return on; }
   };
+  /* Sound must never break the game: some WebKit/Safari builds are picky about Web Audio,
+     and an exception inside e.g. book() would strand the deck mid-swipe. Fail silent. */
+  for(const k of Object.keys(api)){ const f=api[k];
+    if(typeof f==="function") api[k]=function(){ try{ return f.apply(null,arguments); }catch(_){ } }; }
+  return api;
 })();
 
 /* ---------------- helpers ---------------- */
@@ -549,7 +557,7 @@ const rnd = (a,b)=> a + Math.random()*(b-a);
 const pick = arr => arr[Math.floor(Math.random()*arr.length)];
 const clamp = (x,lo=0,hi=100)=> Math.max(lo,Math.min(hi,x));
 function median(xs){ const s=[...xs].sort((a,b)=>a-b); const m=s.length>>1; return s.length%2 ? s[m] : (s[m-1]+s[m])/2; }
-function show(scr){ document.querySelectorAll(".screen,#reveal").forEach(s=>s.classList.remove("active")); $(scr).classList.add("active"); window.scrollTo({top:0,behavior:"instant"}); }
+function show(scr){ document.querySelectorAll(".screen,#reveal").forEach(s=>s.classList.remove("active")); $(scr).classList.add("active"); window.scrollTo(0,0); }
 const isBlonde=m=>m.hair==="blonde"||m.hair==="light";
 const isLightEye=m=>m.eye==="blue"||m.eye==="grey";
 const isIdeal=m=> !m.plus && !m.mid && !m.nonWhite && isBlonde(m) && isLightEye(m);
@@ -591,20 +599,31 @@ function makeModel(opt={}){
 /* ---------------- streaming candidate generation (infinite casting call) ----------------
    No fixed deck: every card that leaves (booked OR passed) is replaced by a freshly
    generated submission, so ANY show is composable — five non-white, five plus-size, etc.
-   The thin-white ideal still dominates the stream (IDEAL_RATE), so building a diverse
-   show costs swipes — that friction is the point. A pity guarantee stops RNG droughts
-   from ever stranding a player who is deliberately hunting for a particular kind of face. */
+   The thin-white ideal dominates the OPENING of the stream (IDEAL_RATE), so the player
+   meets the industry default first — that friction is the point. But hunting rare
+   intersections (thin non-white, plus-size white) must not take endless swiping, so the
+   draw fades to uniform: the first UNIFORM_RAMP.hold cards keep the house odds as-is,
+   then the uniform share ramps linearly until card UNIFORM_RAMP.full, after which origin
+   is a coin flip and body size (thin/mid/plus) is an even three-way. The counter (G.gen)
+   resets each round, so every casting call re-opens on the industry default before the
+   stream loosens up. A pity guarantee stops RNG droughts on top of that. */
 const BUFFER = 4;                                  // cards kept ready (current + peek + a little runway)
 const IDEAL_RATE = 0.64;                           // share of the stream that is the thin-white-blonde ideal  ← rarity knob (higher = diversity costs more swipes)
+const UNIFORM_RAMP = { hold:5, full:10 };          // cards 1–5: house odds; blend to fully uniform origin+BMI from card 10 on
 const PITY = { nonWhite:6, plus:8, intersx:11 };   // force the trait if this many cards stream past without it (drought safety-net, not the main driver)
 
 function streamStar(){ return (G.tier>=3 && Math.random()<0.10) || (G.tier>=2 && Math.random()<0.12); }
 function makeStreamModel(){
-  G.since.nonWhite++; G.since.plus++; G.since.intersx++;
+  G.gen++; G.since.nonWhite++; G.since.plus++; G.since.intersx++;
+  const t = clamp((G.gen-UNIFORM_RAMP.hold)/(UNIFORM_RAMP.full-UNIFORM_RAMP.hold), 0, 1);  // 0 = house odds, 1 = fully uniform
   let m;
   if(G.since.intersx>=PITY.intersx)        m=makeModel({plus:true, nonWhite:true});  // guarantee the intersectional token
   else if(G.since.nonWhite>=PITY.nonWhite) m=makeModel({nonWhite:true});             // guarantee a face of colour
   else if(G.since.plus>=PITY.plus)         m=makeModel({plus:true});                 // guarantee a larger body
+  else if(Math.random()<t){                                                          // uniform draw: origin 50/50, body an even three-way
+    const band=Math.floor(Math.random()*3);
+    m=makeModel({nonWhite:Math.random()<0.5, plus:band===2, mid:band===1});
+  }
   else if(Math.random()<IDEAL_RATE)        m=makeModel({_ideal:true});               // the dominant default
   else                                     m=makeModel();                            // realistic remainder
   if(streamStar() && isIdeal(m)) m.star=true;   // fame only ever wears the house ideal — that's the trade
@@ -616,7 +635,7 @@ function makeStreamModel(){
   return m;
 }
 function refill(){ while(G.stack.length < BUFFER) G.stack.push(makeStreamModel()); }
-function resetStream(){ G.stack=[]; G.since={nonWhite:0, plus:0, intersx:0}; refill(); }
+function resetStream(){ G.stack=[]; G.gen=0; G.since={nonWhite:0, plus:0, intersx:0}; refill(); }
 
 /* ---------------- SVG figure ---------------- */
 function figure(m){
@@ -1004,33 +1023,7 @@ function classifyEnding(){
 }
 const escHTML=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-/* ---- ending pictograms (SVG) ---- */
-function pictoFired(who){
-  if(who==="board") return `<svg viewBox="0 0 120 96" width="124" aria-hidden="true">
-    <line x1="6" y1="40" x2="114" y2="40" stroke="var(--ink2)" stroke-width="1.5" stroke-dasharray="5 4"/>
-    <circle cx="60" cy="56" r="17" fill="none" stroke="var(--accent)" stroke-width="3"/>
-    <text x="60" y="63" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="20" fill="var(--accent)">$</text>
-    <path d="M44 76 L50 82 L56 76 M64 76 L70 82 L76 76" fill="none" stroke="var(--ink3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M54 84 L60 92 L66 84" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  const icon = who==="walks"
-    ? `<rect x="50" y="22" width="20" height="20" rx="10" fill="var(--ink)"/>`
-    : `<g fill="var(--ink)"><circle cx="48" cy="30" r="5"/><circle cx="60" cy="26" r="5"/><circle cx="72" cy="30" r="5"/></g>`;
-  return `<svg viewBox="0 0 120 96" width="124" aria-hidden="true">
-    <line x1="60" y1="48" x2="60" y2="90" stroke="var(--ink)" stroke-width="3"/>
-    <rect x="34" y="10" width="52" height="40" fill="none" stroke="var(--ink)" stroke-width="2.5"/>${icon}
-    <line x1="28" y1="6" x2="92" y2="54" stroke="var(--accent)" stroke-width="3"/></svg>`;
-}
-function pictoStandard(){
-  let s=""; for(let i=0;i<6;i++){ const x=14+i*16; s+=`<g transform="translate(${x},12)"><circle cx="0" cy="6" r="4" fill="var(--ink)"/><rect x="-2" y="11" width="4" height="34" fill="var(--ink)"/></g>`; }
-  return `<svg viewBox="0 0 120 64" width="170" aria-hidden="true">${s}<line x1="6" y1="58" x2="114" y2="58" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3"/></svg>`;
-}
-function pictoToken(){
-  const corners=[[16,16],[124,16],[16,98],[124,98]];
-  const badges=corners.map(a=>`<circle cx="${a[0]}" cy="${a[1]}" r="9" fill="none" stroke="var(--accent)" stroke-width="2.5"/><line x1="${a[0]}" y1="${a[1]}" x2="${a[0]<70?58:82}" y2="${a[1]<57?46:66}" stroke="var(--accent)" stroke-width="2" marker-end="url(#ah)"/>`).join("");
-  return `<svg viewBox="0 0 140 114" width="170" aria-hidden="true">
-    <defs><marker id="ah" markerWidth="8" markerHeight="8" refX="5" refY="3.5" orient="auto"><path d="M0 0 L6 3.5 L0 7 Z" fill="var(--accent)"/></marker></defs>
-    <g transform="translate(70,57)"><circle cx="0" cy="-12" r="9" fill="var(--ink)"/><rect x="-7" y="-2" width="14" height="40" rx="6" fill="var(--ink)"/></g>${badges}</svg>`;
-}
+/* ---- ending pictogram (SVG) — only the rainbow survives; the others read as noise ---- */
 function pictoEveryWalk(){
   const cols=["#C5234B","#D87A1F","#C79A2E","#4E7A33","#1F6F8B","#6A3FA0"];
   const arcs=cols.map((c,i)=>{const r=52-i*6;return `<path d="M ${70-r} 70 A ${r} ${r} 0 0 1 ${70+r} 70" fill="none" stroke="${c}" stroke-width="4"/>`;}).join("");
@@ -1049,37 +1042,50 @@ function reveal(){
   const parade=G.allCast.length?`<div class="parade"><div class="pcap">Everyone who walked for ${B} — hover to pause</div><div class="parade-track">${figs}${figs}</div></div>`:"";
   const charts=`<div class="chartbox"><p class="ct">Your diversity index <span>the story the press told</span></p>${sparkline(divS,{lo:0,hi:100,color:'#141312',ticks:[0,50,100],h:120})}</div>
     <div class="chartbox"><p class="ct">Median body on your runway · BMI <span>what actually walked</span></p>${sparkline(medS,{lo:14,hi:32,color:'#141312',ticks:[16,22,28],ref:POP_BMI,refColor:'#E6007E',refLabel:'avg. person ≈ '+POP_BMI,h:130})}</div>`;
-  const src=`<p class="src">Every number mirrors a finding in Boucherie et al., “Cultural evolution of beauty standards,” <em>PNAS</em> 2026 · <a href="https://www.pnas.org/doi/10.1073/pnas.2602380123" target="_blank" rel="noopener">doi:10.1073/pnas.2602380123</a></p>`;
-  const actions=`<div class="end-actions"><button class="btn" onclick="GAME.restart()">Cast again <span class="ar">→</span></button>
-    <a class="btn line" href="https://www.pnas.org/doi/10.1073/pnas.2602380123" target="_blank" rel="noopener" style="text-decoration:none">Read the paper <span class="ar">→</span></a></div>`;
+  const shows=`${G.hist.length} show${G.hist.length===1?"":"s"}`;
 
-  let cls="", picto="", h="", sub="", body="", lead="";
+  /* Page order (deliberate): big title → explicit verdict ("You lost/won") → why, right
+     below → the paper, small → play again → the statistical record (parade + numbers + plots). */
+  let cls="", h="", result="You lost.", resCls="lost", why="", punch="", rainbow="", helpline="";
   Sfx.ending(end.kind==="everywalk"?"win":"lose");   // lament for fired/usual/token, something almost sacred for the real thing
   if(end.kind==="fired"){
     cls="fired";
-    const why={ board:["Replaced",`The Board let you go. Look ${ROMAN[G.season]} was your last.`,"The collection stopped selling and the owners panicked — you pushed the runway further than the house could bank."],
-                walks:["Boycotted","You lost. A body coalition called a public boycott: season after season your runway stayed too thin.","They quoted your own slogan back at you — “fashion for every body.”"],
-                census:["Boycotted","You lost. A representation boycott ended your tenure: your runway stayed too white for too long.","“The world doesn't look like this,” they said."] }[end.who];
-    picto=pictoFired(end.who); h=`<em>${why[0]}</em>`; sub=why[1];
-    body=`<p class="verdict">${why[2]}</p>${charts}${src}`;
+    if(end.who==="board"){
+      h=`<em>Replaced</em>`;
+      why=`The Board fired you — Look ${ROMAN[G.season]} was your last. The collection stopped selling and the owners panicked: you pushed the runway further, faster than the house could bank. Change that outruns the Board's patience doesn't reform the system; it just gets the director replaced.`;
+    } else if(end.who==="walks"){
+      h=`<em>Boycotted</em>`;
+      why=`A body-size coalition called a public boycott and the house cut you loose: season after season your runway stayed too thin, and you never gave them a reason to believe it would change. They quoted your own slogan back at you — “fashion for every body.”`;
+    } else {
+      h=`<em>Boycotted</em>`;
+      why=`A representation boycott ended your tenure: your runway stayed too white for too long, and the public stopped waiting. “The world doesn't look like this,” they said.`;
+    }
   } else if(end.kind==="standard"){
-    picto=pictoStandard(); h=`Business as <em>usual</em>`; sub=`You survived ${G.hist.length} show${G.hist.length===1?"":"s"}. Nothing changed.`;
-    lead=`You kept your job by keeping the runway thin and white and feeding the coalitions the bare minimum. The press called it timeless. But this is the engine the study is about — a runway that sells an unreachable body to everyone watching, and the documented cost is real: disordered eating and body dysmorphia, landing hardest on the youngest.`;
-    body=`<div class="punch"><div class="big">${gap}<span style="font-size:.4em"> BMI</span></div><div class="cap">The gap between your runway's median body and the average person held at ~${gap} BMI points — “diversity” season after season, and the body never moved.</div></div>${charts}${src}
-      <p class="src" style="border-top:1px solid var(--line); padding-top:12px">If this subject touches you personally: in the US the National Alliance for Eating Disorders runs a free, clinician-staffed helpline — <strong>1-866-662-1235</strong>, weekdays.</p>`;
+    h=`Business as <em>usual</em>`;
+    why=`You survived ${shows} by keeping the runway thin and white and feeding the coalitions the bare minimum. Nothing changed. The press called it timeless, but this is exactly the engine the study describes — a runway selling an unreachable body to everyone watching, and the documented cost is real: disordered eating and body dysmorphia, landing hardest on the youngest.`;
+    punch=`<div class="punch"><div class="big">${gap}<span style="font-size:.4em"> BMI</span></div><div class="cap">The gap between your runway's median body and the average person held at ~${gap} BMI points — “diversity” season after season, and the body never moved.</div></div>`;
+    helpline=`<p class="src">If this subject touches you personally: in the US, the National Alliance for Eating Disorders runs a free, clinician-staffed helpline — <strong>1-866-662-1235</strong>, weekdays. In the UK, Beat listens on <strong>0808 801 0677</strong>; elsewhere in Europe, <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a> lists local support by country.</p>`;
   } else if(end.kind==="token"){
-    picto=pictoToken(); h=`You did it. <em>Sort of.</em>`; sub=`Diversity arrived — concentrated onto a few bodies.`;
-    lead=`You brought diversity in — but you made a few bodies carry all of it at once: the same models held the size <em>and</em> the colour. That's the paper's finding, reproduced by your own hand. Representation became a quota met by the fewest possible people. It counts on paper. It isn't the same as change.`;
-    body=`<div class="punch"><div class="big">${end.OR.toFixed(1)}×</div><div class="cap">On your runway a larger body was ${end.OR.toFixed(1)}× more likely to be non-white than white. The real industry runs at 4.5×.</div></div>${charts}${src}`;
+    h=`You did it. <em>Sort of.</em>`; result=`You won — on paper.`; resCls="";
+    why=`Diversity arrived, but you concentrated it onto a few bodies: the same models carried the size <em>and</em> the colour at once, a quota met by the fewest possible people. That is the paper's central finding, reproduced by your own hand. It counts on paper. It isn't the same as change.`;
+    punch=`<div class="punch"><div class="big">${end.OR.toFixed(1)}×</div><div class="cap">On your runway a larger body was ${end.OR.toFixed(1)}× more likely to be non-white than white. The real industry runs at 4.5×.</div></div>`;
   } else {
-    cls="good"; picto=pictoEveryWalk(); h=`Every <em>walk</em>`; sub=`You made ${G.hist.length} show${G.hist.length===1?"":"s"} — and introduced diversity honestly.`;
-    body=`<div class="punch good"><div class="big" style="color:var(--ink)">${end.OR.toFixed(1)}×</div><div class="cap">A larger body was just ${end.OR.toFixed(1)}× more likely to be non-white than white — no concentration. The industry runs at 4.5×.</div></div>${charts}
-      <p class="verdict">You brought diversity in <strong>step by step</strong>, and spread it across <strong>different bodies</strong> — size on some, colour on others, no single model made to carry the whole story. The median on your runway actually moved toward the average person. This is the hard version, and the rare one. The house survived it anyway.</p>${src}`;
+    cls="good"; h=`Every <em>walk</em>`; result="You won."; resCls="won";
+    why=`You made ${shows} and introduced diversity honestly: step by step, spread across <strong>different bodies</strong> — size on some, colour on others, no single model made to carry the whole story. The median body on your runway actually moved toward the average person. This is the hard version, and the rare one. The house survived it anyway.`;
+    rainbow=`<div class="picto">${pictoEveryWalk()}</div>`;
+    punch=`<div class="punch good"><div class="big" style="color:var(--ink)">${end.OR.toFixed(1)}×</div><div class="cap">A larger body was just ${end.OR.toFixed(1)}× more likely to be non-white than white — no concentration. The industry runs at 4.5×.</div></div>`;
   }
   $("reveal-inner").innerHTML=`<div class="${cls}">
     <div class="rv-kick"><span class="kick">${B}</span><span class="kick">The record</span></div>
-    <div class="rv-hero"><h2 class="rv-h">${h}</h2><p class="rv-fared">${sub}</p>${lead?`<p class="rv-lead">${lead}</p>`:""}<div class="rv-scrollhint">↓ the full record</div></div>
-    <div class="picto">${picto}</div>${parade}${body}${actions}</div>`;
+    <div class="rv-hero"><h2 class="rv-h">${h}</h2><p class="rv-result ${resCls}">${result}</p><p class="rv-lead">${why}</p>${rainbow}</div>
+    <div class="rv-small">
+      ${helpline}
+      <p class="src">Every number below mirrors a finding in Boucherie et al., “Cultural evolution of beauty standards,” <em>PNAS</em> 2026.</p>
+      <a class="btn line small" href="https://www.pnas.org/doi/10.1073/pnas.2602380123" target="_blank" rel="noopener" style="text-decoration:none">Read the paper <span class="ar">→</span></a>
+    </div>
+    <div class="end-actions"><button class="btn" onclick="GAME.restart()">Play again <span class="ar">→</span></button></div>
+    <div class="rv-stats">${parade}${punch}${charts}</div>
+  </div>`;
 }
 
 /* ---------------- lifecycle ---------------- */
@@ -1128,7 +1134,7 @@ const Briefing=(function(){
 window.Briefing=Briefing;
 function restart(){
   Object.assign(G,{ season:1,tier:0,meters:{board:60,walks:45,census:45}, prev:{L:0,E:0},
-    stack:[],booked:[],accl:0,curEvent:null,_lastEvent:null, since:{nonWhite:0,plus:0,intersx:0},
+    stack:[],booked:[],accl:0,curEvent:null,_lastEvent:null, since:{nonWhite:0,plus:0,intersx:0}, gen:0,
     everPlus:false,allCast:[],hist:[],milanSeen:false,
     cum:{total:0,nonWhite:0,plus:0,plusNonWhite:0,plusWhite:0,nonplusNonWhite:0,nonplusWhite:0,regions:new Set(),seasonsWithPlus:0}, firedBy:null,_end:false,_busy:false });
   renderIntroStrip(); rollHouse(); show("intro");
