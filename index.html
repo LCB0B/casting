@@ -341,12 +341,12 @@
 
 /* ---------------- data ---------------- */
 const FIRST = ["Anouk","Sasha","Imani","Lía","Wren","Talia","Yuki","Mara","Senna","Noa","Isolde","Amara",
-  "Fatou","Priya","Mei","Ingrid","Suki","Nadia","Cleo","Esme","Rin","Ada","Lux","Remy","Vesna","Oona",
-  "Dália","Inès","Soraya","Bibi","Zola","Hana","Liv","Tao","Yara","Kira","Ode","Nima","Saoirse","Beau",
+  "Fatou","Priya","Mei","Suki","Nadia","Cleo","Esme","Rin","Ada","Lux","Vesna","Oona",
+  "Dália","Inès","Zola","Hana","Liv","Tao","Yara","Kira","Saoirse",
   "Bella","Gigi","Clara","Anok","Irina","Kate","Gisele","Kendall","Adriana","Nina","Katharina","Karo"];
-const MALE = ["Matteo","Kofi","Ravi","Otis","Sven","Emil","Dae","Nuno","Tariq","Casper","Leon","Idris",
-  "Bram","Yusuf","Anders","Kenji","Ezra","Luca","Rasmus","Omar","Joaquín","Nils","Adé","Theo","Jalen","Søren",
-  "Sean","Tyson","Mark","Marcus","Awwal","Babacar","Cherif","Long","Lux","Mohamed","Mamadou","Louis","Sagar","August"];
+const MALE = ["Matteo","Kofi","Ravi","Otis","Sven","Emil","Dae","Nuno","Tariq","Leon","Idris",
+  "Bram","Yusuf","Kenji","Ezra","Luca","Omar","Joaquín","Nils","Adé","Theo","Jalen"
+  ,"Tyson","Mark","Marcus","Awwal","Babacar","Cherif","Long","Lux","Mohamed","Mamadou","Louis","Sagar","August"];
 const HAIR = {blonde:"#E6C572",light:"#C49A5E",brown:"#6B4A2E",dark:"#2E2018",black:"#161015",red:"#A8451F",auburn:"#7A3318"};
 const EYE = {blue:"#4F86C6",green:"#4E8B4A",hazel:"#9A7338",brown:"#523A22",grey:"#8C9196"};
 const HAIRSTYLES = ["long","short","curly","bun"];
@@ -367,7 +367,7 @@ const ROMAN=["","I","II","III","IV","V","VI","VII","VIII","IX","X"];
 const G = {
   brand:"HOUSE", season:1, tier:0,
   meters:{board:60, walks:45, census:45},
-  prev:{L:0, E:0},
+  prev:{L:0, E:0}, streaks:{noColour:0, oneColour:0},
   stack:[], booked:[], lastPassed:null, accl:0, curEvent:null, _lastEvent:null,
   since:{nonWhite:0, plus:0, intersx:0}, gen:0,
   everPlus:false, allCast:[], hist:[], milanSeen:false,
@@ -901,12 +901,14 @@ function scoreCast(cast){
 
 /* ---------------- reactions (authored by each panel) ---------------- */
 function reactBoard(r){ let b;
-  if(G.meters.walks<TAU||G.meters.census<TAU) b=["The owners are fielding angry calls — this is a problem.","“A boycott is not a brand strategy,” the chairman snaps.","The board smells a PR fire and wants it out.","Projections wobble; the owners blame the noise.","“Fix the optics,” the board says — meaning fix you.","The phrase “reputational risk” is now in every meeting."];
-  else if(r.Div>=3) b=["The board mutters the show “lost the plot” on aspiration.","Buyers blanch — “where's the fantasy we sell?”","“Brave,” the commercial team says, meaning doomed.","An investor leaves at the interval.","“Who is this even for?” the board asks the room.","The order book thins. The owners notice."];
-  else if(r.Div>=2 && r.novel>0.8) b=["“One statement booking sells courage. Two costs orders,” the board notes.","Two risks on one runway — the buyers ask which one you'll drop.","“Spread it out over seasons,” the commercial team advises. “Or better: one model who covers both.”","The board counts two off-ideal stories in five looks, and frowns.","“Couldn't ONE girl carry all of this?” someone asks. Nobody objects."];
-  else if(r.Div>=1 && r.novel<=0.3) b=["The buyers have stopped flinching — this is just what the house looks like now.","“Our customer expects this now,” the board admits.","The order book has made its peace with the new faces.","Nobody upstairs blinks at the lineup anymore.","What scandalised them two seasons ago is now the brand."];
-  else if(r.S>=1 && r.Div<=1) b=["The star's name alone moves pre-orders. The board is soothed.","“Book her every season,” the chairman says of the star. Numbers up.","A famous face on the runway — the owners forgive a lot for that.","The star brings press, buyers, calm. The board purrs.","With a star in the lineup, nobody upstairs asks questions."];
-  else if(r.Div<=1 && r.I>=4) b=["Buyers purr over the clean, aspirational line.","“Timeless, on-brand, sellable,” the board beams.","Pre-orders spike — this is the look that moves units.","The money side has never looked happier.","“This,” the chairman says, “is the house.”","A quiet, profitable triumph. The board exhales."];
+  if(G.meters.walks<TAU||G.meters.census<TAU) b=["The owners are fielding angry calls — this is a problem.","“A boycott is not a brand strategy,” the chairman snaps.","The board smells a PR fire and wants it out.","Projections wobble; the owners blame the noise.","“Fix the optics,” the board says — meaning fix you.","The phrase “reputational risk” is now in every meeting.","“We support diversity,” the chairman says, “the moment it stops costing us.”"];
+  else if(r.Div>=3) b=["The board mutters the show “lost the plot” on aspiration.","Buyers blanch — “where's the fantasy we sell?”","“Brave,” the commercial team says, meaning doomed.","An investor leaves at the interval.","“Who is this even for?” the board asks the room.","The order book thins. The owners notice.","“We sell the dream,” the chairman explains. “Nobody dreams of looking possible.”","Marketing asks if the cast could be diverse “in a more invisible way.”","“We don't do that here,” the chairman tells you."];
+  else if(r.Div>=2 && r.novel>0.8) b=["“One statement booking sells courage. Two costs orders,” the board notes.","Two risks on one runway — the buyers ask which one you'll drop.","“Spread it out over seasons,” the commercial team advises. “Or better: one model who covers both.”","The board counts two off-ideal stories in five looks, and frowns.","“Couldn't ONE girl carry all of this?” someone asks. Nobody objects.","“Two statements is a manifesto,” the board warns. “We budgeted for one.”","“Could the plus one also be the diverse one? Efficiency,” says finance."];
+  else if(r.whip>=3) b=["“Pick a lane,” the board pleads. “Any lane. Ideally the profitable one.”","Buyers call the house “exciting,” the way turbulence is exciting."];
+  else if(r.T>=1 && oddsRatio()>=2.5) b=["“Our diversity is very efficient,” the board tells the reporter. She writes it down."];
+  else if(r.Div>=1 && r.novel<=0.3) b=["The buyers have stopped flinching — this is just what the house looks like now.","“Our customer expects this now,” the board admits.","The order book has made its peace with the new faces.","Nobody upstairs blinks at the lineup anymore.","What scandalised them two seasons ago is now the brand.","“We always believed in this,” the chairman tells the press, newly sincere.","The board has renamed your risk “our heritage of inclusion.”"];
+  else if(r.S>=1 && r.Div<=1) b=["The star's name alone moves pre-orders. The board is soothed.","“Book her every season,” the chairman says of the star. Numbers up.","A famous face on the runway — the owners forgive a lot for that.","The star brings press, buyers, calm. The board purrs.","With a star in the lineup, nobody upstairs asks questions.","One celebrity outsells five principles. The board has done the math.","“Book more famous ones,” says the chairman, solving fashion forever."];
+  else if(r.Div<=1 && r.I>=4) b=["Buyers purr over the clean, aspirational line.","“Timeless, on-brand, sellable,” the board beams.","Pre-orders spike — this is the look that moves units.","The money side has never looked happier.","“This,” the chairman says, “is the house.”","A quiet, profitable triumph. The board exhales.","“Perfection”: five bodies, one body, no surprises.","Pre-orders spike. Somewhere a spreadsheet weeps with joy.","“This is what women want,” agrees a boardroom containing no women."];
   else b=["Sales hold. The board can work with this.","A measured outing — commercial enough.","“Interesting,” the board says, reserving judgment.","Dependable numbers, if not thrilling.","The buyers nod, slowly.","Nothing scares the owners this season."];
   return pick(b); }
 function reactWalks(r){ let b;
@@ -917,10 +919,14 @@ function reactWalks(r){ let b;
   else if(r.T>=1 && r.T>=r.L) b=["A larger body — but they're carrying the colour quota too. They notice.","“Convenient, that your curve model is also your diversity,” they note.","One body, every box ticked at once. Half a clap.","A token doing double duty. They see exactly what it is.","They clock the single booking, and all it's made to carry."];
   else b=["A larger body walks. They'll take it.","Some range — All Walks nods.","Progress, modest but real.","A booking that matters. Noted."];
   return pick(b); }
+const YEARWORD=["","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"];
 function reactCensus(r){ let b;
-  if(r.E===0) b=["An all-white lineup. The Census is unamused.","Not one model of colour — they take note.","“A 1995 catalogue,” the Census observes.","Their silence is louder than any review.","“The world doesn't look like this,” they note.","Their patience is visibly finite now."];
-  else if(r.E>=3) b=["A genuinely global cast. The Census approves.","Faces from everywhere — the real thing.","Broad, unforced representation. Pleased.","“This looks like the world,” they note, almost surprised."];
-  else if(r.T>=1 && r.T>=r.E) b=["Colour on the runway — but only on your larger bodies. They notice.","“Your diversity and your curve model are the same person,” the Census notes.","One face doing two jobs. They clock it.","Representation concentrated onto a token. Half a clap.","They count the faces, and where the colour landed."];
+  if(r.E===0){
+    if(G.streaks.noColour>=2 && Math.random()<0.5) return `Year ${YEARWORD[G.streaks.noColour]||G.streaks.noColour} of the monochrome project.`;
+    b=["An all-white lineup. The Census is unamused.","Not one model of colour — they take note.","“A 1995 catalogue,” the Census observes.","Five models, one continent. The Census admires the logistics.","Their silence is louder than any review.","“The world doesn't look like this,” they note."]; }
+  else if(r.E>=3) b=["A genuinely global cast. The Census approves.","“This looks like the world,” they note.","Truly diverse. The Census has no notes.","Faces from everywhere — the real thing."];
+  else if(r.T>=1 && r.T>=r.E) b=["“A token is not a demographic,” the Census notes.","One token carrying all the colour. The Census counts to one.","“Your diversity and your curve model are the same person,” the Census notes.","Representation concentrated onto a token. Half a clap.","They count the faces, and where the colour landed."];
+  else if(r.E===1 && G.streaks.oneColour>=2) b=["Same seat, new season. The Census recognises a quota when it sees one.","“Quota met,” the Census files. “Representation: pending.”"];
   else b=["Some colour — noted, if modest.","A face or two. They've seen bolder.","“Better,” the Census says, leaving the rest unsaid.","A step in the right direction. They'd like more."];
   return pick(b); }
 const REACT={board:reactBoard, walks:reactWalks, census:reactCensus};
@@ -955,6 +961,8 @@ function stage(){
   const divIndex=clamp(14+9*G.cum.seasonsWithPlus+1.1*nwPct+2.2*G.cum.regions.size);
   G.hist.push({season:G.season,median:medBMI,divIndex,Div:r.Div,whip:r.whip,L:r.L,E:r.E,milan:G._floor});
   cast.forEach(m=>G.allCast.push(m));
+  G.streaks.noColour  = r.E===0 ? G.streaks.noColour+1  : 0;   // reactions read these, so count the current season first
+  G.streaks.oneColour = r.E===1 ? G.streaks.oneColour+1 : 0;
   G.prev={L:r.L, E:r.E};
   G.accl=clamp(G.accl + (r.Div>=G.accl?0.5:0.6)*(r.Div-G.accl), 0, 3);   // the house's normal drifts toward what walked
   playRunway(cast, ()=>showResolution(r,before));
@@ -1135,7 +1143,7 @@ const Briefing=(function(){
 })();
 window.Briefing=Briefing;
 function restart(){
-  Object.assign(G,{ season:1,tier:0,meters:{board:60,walks:45,census:45}, prev:{L:0,E:0},
+  Object.assign(G,{ season:1,tier:0,meters:{board:60,walks:45,census:45}, prev:{L:0,E:0}, streaks:{noColour:0,oneColour:0},
     stack:[],booked:[],accl:0,curEvent:null,_lastEvent:null, since:{nonWhite:0,plus:0,intersx:0}, gen:0,
     everPlus:false,allCast:[],hist:[],milanSeen:false,
     cum:{total:0,nonWhite:0,plus:0,plusNonWhite:0,plusWhite:0,nonplusNonWhite:0,nonplusWhite:0,regions:new Set(),seasonsWithPlus:0}, firedBy:null,_end:false,_busy:false });
@@ -1158,19 +1166,19 @@ const Tutorial = (function(){
 
   const steps = [
     { tgt:()=>document.querySelector("#deck .card:not(.behind)"),
-      kick:"The casting call", title:"Select the models.",
+      title:"Select the models.",
       body:"Every model arrives as a card: <b>BMI</b> top right, <b>origin</b> and height below. Swipe right to book, left to pass. Five make a show." },
     { tgt:()=>$("gauges"),
-      kick:"The three panels", title:"Three levels to keep up.",
+      title:"Three levels to keep up.",
       body:"Every time you send out five models, these levels move. <b>Left is trouble, right is pleased.</b>" },
     { tgt:()=>gauge(0),
-      kick:"The Board", title:"The <em>Board</em>. The money.",
+      title:"The <em>Board</em>. The money.",
       body:"The owners who bankroll the show (the <b>Board</b> needle). They want the look they can sell: sleek, conventional, aspirational." },
     { tgt:()=>gauge(1),
-      kick:"All Walks", title:"<em>All Walks</em>. Body advocacy.",
+      title:"<em>All Walks</em>. Body advocacy.",
       body:"A body-positivity coalition (the <b>Body size</b> needle). They want larger bodies actually booked on the runway, not just named in the press release. Send an all-thin show too many times and their patience runs out." },
     { tgt:()=>gauge(2), last:true,
-      kick:"The Census", title:"The <em>Census</em>. Representation.",
+      title:"The <em>Census</em>. Representation.",
       body:"The diversity body (the <b>Ethnicity</b> needle). They want a cast that looks like the world: models of colour, a real spread of origins. An all-white lineup never goes unnoticed." },
   ];
 
@@ -1216,7 +1224,7 @@ const Tutorial = (function(){
 
   function render(){
     const s = steps[i];
-    kickEl.innerHTML = '<span class="tut-n">'+(i+1)+" / "+steps.length+"</span> \u00b7 "+s.kick;
+    kickEl.innerHTML = '<span class="tut-n">'+(i+1)+" / "+steps.length+"</span>";
     titleEl.innerHTML = s.title;
     bodyEl.innerHTML = s.body;
     backBtn.style.visibility = i===0 ? "hidden" : "visible";
