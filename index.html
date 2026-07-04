@@ -87,7 +87,6 @@
 
   /* lookbook: a strip to cut out and keep */
   .lookbook{margin:12px 0 2px; position:relative; border:1.5px dashed var(--ink3); padding:9px 9px 9px}
-  .lookbook::before{content:"✂"; position:absolute; top:-11px; left:14px; background:var(--paper); padding:0 5px; color:var(--ink2); font-size:14px; line-height:1}
   .lb-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px}
   .lb-cells{display:grid; grid-template-columns:repeat(5,1fr); gap:5px}
   .lb-cell{height:108px; border:1.5px solid var(--ink); background:var(--panel); display:flex; align-items:flex-end; justify-content:center; position:relative; overflow:hidden}
@@ -142,6 +141,22 @@
   .undo:hover{color:var(--ink)}
   .keyhint{display:none; text-align:center; font-family:var(--mono); font-weight:700; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink3); margin-top:2px}
   @media(hover:hover) and (pointer:fine){ .keyhint{display:block} }
+  /* mobile: shrink the swipe card so it clears the lookbook above and the ✕/✓ row below */
+  @media(max-width:480px){
+    .card{width:min(70vw,238px); padding:11px 11px 10px}
+    .card-fig{height:164px}
+    .card-fig .figwrap{height:164px; width:118px}
+    .card-fig .fig-svg{width:80px}
+    .bmi b{font-size:16px}
+    .cname{font-size:16px}
+    .cspec{font-size:10px; margin-top:4px}
+    .bmibar{margin-top:7px}
+    .card-meta{margin-top:8px; padding-top:7px}
+    .swipe-tag{top:40px; font-size:18px}
+    .withdrawn{inset:auto 12px 54px}
+    .deck{min-height:240px}
+    .ctrl{width:52px; height:52px; font-size:22px}
+  }
 
   /* figure */
   .figwrap{display:flex; align-items:flex-end; justify-content:center}
@@ -169,10 +184,21 @@
   .veil{position:fixed; inset:0; background:rgba(16,15,14,.66); display:none; align-items:center; justify-content:center; padding:18px; z-index:30}
   .veil.show{display:flex; animation:fade .25s ease both}
   .runway-veil{background:rgba(12,11,10,.94)}
-  .stagebox{position:relative; width:100%; max-width:540px; height:min(66vh,520px); overflow:hidden; border:1px solid #2b2926; cursor:pointer; background:radial-gradient(120% 60% at 50% -8%, rgba(255,255,255,.16), transparent 60%), var(--stage)}
-  .stagebox .floor{position:absolute; left:50%; bottom:0; transform:translateX(-50%); width:80%; height:66%; background:linear-gradient(#211f1d,#34322e); -webkit-clip-path:polygon(34% 0,66% 0,100% 100%,0 100%); clip-path:polygon(34% 0,66% 0,100% 100%,0 100%); opacity:.92}
-  .stagebox .floor::after{content:""; position:absolute; left:50%; top:6%; bottom:0; width:1px; transform:translateX(-50%); background:repeating-linear-gradient(#6a6862 0 14px, transparent 14px 30px)}
-  .lights{position:absolute; top:0; left:0; right:0; height:42%; pointer-events:none; background:radial-gradient(50% 100% at 50% 0,rgba(255,255,255,.18),transparent 72%)}
+  .stagebox{position:relative; width:100%; max-width:540px; height:min(66vh,520px); overflow:hidden; border:1px solid #2b2926; cursor:pointer;
+    --sky:#0B0B0A; --beam:rgba(255,255,255,.16); --run-a:#E9E5DA; --run-b:#C4BFB2;
+    background:radial-gradient(120% 60% at 50% -8%, var(--beam), transparent 60%), var(--sky)}
+  .stagebox .floor{position:absolute; left:50%; bottom:0; transform:translateX(-50%); width:80%; height:66%; background:linear-gradient(var(--run-a),var(--run-b)); -webkit-clip-path:polygon(34% 0,66% 0,100% 100%,0 100%); clip-path:polygon(34% 0,66% 0,100% 100%,0 100%)}
+  .stagebox .floor::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent 32%,rgba(255,255,255,.26) 50%,transparent 68%)}   /* sheen down the catwalk — not a centre line, runways aren't roads */
+  .lights{position:absolute; top:0; left:0; right:0; height:42%; pointer-events:none; background:radial-gradient(50% 100% at 50% 0, var(--beam), transparent 72%)}
+  /* 8 venues, one drawn per show (rw-noir = the base black-box theatre) */
+  .rw-blanc{--sky:#E8E6DF; --beam:rgba(255,255,255,.9); --run-a:#FBFAF6; --run-b:#D9D6CC}          /* the white tent */
+  .rw-rose{--sky:#150710; --beam:rgba(230,0,126,.34); --run-a:#F2CFE3; --run-b:#D79ABE}            /* fluoro after-dark */
+  .rw-or{--sky:#171106; --beam:rgba(255,200,120,.30); --run-a:#EBD9AE; --run-b:#C6A96E}            /* gilded salon */
+  .rw-beton{--sky:#14171A; --beam:rgba(185,210,255,.22); --run-a:#B8BBB4; --run-b:#8E928B}         /* warehouse concrete */
+  .rw-nuit{--sky:#07211C; --beam:rgba(150,255,215,.16); --run-a:#D8D5C6; --run-b:#AFACA0}          /* garden at dusk */
+  .rw-cristal{--sky:#0D1118; --beam:rgba(205,222,255,.26); --run-a:#E2E6ED; --run-b:#A9B1BF}       /* mirror hall */
+  .rw-damier{--sky:#101010; --beam:rgba(255,255,255,.2)}                                           /* mod checkerboard */
+  .rw-damier .floor{background:repeating-conic-gradient(#F0EEE7 0 25%, #131210 0 50%) 50% 0/36px 36px}
   .walkers{position:absolute; left:0; right:0; bottom:7%; display:flex; justify-content:center; align-items:flex-end; gap:1.5%; padding:0 4%}
   .walker{width:clamp(52px,13vw,86px); animation:walkin 1s cubic-bezier(.2,.7,.3,1) both}
   @keyframes walkin{from{transform:translateY(46px) scale(.62); opacity:0}to{transform:none; opacity:1}}
@@ -1052,12 +1078,15 @@ function stage(){
   G.accl=clamp(G.accl + (r.Div>=G.accl?0.5:0.6)*(r.Div-G.accl), 0, 3);   // the house's normal drifts toward what walked
   playRunway(cast, ()=>showResolution(r,before));
 }
+const RW_THEMES=["rw-noir","rw-blanc","rw-rose","rw-or","rw-beton","rw-nuit","rw-cristal","rw-damier"];
 function playRunway(cast, cb){
   const w=$("walkers"); w.innerHTML="";
   cast.forEach((m,i)=>{ const d=document.createElement("div"); d.className="walker"; d.style.animationDelay=(i*0.12)+"s";
     d.innerHTML=`<div class="fig walking" style="animation-delay:${(-i*0.1).toFixed(2)}s">${figure(m)}</div>`; w.appendChild(d); });
   $("runway-veil").classList.add("show"); Sfx.walk();
   const box=$("stagebox"); box.querySelectorAll(".pflash").forEach(e=>e.remove());
+  const venue=pick(RW_THEMES.filter(t=>t!==G._lastVenue)); G._lastVenue=venue;   // new venue every show
+  RW_THEMES.forEach(t=>box.classList.remove(t)); box.classList.add(venue);
   for(let i=0;i<14;i++){                                      // paparazzi from the dark: sparse early, frenzy at the finale
     const when=320+Math.pow(Math.random(),0.45)*1980;         // pow<1 biases the shutter storm toward the end of the walk
     setTimeout(()=>{
