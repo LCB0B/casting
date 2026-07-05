@@ -25,10 +25,6 @@
   .kick{font-family:var(--mono); font-weight:700; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink)}
 
   .wrap{max-width:540px; margin:0 auto; min-height:100%; padding:14px 18px calc(12px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; position:relative}
-  /* crop marks: the page is an uncut print proof */
-  .wrap::before,.wrap::after{content:""; position:absolute; width:14px; height:14px; opacity:.5; pointer-events:none}
-  .wrap::before{left:4px; top:4px; border-left:1.5px solid var(--ink2); border-top:1.5px solid var(--ink2)}
-  .wrap::after{right:4px; bottom:4px; border-right:1.5px solid var(--ink2); border-bottom:1.5px solid var(--ink2)}
   .screen{display:none; flex:1; flex-direction:column}
   .screen.active{display:flex; animation:fade .5s ease both}
   @keyframes fade{from{opacity:0}to{opacity:1}}
@@ -82,12 +78,9 @@
   .gauge-cap.happy{color:var(--good); font-weight:800}
   @keyframes capblink{0%,100%{transform:scale(1); opacity:1}50%{transform:scale(1.16); opacity:.7}}
 
-  .tag{display:flex; gap:8px; align-items:center; font-family:var(--mono); font-weight:700; font-size:10px; letter-spacing:.1em; text-transform:uppercase; padding:5px 9px; margin-top:6px; border:1.5px dashed var(--ink)}
-  .tag.boom{border-color:var(--accent); color:var(--accent)}
-  .tag .x{font-family:var(--serif); font-weight:400; font-size:12px; opacity:.6; margin-left:auto}
 
   /* lookbook: a strip to cut out and keep */
-  .lookbook{margin:12px 0 2px; position:relative; border:1.5px dashed var(--ink3); padding:9px 9px 9px}
+  .lookbook{margin:12px 0 2px; position:relative}
   .lb-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px}
   .lb-cells{display:grid; grid-template-columns:repeat(5,1fr); gap:5px}
   .lb-cell{height:108px; border:1.5px solid var(--ink); background:var(--panel); display:flex; align-items:flex-end; justify-content:center; position:relative; overflow:hidden}
@@ -117,7 +110,7 @@
   .bmi b{display:block; font-family:var(--serif); font-weight:900; font-size:19px; letter-spacing:0; color:var(--ink); line-height:.9}
   .card-meta{border-top:2px solid var(--ink); margin-top:10px; padding-top:9px}
   .cname{font-family:var(--ui); font-weight:900; font-size:19px; letter-spacing:.06em; text-transform:uppercase; line-height:1.05; display:inline-block; background:var(--ink); color:var(--paper); padding:2px 8px 3px; transform:rotate(-1deg); max-width:100%}
-  .cname .star{color:var(--accent)}
+  .cname .star{color:var(--accent); display:inline-block; line-height:1}   /* ★ falls back to a system font; inline-block pins its line box so star cards don't grow taller */
   .cspec{font-family:var(--mono); font-weight:700; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); margin-top:6px}
   .bmibar{display:block; width:100%; height:auto; margin-top:9px}
   .bmibar .bmit{font-family:var(--ui); font-weight:700; font-size:7.5px; letter-spacing:.07em; text-transform:uppercase; fill:var(--ink2)}
@@ -125,7 +118,6 @@
   .swipe-tag{position:absolute; top:58px; font-family:var(--serif); font-weight:900; font-size:22px; letter-spacing:.08em; text-transform:uppercase; padding:4px 12px; border:2.5px solid; box-shadow:inset 0 0 0 2px var(--panel), inset 0 0 0 3.5px currentColor; opacity:0; pointer-events:none; mix-blend-mode:multiply}
   .swipe-tag.book{right:10px; color:var(--good); border-color:var(--good); transform:rotate(14deg)}
   .swipe-tag.pass{left:10px; color:var(--accent); border-color:var(--accent); transform:rotate(-14deg)}
-  .withdrawn{position:absolute; inset:auto 12px 70px; text-align:center; font-family:var(--mono); font-weight:700; font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:#fff; background:var(--accent); padding:5px; transform:rotate(-1.2deg)}
   .card.shake{animation:shake .4s ease}
   @keyframes shake{0%,100%{transform:translateX(0) rotate(var(--tilt,0deg))}20%{transform:translateX(-9px) rotate(-2deg)}40%{transform:translateX(9px) rotate(2deg)}60%{transform:translateX(-6px) rotate(var(--tilt,0deg))}80%{transform:translateX(6px) rotate(var(--tilt,0deg))}}
 
@@ -154,7 +146,6 @@
     .bmibar{margin-top:7px}
     .card-meta{margin-top:8px; padding-top:7px}
     .swipe-tag{top:40px; font-size:18px}
-    .withdrawn{inset:auto 12px 54px}
     .deck{min-height:240px}
     .ctrl{width:52px; height:52px; font-size:22px}
   }
@@ -368,7 +359,6 @@
   <section id="season" class="screen">
     <div class="top"><div class="h" id="house-name">House</div><button class="helpbtn" onclick="Tutorial.start()" title="How to play" aria-label="How to play">?</button></div>
     <div class="gauges" id="gauges"></div>
-    <div id="tag-slot"></div>
 
     <div class="lookbook">
       <div class="lb-head"><span class="kick">The show</span><span class="kick" id="count">0 / 5</span></div>
@@ -442,7 +432,6 @@ const DRESSY=["aline","column","gown","wrap","twopiece"];      // the dress fami
 const TROUSER=["pants","pants","wide"];                        // straight trousers twice as common as palazzo
 const HOUSES = ["GOCCI","BRADA","PALIENCIAGO","ARNAMI","BOLCE & GOBONO"];
 const POP_BMI = 29;          // real-population reference (US adult average, ~BMI 29)
-const FLOOR = 18.5;          // Milan 2006 rule
 
 const STAKE = [{id:"board",cap:"Board"},{id:"walks",cap:"Body size"},{id:"census",cap:"Ethnicity"}];
 const PANEL = {board:"The Board", walks:"All Walks · body size", census:"The Census · ethnicity"};
@@ -454,11 +443,11 @@ const G = {
   brand:"HOUSE", season:1, tier:0,
   meters:{board:60, walks:45, census:45},
   prev:{L:0, E:0}, streaks:{noColour:0, oneColour:0},
-  stack:[], booked:[], lastPassed:null, accl:0, curEvent:null, _lastEvent:null,
+  stack:[], booked:[], lastPassed:null, accl:0,
   since:{nonWhite:0, plus:0, intersx:0}, gen:0,
-  everPlus:false, allCast:[], hist:[], milanSeen:false,
+  everPlus:false, allCast:[], hist:[],
   cum:{total:0, nonWhite:0, plus:0, plusNonWhite:0, plusWhite:0, nonplusNonWhite:0, nonplusWhite:0, regions:new Set(), seasonsWithPlus:0},
-  firedBy:null, _end:false, _floor:false, _runTimer:null, _runCb:null, _busy:false
+  firedBy:null, _end:false, _runTimer:null, _runCb:null, _busy:false
 };
 
 /* ---------------- sound (Web Audio, synthesized — no files) ---------------- */
@@ -649,7 +638,6 @@ function show(scr){ document.querySelectorAll(".screen,#reveal").forEach(s=>s.cl
 const isBlonde=m=>m.hair==="blonde"||m.hair==="light";
 const isLightEye=m=>m.eye==="blue"||m.eye==="grey";
 const isIdeal=m=> !m.plus && !m.mid && !m.nonWhite && isBlonde(m) && isLightEye(m);
-const blockedNow=m=>G._floor && m.bmi<FLOOR;
 
 /* ---------------- models (realistic dominant ideal; diversity is the outlier) ---------------- */
 let UID = 100;
@@ -715,8 +703,6 @@ function makeStreamModel(){
   else if(Math.random()<IDEAL_RATE)        m=makeModel({_ideal:true});               // the dominant default
   else                                     m=makeModel();                            // realistic remainder
   if(streamStar() && isIdeal(m)) m.star=true;   // fame only ever wears the house ideal — that's the trade
-  // Milan floor: keep the deck castable but let the rule stay visible (~15% withdrawn)
-  if(G._floor && !m.plus && m.bmi<FLOOR && Math.random()<0.85){ m.bmi=Math.round(rnd(18.6,19.2)*10)/10; }
   if(m.nonWhite) G.since.nonWhite=0;
   if(m.plus)     G.since.plus=0;
   if(m.plus && m.nonWhite) G.since.intersx=0;
@@ -773,25 +759,26 @@ function figure(m){
   switch(m.hairStyle){
     case "crop":
       hairBack=crop;
-      hairFront=`<path d="M21 22 Q24 14 32 14 Q40 14 43 22 Q38 17 32 17 Q26 17 21 22 Z" fill="${hair}"/>`; break;
+      hairFront=`<path d="M21 19.5 Q24 13 32 13 Q40 13 43 19.5 Q38 16 32 16 Q26 16 21 19.5 Z" fill="${hair}"/>`; break;
     case "side":
       hairBack=crop;
-      hairFront=`<path d="M20 23 Q21 13 33 12 Q43 13 44 22 Q35 15 27 18 Q22 20 20 23 Z" fill="${hair}"/>`; break;
+      hairFront=`<path d="M20 20 Q21 12 33 11.5 Q43 12 44 18.5 Q35 14 27 16 Q22 18 20 20 Z" fill="${hair}"/>`; break;
     case "buzz":  /* close crop: drawn in FRONT of the head or the circle swallows it */
       hairFront=`<path d="M19.5 20 Q20.5 10.5 32 10 Q43.5 10.5 44.5 20 Q40 14.5 32 14 Q24 14.5 19.5 20 Z" fill="${hair}" opacity=".92"/>`; break;
     case "long":
       strands=`<path d="M19 22 Q12 44 15 64 L21 64 Q20 42 23 28 Z" fill="${hair}"/><path d="M45 22 Q52 44 49 64 L43 64 Q44 42 41 28 Z" fill="${hair}"/>`;
-      hairBack=cap; hairFront=`<path d="M21 23 Q24 14 32 14 Q40 14 43 23 Q38 18 32 18 Q26 18 21 23 Z" fill="${hair}"/>`; break;
+      hairBack=cap; hairFront=`<path d="M21 20 Q24 13 32 13 Q40 13 43 20 Q38 16.5 32 16.5 Q26 16.5 21 20 Z" fill="${hair}"/>`; break;
     case "curly":
       hairBack=`<g fill="${hair}"><circle cx="22" cy="16" r="7"/><circle cx="42" cy="16" r="7"/><circle cx="32" cy="10" r="8"/><circle cx="18" cy="23" r="5.5"/><circle cx="46" cy="23" r="5.5"/></g>`;
-      hairFront=`<path d="M22 23 Q25 15 32 15 Q39 15 42 23 Q37 18 32 18 Q27 18 22 23 Z" fill="${hair}"/>`; break;
+      hairFront=`<path d="M22 20 Q25 14 32 14 Q39 14 42 20 Q37 17 32 17 Q27 17 22 20 Z" fill="${hair}"/>`; break;
     case "bun":
       hairBack=`<circle cx="32" cy="7" r="4.5" fill="${hair}"/>`+cap;
-      hairFront=`<path d="M21 23 Q24 14 32 14 Q40 14 43 23 Q38 18 32 18 Q26 18 21 23 Z" fill="${hair}"/>`; break;
+      hairFront=`<path d="M21 20 Q24 13 32 13 Q40 13 43 20 Q38 16.5 32 16.5 Q26 16.5 21 20 Z" fill="${hair}"/>`; break;
     default:
-      hairBack=cap; hairFront=`<path d="M20 24 Q22 13 32 13 Q42 13 44 24 Q39 17 32 17 Q25 17 20 24 Z" fill="${hair}"/>`;
+      hairBack=cap; hairFront=`<path d="M20 20.5 Q22 12 32 12 Q42 12 44 20.5 Q39 15.5 32 15.5 Q25 15.5 20 20.5 Z" fill="${hair}"/>`;
   }
-  return `<svg class="fig-svg" viewBox="0 0 64 ${vbH}" aria-hidden="true">
+  /* inline aspect-ratio: don't trust Safari to derive it from the viewBox when max-height clamps */
+  return `<svg class="fig-svg" viewBox="0 0 64 ${vbH}" style="aspect-ratio:64/${vbH}" aria-hidden="true">
     <ellipse class="spot" cx="32" cy="${feetY+4}" rx="22" ry="4" fill="#000" opacity="0"/>${strands}
     <g class="leg l">${legShape(lx)}${shortsAt(lx)}<rect x="25.6" y="${feetY-2}" width="8" height="4" rx="2" fill="var(--ink)"/></g>
     <g class="leg r">${legShape(rx)}${shortsAt(rx)}<rect x="30.4" y="${feetY-2}" width="8" height="4" rx="2" fill="var(--ink)"/></g>
@@ -850,33 +837,10 @@ function initNeedles(idp,v){ STAKE.forEach(s=>{ const el=$(idp+"-"+s.id); if(el)
 function renderGauges(c,idp,v){ $(c).innerHTML=STAKE.map(s=>gaugeHTML(s.id,s.cap,v[s.id],idp)).join(""); initNeedles(idp,v); }
 function setNeedles(idp,v){ STAKE.forEach(s=>{ const el=$(idp+"-"+s.id); if(el) setNeedle(el, needleAngle(v[s.id])); }); }
 
-/* ---------------- events (occasional, random — not every show) ---------------- */
-const EVENTS = [
-  {kind:"milan",  label:"Milan · BMI floor in effect",            style:"rule", floor:true},
-  {kind:"trend",  label:"Inclusivity is in vogue",                style:"boom", divMult:0.5},
-  {kind:"expose", label:"Tokenism exposé — eyes on the house",    style:"rule", advocateStakes:1.8, tokenWatch:true},
-  {kind:"slump",  label:"Market slump — the owners are nervous",  style:"rule", boardBias:-3},
-  {kind:"viral",  label:"A look goes viral — buyers pile in",     style:"boom", boardBias:5},
-];
-function rollEvent(){
-  if(G.season===1) return null;            // debut: clean
-  if(Math.random()>0.42) return null;      // ~58% of shows carry no event
-  const pool=EVENTS.filter(e=>e.kind!==G._lastEvent);
-  const ev=pick(pool); G._lastEvent=ev.kind; return ev;
-}
-
 /* ---------------- season render ---------------- */
 function renderSeason(){
   G.tier=Math.min(3, Math.floor((G.season-1)/2));
-  G.curEvent=rollEvent();
   $("house-name").textContent=G.brand;
-  G._floor=false;
-  const ts=$("tag-slot"); ts.innerHTML="";
-  if(G.curEvent){
-    const e=G.curEvent;
-    if(e.kind==="milan"){ G._floor=true; G.milanSeen=true; }
-    ts.innerHTML=`<div class="tag ${e.style==='boom'?'boom':''}">${e.label}<span class="x">${e.style==='boom'?'+':'§'}</span></div>`;
-  }
   renderGauges("gauges","g",G.meters);
   resetStream(); G.booked=[]; G.lastPassed=null;
   renderLookbook(); updateCount(); renderDeck();
@@ -888,7 +852,7 @@ function renderSeason(){
 function bmiBar(m){
   const LO=15, HI=34, X=v=>4+(clamp(v,LO,HI)-LO)/(HI-LO)*192;
   const xm=X(m.bmi).toFixed(1), xp=X(POP_BMI).toFixed(1);
-  const col=m.bmi<FLOOR?"var(--accent)":"var(--ink)";
+  const col=m.bmi<18.5?"var(--accent)":"var(--ink)";   // pink below the WHO underweight line
   return `<svg class="bmibar" viewBox="0 0 200 23" aria-hidden="true">
     <line x1="4" x2="196" y1="7" y2="7" stroke="var(--hair)" stroke-width="1.5"/>
     <line x1="${xp}" x2="${xp}" y1="3" y2="11" stroke="var(--ink2)" stroke-width="1"/>
@@ -896,10 +860,9 @@ function bmiBar(m){
     <circle cx="${xm}" cy="7" r="3.4" fill="${col}"/></svg>`;
 }
 function cardHTML(m){
-  const blk=blockedNow(m);
   const tilt=((Math.random()*3.2)-1.6).toFixed(2);            // every card is pasted in slightly crooked
   return `<div class="card" data-uid="${m.uid}" style="--tilt:${tilt}deg">
-    <div class="card-fig"><div class="bmi">BMI<b>${m.bmi}</b></div>${m.star?'<div class="scrawl-star">famous!!<br>book this one</div>':''}${figWrap(m)}${blk?'<div class="withdrawn">withdrawn · Milan floor</div>':''}</div>
+    <div class="card-fig"><div class="bmi">BMI<b>${m.bmi}</b></div>${m.star?'<div class="scrawl-star">famous!!<br>book this one</div>':''}${figWrap(m)}</div>
     <div class="card-meta"><div class="cname">${m.name}${m.star?' <span class="star">★</span>':''}</div><div class="cspec">${m.region} · ${m.height} cm</div>${bmiBar(m)}</div>
     <div class="swipe-tag book">Book</div><div class="swipe-tag pass">Pass</div></div>`;
 }
@@ -948,8 +911,6 @@ function snapBack(el){ el.style.transition="transform .25s ease"; el.style.trans
   const tb=el.querySelector(".swipe-tag.book"), tp=el.querySelector(".swipe-tag.pass"); if(tb)tb.style.opacity=0; if(tp)tp.style.opacity=0;
   setTimeout(()=>{ if(el) el.style.transition=""; },260); }
 function commit(el, model, dir){
-  if(dir>0 && blockedNow(model)){ Sfx.deny(); el.classList.add("shake"); setTimeout(()=>el.classList.remove("shake"),420);
-    el.style.transition="transform .2s ease"; el.style.transform=""; const tb=el.querySelector(".swipe-tag.book"); if(tb) tb.style.opacity=0; return; }
   G._busy=true;
   el.style.transition="transform .34s cubic-bezier(.4,0,.5,1), opacity .34s";
   el.style.transform=`translateX(${dir*150}%) rotate(${dir*20+(parseFloat(el.style.getPropertyValue("--tilt"))||0)}deg)`; el.style.opacity="0";
@@ -986,8 +947,6 @@ document.addEventListener("keydown", e=>{
    (one body, both traits); spreading makes it large (different bodies). The Board
    punishes Div directly, so concentration is the cheap path and spreading is the hard one. */
 function scoreCast(cast){
-  const e=G.curEvent||{};
-  const stk=e.advocateStakes||1, divMult=e.divMult||1;
   const I=cast.filter(isIdeal).length;
   const L=cast.filter(m=>m.plus).length, E=cast.filter(m=>m.nonWhite).length, T=cast.filter(m=>m.plus&&m.nonWhite).length;
   const M=cast.filter(m=>m.mid).length, S=cast.filter(m=>m.star).length;
@@ -998,16 +957,15 @@ function scoreCast(cast){
   /* The Board is the binding constraint — but it ACCLIMATES. Diversity beyond what the
      house is known for (novel) costs -6 a body; diversity the buyers have grown used to
      (familiar) costs -2.5. Introduce change gradually and the runway's normal shifts with
-     you; jump and the order book panics. Stars and the trend event still buy tolerance. */
+     you; jump and the order book panics. Stars still buy tolerance. */
   const novel=Math.max(0, Div-G.accl), familiar=Div-novel;
-  let dBoard = 1 + 1.2*I + 2.5*S - divMult*(6*novel + 2.5*familiar) + (e.boardBias||0);
+  let dBoard = 1 + 1.2*I + 2.5*S - (6*novel + 2.5*familiar);
   let dWalks = (L>=1) ? (L===1? 5 : (L===2? 8 : 9))
              : (M>=2 ? 0 : (M===1 ? -4 : -8));                 // mid-size softens the anger but doesn't satisfy
   let dCensus= (E===0)? -8 : (E===1? 5 : (E===2? 8 : 9));
   const early=G.season<=4?1.6:1;                               // debut shows: everyone watches the newcomer — misses cost more
-  if(dWalks<0) dWalks*=stk*early;                              // advocacy stakes deepen the cost of ignoring them
-  if(dCensus<0) dCensus*=stk*early;
-  if(e.tokenWatch && oddsRatio()>=2.5){ dBoard-=4; }            // an exposé punishes a tokenised record
+  if(dWalks<0) dWalks*=early;
+  if(dCensus<0) dCensus*=early;
   return {dBoard,dWalks,dCensus,I,L,E,T,M,S,Div,novel,whip,firstPlus,newDistinct};
 }
 
@@ -1071,7 +1029,7 @@ function stage(){
     else { m.nonWhite?G.cum.nonplusNonWhite++:G.cum.nonplusWhite++; } });
   const medBMI=median(cast.map(m=>m.bmi)), nwPct=G.cum.nonWhite/G.cum.total*100;
   const divIndex=clamp(14+9*G.cum.seasonsWithPlus+1.1*nwPct+2.2*G.cum.regions.size);
-  G.hist.push({season:G.season,median:medBMI,divIndex,Div:r.Div,whip:r.whip,L:r.L,E:r.E,milan:G._floor});
+  G.hist.push({season:G.season,median:medBMI,divIndex,Div:r.Div,whip:r.whip,L:r.L,E:r.E});
   cast.forEach(m=>G.allCast.push(m));
   G.streaks.noColour  = r.E===0 ? G.streaks.noColour+1  : 0;   // reactions read these, so count the current season first
   G.streaks.oneColour = r.E===1 ? G.streaks.oneColour+1 : 0;
@@ -1139,8 +1097,7 @@ function sparkline(series, opts){
   const dots=series.map(p=>`<circle cx="${x(p.season).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="3" fill="${opts.color}"/>`).join("");
   const yl=(opts.ticks||[]).map(t=>`<text x="${padL-6}" y="${y(t)+3}" text-anchor="end" font-family="'Courier Prime',monospace" font-size="9" fill="#6B6B6B">${t}</text><line x1="${padL}" x2="${W-padR}" y1="${y(t)}" y2="${y(t)}" stroke="#D5D5D3" stroke-width="1"/>`).join("");
   let ref=""; if(opts.ref!=null) ref=`<line x1="${padL}" x2="${W-padR}" y1="${y(opts.ref)}" y2="${y(opts.ref)}" stroke="${opts.refColor}" stroke-width="1.5" stroke-dasharray="6 4"/><text x="${W-padR}" y="${y(opts.ref)-5}" text-anchor="end" font-family="'Courier Prime',monospace" font-weight="700" font-size="9" fill="${opts.refColor}">${opts.refLabel}</text>`;
-  const marks=series.filter(p=>p.milan).map(p=>{ const lbl="MILAN",c="#E6007E"; return `<line x1="${x(p.season)}" x2="${x(p.season)}" y1="${padT}" y2="${H-padB}" stroke="${c}" stroke-width="1" stroke-dasharray="2 2" opacity=".6"/><text x="${x(p.season)}" y="${H-6}" text-anchor="middle" font-family="'Courier Prime',monospace" font-size="8" fill="${c}">${lbl}</text>`; }).join("");
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img">${yl}${ref}${marks}<polyline points="${pts}" fill="none" stroke="${opts.color}" stroke-width="2.5" stroke-linejoin="round"/>${dots}</svg>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img">${yl}${ref}<polyline points="${pts}" fill="none" stroke="${opts.color}" stroke-width="2.5" stroke-linejoin="round"/>${dots}</svg>`;
 }
 function classifyEnding(){
   if(G.firedBy) return {kind:"fired", who:G.firedBy};
@@ -1165,8 +1122,8 @@ function pictoEveryWalk(){
 function reveal(){
   show("reveal");
   const B=G.brand, series=G.hist, end=classifyEnding();
-  const divS=series.map(p=>({season:p.season,value:p.divIndex,milan:p.milan}));
-  const medS=series.map(p=>({season:p.season,value:p.median,milan:p.milan}));
+  const divS=series.map(p=>({season:p.season,value:p.divIndex}));
+  const medS=series.map(p=>({season:p.season,value:p.median}));
   const gap=(POP_BMI-median(series.map(s=>s.median))).toFixed(0);
   const figs=G.allCast.map(m=>figWrap(m)).join("");
   const parade=G.allCast.length?`<div class="parade"><div class="pcap">Everyone who walked for ${B} — hover to pause</div><div class="parade-track">${figs}${figs}</div></div>`:"";
@@ -1263,8 +1220,8 @@ const Briefing=(function(){
 window.Briefing=Briefing;
 function restart(){
   Object.assign(G,{ season:1,tier:0,meters:{board:60,walks:45,census:45}, prev:{L:0,E:0}, streaks:{noColour:0,oneColour:0},
-    stack:[],booked:[],accl:0,curEvent:null,_lastEvent:null, since:{nonWhite:0,plus:0,intersx:0}, gen:0,
-    everPlus:false,allCast:[],hist:[],milanSeen:false,
+    stack:[],booked:[],accl:0, since:{nonWhite:0,plus:0,intersx:0}, gen:0,
+    everPlus:false,allCast:[],hist:[],
     cum:{total:0,nonWhite:0,plus:0,plusNonWhite:0,plusWhite:0,nonplusNonWhite:0,nonplusWhite:0,regions:new Set(),seasonsWithPlus:0}, firedBy:null,_end:false,_busy:false });
   renderIntroStrip(); rollHouse(); show("intro");
 }
