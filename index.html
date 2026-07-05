@@ -81,7 +81,7 @@
 
   /* lookbook: a strip to cut out and keep */
   .lookbook{margin:12px 0 2px; position:relative}
-  .lb-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px}
+  .lb-head{display:flex; justify-content:flex-end; align-items:baseline; margin-bottom:5px}
   .lb-cells{display:grid; grid-template-columns:repeat(5,1fr); gap:5px}
   .lb-cell{height:108px; border:1.5px solid var(--ink); background:var(--panel); display:flex; align-items:flex-end; justify-content:center; position:relative; overflow:hidden}
   .lb-cell:nth-child(odd){transform:rotate(-.9deg)}
@@ -361,7 +361,7 @@
     <div class="gauges" id="gauges"></div>
 
     <div class="lookbook">
-      <div class="lb-head"><span class="kick">The show</span><span class="kick" id="count">0 / 5</span></div>
+      <div class="lb-head"><span class="kick" id="count">0 / 5</span></div>
       <div class="lb-cells" id="slots"></div>
     </div>
 
