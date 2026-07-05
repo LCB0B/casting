@@ -50,6 +50,7 @@
   .name-row{margin:24px 0 0; display:flex; flex-direction:column; gap:12px}
   .intro-strip{display:flex; gap:0; height:120px; align-items:flex-end; justify-content:center; margin-top:30px; opacity:.92; pointer-events:none}
   .intro-strip .figwrap{width:50px}
+  .intro-strip .fig-svg{max-height:120px}   /* same cm-height cap as the card: tallest models otherwise overflow the strip */
 
   .btn{display:inline-flex; align-items:center; justify-content:space-between; gap:14px; background:var(--ink); color:var(--paper); border:none; padding:14px 20px; font-weight:800; font-size:12px; letter-spacing:.22em; text-transform:uppercase; transition:box-shadow .15s, transform .15s; width:100%; box-shadow:4px 4px 0 var(--accent)}
   .btn:hover{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--accent)}
@@ -111,7 +112,7 @@
   .card:active{cursor:grabbing}
   .card-fig{height:212px; display:flex; align-items:flex-end; justify-content:center; position:relative}
   .card-fig .figwrap{height:212px; width:150px}
-  .card-fig .fig-svg{width:98px}
+  .card-fig .fig-svg{width:98px; max-height:212px}   /* viewBox height tracks the model's cm height — cap it so tall models scale to fit instead of poking out the card top */
   .bmi{position:absolute; top:0; right:0; font-family:var(--mono); font-weight:700; font-size:9.5px; letter-spacing:.1em; color:var(--ink2); text-align:right}
   .bmi b{display:block; font-family:var(--serif); font-weight:900; font-size:19px; letter-spacing:0; color:var(--ink); line-height:.9}
   .card-meta{border-top:2px solid var(--ink); margin-top:10px; padding-top:9px}
@@ -146,7 +147,7 @@
     .card{width:min(70vw,238px); padding:11px 11px 10px}
     .card-fig{height:164px}
     .card-fig .figwrap{height:164px; width:118px}
-    .card-fig .fig-svg{width:80px}
+    .card-fig .fig-svg{width:80px; max-height:164px}
     .bmi b{font-size:16px}
     .cname{font-size:16px}
     .cspec{font-size:10px; margin-top:4px}
