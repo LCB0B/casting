@@ -658,8 +658,9 @@ function makeModel(opt={}){
   const region = nonWhite ? pick(["E. Asia","S. Asia","W. Africa","S. America","SE Asia"])
                           : pick(["W. Europe","N. America","E. Europe","Scandinavia"]);
   const skin = nonWhite ? pick(SKINS.slice(2)) : pick(SKINS.slice(0,3));
-  /* Clothes are NOT gender-coded: anyone can walk in a gown, trousers or a coat, sleeved or
-     sleeveless — only a mild lean by sex. Hairstyles cross over both ways too. */
+  /* Street clothes — only ever seen in the intro-strip crowd; on the deck and in the show
+     everyone is dressed by the season's looks (G.looks). Not gender-coded: anyone can walk
+     in a gown, trousers or a coat — only a mild lean by sex. Hairstyles cross over too. */
   const r=Math.random();
   const garb = sex==="male" ? (r<0.14? pick(DRESSY) : r<0.66? pick(TROUSER) : r<0.82? "shorts" : "coat")
                             : (r<0.54? pick(DRESSY) : r<0.80? pick(TROUSER) : r<0.92? "shorts" : "coat");
@@ -672,6 +673,23 @@ function makeModel(opt={}){
     bmi:Math.round(bmi*10)/10, height:Math.round(sex==="male"?rnd(177,190):rnd(172,184)),
     region, hair, eye, skin, outfit, outfit2, hairStyle };
 }
+/* ---------------- the collection: five looks per season ----------------
+   The house designs the clothes, not the models. Slot N of the show is look N: every
+   candidate auditions wearing the look being cast right now, so the swipe compares
+   bodies inside the same garment. Five distinct cuts per season, colours re-rolled. */
+const CUTS=[...DRESSY,...new Set(TROUSER),"shorts","coat"];
+function makeLooks(){
+  const cuts=CUTS.slice();
+  for(let i=cuts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=cuts[i]; cuts[i]=cuts[j]; cuts[j]=t; }
+  return cuts.slice(0,PICK).map(garb=>{
+    const outfit=pick(OUTFITS);
+    return { garb, sleeves:pick(["none","short","long"]),
+             outfit, outfit2: Math.random()<0.75 ? pick(OUTFITS) : outfit };
+  });
+}
+function lookFor(i){ return G.looks ? G.looks[Math.min(i,PICK-1)] : null; }
+function dress(m,look){ if(look) Object.assign(m,look); return m; }
+
 /* ---------------- streaming candidate generation (infinite casting call) ----------------
    No fixed deck: every card that leaves (booked OR passed) is replaced by a freshly
    generated submission, so ANY show is composable — five non-white, five plus-size, etc.
@@ -843,6 +861,7 @@ function renderSeason(){
   $("house-name").textContent=G.brand;
   renderGauges("gauges","g",G.meters);
   resetStream(); G.booked=[]; G.lastPassed=null;
+  G.looks=makeLooks();                              // this season's five looks, one per slot
   renderLookbook(); updateCount(); renderDeck();
 }
 
@@ -860,6 +879,7 @@ function bmiBar(m){
     <circle cx="${xm}" cy="7" r="3.4" fill="${col}"/></svg>`;
 }
 function cardHTML(m){
+  dress(m, lookFor(G.booked.length));               // everyone auditions in the look being cast
   const tilt=((Math.random()*3.2)-1.6).toFixed(2);            // every card is pasted in slightly crooked
   return `<div class="card" data-uid="${m.uid}" style="--tilt:${tilt}deg">
     <div class="card-fig"><div class="bmi">BMI<b>${m.bmi}</b></div>${m.star?'<div class="scrawl-star">famous!!<br>book this one</div>':''}${figWrap(m)}</div>
@@ -878,7 +898,7 @@ function updateButtons(){ const none=G.stack.length===0||G.booked.length>=PICK; 
 function renderLookbook(){
   const host=$("slots"); host.innerHTML="";
   for(let i=0;i<PICK;i++){ const s=document.createElement("div"); s.className="lb-cell";
-    if(G.booked[i]){ s.classList.add("full"); s.innerHTML=figWrap(G.booked[i]); s.title="Remove "+G.booked[i].name; s.addEventListener("click",()=>unbook(i)); }
+    if(G.booked[i]){ s.classList.add("full"); s.innerHTML=figWrap(dress(G.booked[i], lookFor(i))); s.title="Remove "+G.booked[i].name; s.addEventListener("click",()=>unbook(i)); }
     else { s.classList.add("empty"); s.innerHTML=`<span>${ROMAN[i+1]}</span>`; }
     host.appendChild(s); }
 }
