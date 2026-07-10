@@ -48,14 +48,14 @@
   .intro-strip .figwrap{width:50px}
   .intro-strip .fig-svg{max-height:120px}   /* same cm-height cap as the card: tallest models otherwise overflow the strip */
 
-  .btn{display:inline-flex; align-items:center; justify-content:space-between; gap:14px; background:var(--ink); color:var(--paper); border:none; padding:14px 20px; font-weight:800; font-size:12px; letter-spacing:.22em; text-transform:uppercase; transition:box-shadow .15s, transform .15s; width:100%; box-shadow:4px 4px 0 var(--accent)}
-  .btn:hover{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--accent)}
-  .btn:active{transform:translate(4px,4px); box-shadow:0 0 0 var(--accent)}
+  .btn{display:inline-flex; align-items:center; justify-content:space-between; gap:14px; background:var(--ink); color:var(--paper); border:none; padding:14px 20px; font-weight:800; font-size:12px; letter-spacing:.22em; text-transform:uppercase; transition:box-shadow .15s, transform .15s; width:100%; box-shadow:0 1px 3px rgba(0,0,0,.22)}
+  .btn:hover{transform:translateY(1px); box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .btn:active{transform:translateY(2px); box-shadow:none}
   .btn:disabled{opacity:.25; cursor:not-allowed; box-shadow:none}
   .btn .ar{font-family:var(--serif); font-size:18px}
   .btn.center{justify-content:center; gap:10px}
-  .btn.line{background:var(--paper); color:var(--ink); border:2px solid var(--ink); box-shadow:4px 4px 0 var(--ink)}
-  .btn.line:hover{background:var(--ink); color:var(--paper); box-shadow:2px 2px 0 var(--ink)}
+  .btn.line{background:var(--paper); color:var(--ink); border:2px solid var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.15)}
+  .btn.line:hover{background:var(--ink); color:var(--paper); box-shadow:0 1px 2px rgba(0,0,0,.15)}
 
   /* season header */
   .top{position:relative; text-align:center; border-bottom:2px solid var(--ink); padding-bottom:7px}
@@ -88,7 +88,7 @@
   .lb-cell:nth-child(even){transform:rotate(.7deg)}
   .lb-cell.empty{border:1.5px dashed var(--ink3); align-items:center; background-image:radial-gradient(rgba(10,10,10,.13) 1px, transparent 1.3px); background-size:7px 7px}
   .lb-cell.empty span{font-family:var(--marker); color:var(--ink3); font-size:13px; width:26px; height:26px; border:1.5px solid var(--ink3); border-radius:50%; display:flex; align-items:center; justify-content:center; transform:rotate(-5deg)}
-  .lb-cell.full{cursor:pointer; border-color:var(--ink); box-shadow:2px 2px 0 rgba(0,0,0,.15)}
+  .lb-cell.full{cursor:pointer; border-color:var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.16)}
   .lb-cell.full::before{content:""; position:absolute; top:-3px; left:50%; width:26px; height:9px; transform:translateX(-50%) rotate(2deg); background:rgba(196,194,186,.55); z-index:2}
   .lb-cell .figwrap{height:100px; width:100%}
   .lb-cell .fig-svg{width:34px}
@@ -97,18 +97,20 @@
 
   /* deck */
   .deck-wrap{flex:1; display:flex; flex-direction:column; min-height:0}
-  .deck{position:relative; flex:1; min-height:270px; margin:8px 0 4px; display:flex; align-items:center; justify-content:center}
-  .card{position:absolute; width:min(76vw,268px); background:var(--panel); border:2px solid var(--ink); box-shadow:5px 5px 0 var(--ink); touch-action:pan-y; -webkit-user-select:none; user-select:none; will-change:transform; cursor:grab; padding:14px 14px 13px; transform:rotate(var(--tilt,0deg))}
+  .deck{position:relative; flex:1; min-height:244px; margin:8px 0 4px; display:flex; align-items:center; justify-content:center}
+  /* the card may never outgrow the deck: it caps at the deck's height (it is abs-positioned, so
+     100% = the deck) and the figure is the flex child that gives way — meta and name stay intact */
+  .card{position:absolute; max-height:calc(100% - 22px); display:flex; flex-direction:column; width:min(76vw,268px); background:var(--panel); border:2px solid var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.16), 0 8px 18px rgba(0,0,0,.13); touch-action:pan-y; -webkit-user-select:none; user-select:none; will-change:transform; cursor:grab; padding:14px 14px 13px; transform:rotate(var(--tilt,0deg))}
   .card::before{content:""; position:absolute; top:-10px; left:50%; width:72px; height:19px; transform:translateX(-50%) rotate(-2.5deg); background:rgba(196,194,186,.45); box-shadow:0 1px 2px rgba(0,0,0,.12); z-index:6}
   .card.behind{transform:scale(.93) translateY(12px) rotate(var(--tilt,0deg)); opacity:.5; pointer-events:none; box-shadow:none; border-color:var(--hair)}
   .scrawl-star{position:absolute; left:0; top:2px; font-family:var(--marker); font-size:12.5px; color:var(--accent); transform:rotate(-8deg); max-width:86px; line-height:1.2; pointer-events:none}
   .card:active{cursor:grabbing}
-  .card-fig{height:212px; display:flex; align-items:flex-end; justify-content:center; position:relative}
-  .card-fig .figwrap{height:212px; width:150px}
-  .card-fig .fig-svg{width:98px; max-height:212px}   /* viewBox height tracks the model's cm height — cap it so tall models scale to fit instead of poking out the card top */
+  .card-fig{height:212px; min-height:92px; display:flex; align-items:flex-end; justify-content:center; position:relative}
+  .card-fig .figwrap{height:100%; width:150px}
+  .card-fig .fig-svg{width:98px; max-height:100%}   /* viewBox height tracks the model's cm height — cap it so tall models scale to fit instead of poking out the card top */
   .bmi{position:absolute; top:0; right:0; font-family:var(--mono); font-weight:700; font-size:9.5px; letter-spacing:.1em; color:var(--ink2); text-align:right}
   .bmi b{display:block; font-family:var(--serif); font-weight:900; font-size:19px; letter-spacing:0; color:var(--ink); line-height:.9}
-  .card-meta{border-top:2px solid var(--ink); margin-top:10px; padding-top:9px}
+  .card-meta{border-top:2px solid var(--ink); margin-top:10px; padding-top:9px; flex-shrink:0}
   .cname{font-family:var(--ui); font-weight:900; font-size:19px; letter-spacing:.06em; text-transform:uppercase; line-height:1.05; display:inline-block; background:var(--ink); color:var(--paper); padding:2px 8px 3px; transform:rotate(-1deg); max-width:100%}
   .cname .star{color:var(--accent); display:inline-block; line-height:1}   /* ★ falls back to a system font; inline-block pins its line box so star cards don't grow taller */
   .cspec{font-family:var(--mono); font-weight:700; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); margin-top:6px}
@@ -122,13 +124,13 @@
   @keyframes shake{0%,100%{transform:translateX(0) rotate(var(--tilt,0deg))}20%{transform:translateX(-9px) rotate(-2deg)}40%{transform:translateX(9px) rotate(2deg)}60%{transform:translateX(-6px) rotate(var(--tilt,0deg))}80%{transform:translateX(6px) rotate(var(--tilt,0deg))}}
 
   .controls{display:flex; justify-content:center; gap:26px; margin:2px 0 4px}
-  .ctrl{width:60px; height:60px; border:2px solid var(--ink); background:var(--panel); display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:25px; font-weight:700; box-shadow:3px 3px 0 var(--ink); transition:transform .14s, background .2s, color .2s, box-shadow .14s}
-  .ctrl:hover{transform:translate(1px,1px); box-shadow:2px 2px 0 var(--ink)}
-  .ctrl:active{transform:translate(3px,3px); box-shadow:0 0 0 var(--ink)}
-  .ctrl.pass{border-color:var(--accent); color:var(--accent); box-shadow:3px 3px 0 var(--accent)}
-  .ctrl.pass:hover{background:var(--accent); color:#fff; box-shadow:2px 2px 0 var(--accent)}
-  .ctrl.book{border-color:var(--good); color:var(--good); box-shadow:3px 3px 0 var(--good)}
-  .ctrl.book:hover{background:var(--good); color:#fff; box-shadow:2px 2px 0 var(--good)}
+  .ctrl{width:60px; height:60px; border:2px solid var(--ink); background:var(--panel); display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:25px; font-weight:700; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:transform .14s, background .2s, color .2s, box-shadow .14s}
+  .ctrl:hover{transform:translateY(1px); box-shadow:0 1px 2px rgba(0,0,0,.18)}
+  .ctrl:active{transform:translateY(2px); box-shadow:none}
+  .ctrl.pass{border-color:var(--accent); color:var(--accent)}
+  .ctrl.pass:hover{background:var(--accent); color:#fff}
+  .ctrl.book{border-color:var(--good); color:var(--good)}
+  .ctrl.book:hover{background:var(--good); color:#fff}
   .ctrl:disabled{opacity:.25; cursor:not-allowed; transform:none}
   .undo{display:block; margin:0 auto 2px; background:none; border:none; font-family:var(--mono); font-weight:700; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); text-decoration:underline; text-underline-offset:3px; padding:4px 8px}
   .undo:hover{color:var(--ink)}
@@ -137,22 +139,22 @@
   /* mobile: shrink the swipe card so it clears the lookbook above and the ✕/✓ row below */
   @media(max-width:480px){
     .card{width:min(70vw,238px); padding:11px 11px 10px}
-    .card-fig{height:164px}
-    .card-fig .figwrap{height:164px; width:118px}
-    .card-fig .fig-svg{width:80px; max-height:164px}
+    .card-fig{height:164px; min-height:80px}
+    .card-fig .figwrap{width:118px}
+    .card-fig .fig-svg{width:80px}
     .bmi b{font-size:16px}
     .cname{font-size:16px}
     .cspec{font-size:10px; margin-top:4px}
     .bmibar{margin-top:7px}
     .card-meta{margin-top:8px; padding-top:7px}
     .swipe-tag{top:40px; font-size:18px}
-    .deck{min-height:240px}
+    .deck{min-height:208px}
     .ctrl{width:52px; height:52px; font-size:22px}
   }
 
   /* figure */
   .figwrap{display:flex; align-items:flex-end; justify-content:center}
-  .figwrap .fig{width:100%; display:flex; justify-content:center; align-items:flex-end; animation:bob 2.8s ease-in-out infinite; transform-origin:50% 100%}
+  .figwrap .fig{width:100%; height:100%; display:flex; justify-content:center; align-items:flex-end; animation:bob 2.8s ease-in-out infinite; transform-origin:50% 100%}   /* full height so the svg's max-height:100% has something to resolve against */
   .fig-svg{display:block; overflow:visible; height:auto; width:100%}   /* explicit width: Safari sizes viewBox-only SVGs at the 300px default */
   .fig .arm{transform-box:fill-box; transform-origin:50% 8%; animation:armsway 3.6s ease-in-out infinite}
   .fig .arm.r{animation-delay:-1.3s}
@@ -209,7 +211,7 @@
   .skiphint{position:absolute; bottom:9px; right:13px; font-family:var(--mono); font-weight:700; font-size:9.5px; letter-spacing:.14em; color:#7a7872; text-transform:uppercase}
 
   /* resolution */
-  .resol{background:var(--paper); border:2px solid var(--ink); max-width:480px; width:100%; padding:22px 22px 18px; box-shadow:8px 8px 0 var(--ink); max-height:92vh; overflow-y:auto}
+  .resol{background:var(--paper); border:2px solid var(--ink); max-width:480px; width:100%; padding:22px 22px 18px; box-shadow:0 12px 32px rgba(0,0,0,.3); max-height:92vh; overflow-y:auto}
   .resol .hk{display:flex; justify-content:space-between; align-items:baseline; border-bottom:2px solid var(--ink); padding-bottom:6px; margin-bottom:14px}
   .resol .hl{font-family:var(--mono); font-weight:700; font-size:15px; line-height:1.5; margin:0 0 16px}
   .resol .hl .hlt{background:rgba(230,0,126,.20); padding:0 3px; -webkit-box-decoration-break:clone; box-decoration-break:clone}
@@ -250,7 +252,7 @@
   .chartbox::after{bottom:-8px; right:18px; transform:rotate(2.5deg)}
   .chartbox .ct{font-family:var(--mono); font-weight:700; font-size:10px; letter-spacing:.1em; text-transform:uppercase; margin:0 0 8px; display:flex; justify-content:space-between; align-items:baseline}
   .chartbox .ct span{color:var(--accent); font-weight:400; font-family:var(--marker); font-size:12px; text-transform:none; display:inline-block; transform:rotate(-2deg)}
-  .punch{border:3px solid var(--ink); box-shadow:6px 6px 0 var(--ink); padding:18px 12px; margin:22px 0; text-align:center; background-image:radial-gradient(rgba(10,10,10,.09) 1px, transparent 1.3px); background-size:7px 7px}
+  .punch{border:3px solid var(--ink); box-shadow:0 1px 3px rgba(0,0,0,.15); padding:18px 12px; margin:22px 0; text-align:center; background-image:radial-gradient(rgba(10,10,10,.09) 1px, transparent 1.3px); background-size:7px 7px}
   .punch .big{font-family:var(--serif); font-weight:900; font-size:clamp(48px,18vw,90px); line-height:.84; color:var(--accent); position:relative; display:inline-block}
   .punch .big::after{content:""; position:absolute; inset:-7px -24px; border:3px solid var(--ink); border-radius:50%; transform:rotate(-4deg); opacity:.5; pointer-events:none}   /* pen circle around the number */
   .punch.good .big::after{border-color:var(--accent)}
@@ -269,7 +271,7 @@
 
   /* ---------------- appointment briefing (before the tutorial) ---------------- */
   .brief-veil{background:rgba(16,15,14,.82); z-index:150}
-  .brief{background:var(--paper); border:2px solid var(--ink); box-shadow:8px 8px 0 var(--ink); max-width:440px; width:100%; padding:26px 24px 20px; max-height:92vh; overflow-y:auto}
+  .brief{background:var(--paper); border:2px solid var(--ink); box-shadow:0 12px 32px rgba(0,0,0,.3); max-width:440px; width:100%; padding:26px 24px 20px; max-height:92vh; overflow-y:auto}
   .brief .bl{opacity:0; transform:translateY(10px); animation:briefin .55s ease forwards; font-size:14px; line-height:1.5; margin:0 0 12px}
   .brief p.bl{font-family:var(--mono); font-size:13.5px}   /* the letter is typed */
   .brief .bt{font-family:var(--mono); font-weight:700; font-size:16px; line-height:1.4; margin-bottom:14px}
@@ -283,7 +285,7 @@
   .env-wrap{display:flex; align-items:center; justify-content:center; width:100%}
   .envelope{position:relative; width:min(80vw,330px); height:205px; cursor:pointer; perspective:700px; animation:envdrop .85s cubic-bezier(.25,1.2,.4,1) both}
   @keyframes envdrop{from{transform:translateY(-55vh) rotate(-7deg); opacity:0} 70%{transform:translateY(12px) rotate(1.6deg); opacity:1} to{transform:none; opacity:1}}
-  .env-back{position:absolute; inset:0; background:var(--panel); border:1.5px solid var(--ink); box-shadow:8px 8px 0 rgba(0,0,0,.35)}
+  .env-back{position:absolute; inset:0; background:var(--panel); border:1.5px solid var(--ink); box-shadow:0 10px 26px rgba(0,0,0,.4)}
   .env-letter{position:absolute; left:6%; right:6%; top:7%; bottom:12%; background:#fff; border:1px solid var(--hair); z-index:1;
     background-image:repeating-linear-gradient(var(--hair) 0 1px, transparent 1px 12px); background-size:72% 60%; background-position:14% 78%; background-repeat:no-repeat;
     transition:transform .6s cubic-bezier(.3,1,.4,1) .28s}
@@ -319,7 +321,7 @@
     box-shadow:0 0 0 9999px rgba(16,15,14,.74); pointer-events:none;
     transition:left .35s cubic-bezier(.33,1.05,.45,1), top .35s cubic-bezier(.33,1.05,.45,1), width .35s cubic-bezier(.33,1.05,.45,1), height .35s cubic-bezier(.33,1.05,.45,1), opacity .25s ease}
   .tut-tip{position:absolute; left:0; top:0; width:min(90vw,338px); background:var(--paper); border:2px solid var(--ink);
-    box-shadow:6px 6px 0 var(--ink); padding:15px 16px 12px; pointer-events:auto;
+    box-shadow:0 10px 26px rgba(0,0,0,.28); padding:15px 16px 12px; pointer-events:auto;
     transition:left .35s cubic-bezier(.33,1.05,.45,1), top .35s cubic-bezier(.33,1.05,.45,1)}
   .tut-caret{position:absolute; width:12px; height:12px; background:var(--paper); transform:translateX(-50%) rotate(45deg); display:none}
   .tut-caret.below{top:-6px; border-top:1px solid var(--ink); border-left:1px solid var(--ink)}
