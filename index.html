@@ -81,7 +81,8 @@
 
   /* lookbook: a strip to cut out and keep */
   .lookbook{margin:12px 0 2px; position:relative}
-  .lb-head{display:flex; justify-content:flex-end; align-items:baseline; margin-bottom:5px}
+  .lb-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px}
+  #season-tag b{color:var(--accent); font-weight:700}
   .lb-cells{display:grid; grid-template-columns:repeat(5,1fr); gap:5px}
   .lb-cell{height:108px; border:1.5px solid var(--ink); background:var(--panel); display:flex; align-items:flex-end; justify-content:center; position:relative; overflow:hidden}
   .lb-cell:nth-child(odd){transform:rotate(-.9deg)}
@@ -104,6 +105,7 @@
   .card::before{content:""; position:absolute; top:-10px; left:50%; width:72px; height:19px; transform:translateX(-50%) rotate(-2.5deg); background:rgba(196,194,186,.45); box-shadow:0 1px 2px rgba(0,0,0,.12); z-index:6}
   .card.behind{transform:scale(.93) translateY(12px) rotate(var(--tilt,0deg)); opacity:.5; pointer-events:none; box-shadow:none; border-color:var(--hair)}
   .scrawl-star{position:absolute; left:0; top:2px; font-family:var(--marker); font-size:12.5px; color:var(--accent); transform:rotate(-8deg); max-width:86px; line-height:1.2; pointer-events:none}
+  .scrawl-star.alum{font-size:11px; max-width:92px}
   .card:active{cursor:grabbing}
   .card-fig{height:212px; min-height:92px; display:flex; align-items:flex-end; justify-content:center; position:relative}
   .card-fig .figwrap{height:100%; width:150px}
@@ -236,6 +238,7 @@
     display:inline-block; padding:6px 16px 7px; border:3px solid currentColor; box-shadow:inset 0 0 0 2.5px var(--paper), inset 0 0 0 4.5px currentColor; transform:rotate(-5deg); mix-blend-mode:multiply}
   .rv-result.lost{color:var(--accent)}
   .rv-result.won{color:var(--good)}
+  .rv-slip{display:inline-block; font-family:var(--mono); font-weight:700; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); border:1.5px solid var(--accent); padding:5px 10px 4px; transform:rotate(-1.4deg); margin:0 0 16px}
   .rv-lead{font-family:var(--mono); font-size:13px; line-height:1.55; max-width:52ch; margin:0 auto; text-align:left}
   .parade{border:2px solid var(--ink); background:var(--stage); overflow:hidden; margin-bottom:18px; position:relative}
   .parade .pcap{position:absolute; top:8px; left:12px; z-index:2; font-family:var(--mono); font-weight:700; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:#d4d2cc}
@@ -363,7 +366,7 @@
     <div class="gauges" id="gauges"></div>
 
     <div class="lookbook">
-      <div class="lb-head"><span class="kick" id="count">0 / 5</span></div>
+      <div class="lb-head"><span class="kick" id="season-tag"></span><span class="kick" id="count">0 / 5</span></div>
       <div class="lb-cells" id="slots"></div>
     </div>
 
@@ -445,6 +448,7 @@ const G = {
   brand:"HOUSE", season:1, tier:0,
   meters:{board:60, walks:45, census:45},
   prev:{L:0, E:0}, streaks:{noColour:0, oneColour:0},
+  press:{timeless:0, applause:0, plot:0}, notRenewed:null,
   stack:[], booked:[], lastPassed:null, accl:0,
   since:{nonWhite:0, plus:0, intersx:0}, gen:0,
   everPlus:false, allCast:[], hist:[],
@@ -709,6 +713,16 @@ const UNIFORM_RAMP = { hold:5, full:10 };          // cards 1–5: house odds; b
 const PITY = { nonWhite:6, plus:8, intersx:11 };   // force the trait if this many cards stream past without it (drought safety-net, not the main driver)
 
 function streamStar(){ return (G.tier>=3 && Math.random()<0.10) || (G.tier>=2 && Math.random()<0.12); }
+/* The Board's favourite resurfaces: sometimes an ideal model who already walked for the
+   house is re-proposed with a pink note attached — the default selling itself back to you.
+   At most once a season, never in season 1. */
+function alumProposal(){
+  if(G._alumDone || G.season<2 || G.gen<3 || Math.random()>=0.3) return null;
+  const pool=G.allCast.filter(a=>!a.plus && !a.nonWhite);
+  if(!pool.length) return null;
+  G._alumDone=true;
+  return {...pick(pool), uid:UID++, alum:true};
+}
 function makeStreamModel(){
   G.gen++; G.since.nonWhite++; G.since.plus++; G.since.intersx++;
   const t = clamp((G.gen-UNIFORM_RAMP.hold)/(UNIFORM_RAMP.full-UNIFORM_RAMP.hold), 0, 1);  // 0 = house odds, 1 = fully uniform
@@ -716,6 +730,7 @@ function makeStreamModel(){
   if(G.since.intersx>=PITY.intersx)        m=makeModel({plus:true, nonWhite:true});  // guarantee the intersectional token
   else if(G.since.nonWhite>=PITY.nonWhite) m=makeModel({nonWhite:true});             // guarantee a face of colour
   else if(G.since.plus>=PITY.plus)         m=makeModel({plus:true});                 // guarantee a larger body
+  else if((m=alumProposal())){ }                                                     // the Board's pet, back in the pile
   else if(Math.random()<t){                                                          // uniform draw: origin 50/50, body an even three-way
     const band=Math.floor(Math.random()*3);
     m=makeModel({nonWhite:Math.random()<0.5, plus:band===2, mid:band===1});
@@ -729,7 +744,7 @@ function makeStreamModel(){
   return m;
 }
 function refill(){ while(G.stack.length < BUFFER) G.stack.push(makeStreamModel()); }
-function resetStream(){ G.stack=[]; G.gen=0; G.since={nonWhite:0, plus:0, intersx:0}; refill(); }
+function resetStream(){ G.stack=[]; G.gen=0; G.since={nonWhite:0, plus:0, intersx:0}; G._alumDone=false; refill(); }
 
 /* ---------------- SVG figure ---------------- */
 function figure(m){
@@ -861,6 +876,12 @@ function setNeedles(idp,v){ STAKE.forEach(s=>{ const el=$(idp+"-"+s.id); if(el) 
 function renderSeason(){
   G.tier=Math.min(3, Math.floor((G.season-1)/2));
   $("house-name").textContent=G.brand;
+  /* the contract prints its terms: the ending should be a countdown, not a surprise */
+  let tag=`Season ${G.season} of ${TENURE_MAX}`;
+  if(G.season>=TENURE_MAX) tag+=` <b>· final show</b>`;
+  else if(G.season>=TENURE_BASE) tag+=` <b>· under review</b>`;
+  else if(G.season===TENURE_BASE-1) tag+=` <b>· review next show</b>`;
+  $("season-tag").innerHTML=tag;
   renderGauges("gauges","g",G.meters);
   resetStream(); G.booked=[]; G.lastPassed=null;
   G.looks=makeLooks();                              // this season's five looks, one per slot
@@ -884,7 +905,7 @@ function cardHTML(m){
   dress(m, lookFor(G.booked.length));               // everyone auditions in the look being cast
   const tilt=((Math.random()*3.2)-1.6).toFixed(2);            // every card is pasted in slightly crooked
   return `<div class="card" data-uid="${m.uid}" style="--tilt:${tilt}deg">
-    <div class="card-fig"><div class="bmi">BMI<b>${m.bmi}</b></div>${m.star?'<div class="scrawl-star">famous!!<br>book this one</div>':''}${figWrap(m)}</div>
+    <div class="card-fig"><div class="bmi">BMI<b>${m.bmi}</b></div>${m.alum?'<div class="scrawl-star alum">the board really<br>liked this one<br>last time</div>':m.star?'<div class="scrawl-star">famous!!<br>book this one</div>':''}${figWrap(m)}</div>
     <div class="card-meta"><div class="cname">${m.name}${m.star?' <span class="star">★</span>':''}</div><div class="cspec">${m.region} · ${m.height} cm</div>${bmiBar(m)}</div>
     <div class="swipe-tag book">Book</div><div class="swipe-tag pass">Pass</div></div>`;
 }
@@ -997,12 +1018,12 @@ function reactBoard(r){ let b;
   else if(r.Div>=3) b=["The board mutters the show “lost the plot” on aspiration.","Buyers blanch — “where's the fantasy we sell?”","“Brave,” the commercial team says, meaning doomed.","An investor leaves at the interval.","“Who is this even for?” the board asks the room.","The order book thins. The owners notice.","“We sell the dream,” the chairman explains. “Nobody dreams of looking possible.”","Marketing asks if the cast could be diverse “in a more invisible way.”","“We don't do that here,” the chairman tells you."];
   else if(r.Div>=2 && r.novel>0.8) b=["“One statement booking sells courage. Two costs orders,” the board notes.","Two risks on one runway — the buyers ask which one you'll drop.","“Spread it out over seasons,” the commercial team advises. “Or better: one model who covers both.”","The board counts two off-ideal stories in five looks, and frowns.","“Couldn't ONE girl carry all of this?” someone asks. Nobody objects.","“Two statements is a manifesto,” the board warns. “We budgeted for one.”","“Could the plus one also be the diverse one? Efficiency,” says finance."];
   else if(r.whip>=3) b=["“Pick a lane,” the board pleads. “Any lane. Ideally the profitable one.”","Buyers call the house “exciting,” the way turbulence is exciting."];
-  else if(r.T>=1 && oddsRatio()>=2.5) b=["“Our diversity is very efficient,” the board tells the reporter. She writes it down."];
+  else if(r.T>=1 && oddsRatio()>=2.5) b=["“Our diversity is very efficient,” the board tells the reporter. She writes it down.","One model, several boxes — finance calls it “synergy.”","The board admires how little change the change required.","“Maximum optics, minimum disruption,” reads the internal memo, approvingly."];
   else if(r.Div>=1 && r.novel<=0.3) b=["The buyers have stopped flinching — this is just what the house looks like now.","“Our customer expects this now,” the board admits.","The order book has made its peace with the new faces.","Nobody upstairs blinks at the lineup anymore.","What scandalised them two seasons ago is now the brand.","“We always believed in this,” the chairman tells the press, newly sincere.","The board has renamed your risk “our heritage of inclusion.”"];
   else if(r.S>=1 && r.Div<=1) b=["The star's name alone moves pre-orders. The board is soothed.","“Book her every season,” the chairman says of the star. Numbers up.","A famous face on the runway — the owners forgive a lot for that.","The star brings press, buyers, calm. The board purrs.","With a star in the lineup, nobody upstairs asks questions.","One celebrity outsells five principles. The board has done the math.","“Book more famous ones,” says the chairman, solving fashion forever."];
   else if(r.Div<=1 && r.I>=4) b=["Buyers purr over the clean, aspirational line.","“Timeless, on-brand, sellable,” the board beams.","Pre-orders spike — this is the look that moves units.","The money side has never looked happier.","“This,” the chairman says, “is the house.”","A quiet, profitable triumph. The board exhales.","“Perfection”: five bodies, one body, no surprises.","Pre-orders spike. Somewhere a spreadsheet weeps with joy.","“This is what women want,” agrees a boardroom containing no women."];
   else b=["Sales hold. The board can work with this.","A measured outing — commercial enough.","“Interesting,” the board says, reserving judgment.","Dependable numbers, if not thrilling.","The buyers nod, slowly.","Nothing scares the owners this season."];
-  return pick(b); }
+  return pickFresh(b,"board"); }
 function reactWalks(r){ let b;
   if(r.firstPlus) b=["At last — a larger body walks. They're moved.","A historic first. All Walks applauds.","They've waited years for this booking.","“Finally,” the coalition says, and means it.","A real body on the runway. The room exhales."];
   else if(r.L===0 && r.M>=1) b=["Mid-size on the runway — halfway to the point, they note.","“Closer,” the coalition says. “Now keep going.”","A size 10 walks. It's a start, not the finish.","The middle of the wardrobe finally walks. They want the whole rack.","Softer lines this season — they notice, and wait for more."];
@@ -1010,7 +1031,7 @@ function reactWalks(r){ let b;
   else if(r.L>=2 && r.newDistinct) b=["Two bodies, two stories — you stopped making one model do all the work.","Genuine range, not a single token. They're thrilled.","“This is what we asked for,” the coalition beams.","Range you can believe in. Real progress.","Bodies of every kind — and they each get to be themselves."];
   else if(r.T>=1 && r.T>=r.L) b=["A larger body — but they're carrying the colour quota too. They notice.","“Convenient, that your curve model is also your diversity,” they note.","One body, every box ticked at once. Half a clap.","A token doing double duty. They see exactly what it is.","They clock the single booking, and all it's made to carry."];
   else b=["A larger body walks. They'll take it.","Some range — All Walks nods.","Progress, modest but real.","A booking that matters. Noted."];
-  return pick(b); }
+  return pickFresh(b,"walks"); }
 const YEARWORD=["","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"];
 function reactCensus(r){ let b;
   if(r.E===0){
@@ -1020,17 +1041,43 @@ function reactCensus(r){ let b;
   else if(r.T>=1 && r.T>=r.E) b=["“A token is not a demographic,” the Census notes.","One token carrying all the colour. The Census counts to one.","“Your diversity and your curve model are the same person,” the Census notes.","Representation concentrated onto a token. Half a clap.","They count the faces, and where the colour landed."];
   else if(r.E===1 && G.streaks.oneColour>=2) b=["Same seat, new season. The Census recognises a quota when it sees one.","“Quota met,” the Census files. “Representation: pending.”"];
   else b=["Some colour — noted, if modest.","A face or two. They've seen bolder.","“Better,” the Census says, leaving the rest unsaid.","A step in the right direction. They'd like more."];
-  return pick(b); }
+  return pickFresh(b,"census"); }
 const REACT={board:reactBoard, walks:reactWalks, census:reactCensus};
 
-function headlineFor(r){ const B=G.brand;
-  if(r.firstPlus) return `“A watershed”: ${B} sends its first larger body down the runway.`;
-  if(r.T>=1 && r.I>=3 && r.L<=1) return `“Finally, a body that looks like mine.” Critics praise ${B}'s inclusive new face.`;
-  if(r.L===0 && r.E<=1) return `${B}'s lineup draws quiet praise for its “timeless” silhouette.`;
-  if(r.Div>=3) return `Buyers grumble that ${B}'s show “lost the plot” on aspiration.`;
-  if(r.newDistinct && r.L>=2) return `Reviewers call ${B}'s runway its most genuinely varied yet.`;
-  if(r.whip>=3) return `${B} confounds critics with a wildly different lineup — again.`;
-  return `${B} closes another season to polite applause.`; }
+/* pick() that won't say the exact same line twice running, per voice */
+function pickFresh(pool,key){ G._said=G._said||{}; let s=pick(pool);
+  if(pool.length>1 && s===G._said[key]) s=pick(pool.filter(x=>x!==s));
+  G._said[key]=s; return s; }
+/* The press keeps receipts: repeated verdicts climb a ladder instead of replaying —
+   the euphemism wearing out is the point */
+function headlineFor(r){ const B=G.brand, P=G.press;
+  const timeless=(r.L===0 && r.E<=1), plot=(r.Div>=3);
+  P.timeless = timeless? P.timeless+1 : 0;
+  P.plot     = plot?     P.plot+1     : 0;
+  let line=null;
+  if(r.firstPlus) line=`“A watershed”: ${B} sends its first larger body down the runway.`;
+  else if(r.T>=1 && r.I>=3 && r.L<=1) line=`“Finally, a body that looks like mine.” Critics praise ${B}'s inclusive new face.`;
+  else if(timeless){ const t=[
+    `${B}'s lineup draws quiet praise for its “timeless” silhouette.`,
+    `“Timeless,” the critics write of ${B} again — a few of them checking their old copy.`,
+    `The trade reprints last season's ${B} review unchanged. Nobody notices.`,
+    `Critics no longer attend ${B} in person. The review writes itself.`];
+    line=t[Math.min(P.timeless,t.length)-1]; }
+  else if(plot){ const t=[
+    `Buyers grumble that ${B}'s show “lost the plot” on aspiration.`,
+    `“The plot, still lost,” buyers sigh — yet ${B}'s name keeps coming up.`,
+    `The trade stops calling ${B} a fashion house and starts calling it a position.`];
+    line=t[Math.min(P.plot,t.length)-1]; }
+  else if(r.newDistinct && r.L>=2) line=`Reviewers call ${B}'s runway its most genuinely varied yet.`;
+  else if(r.whip>=3) line=`${B} confounds critics with a wildly different lineup — again.`;
+  P.applause = line? 0 : P.applause+1;
+  if(!line){ const t=[
+    `${B} closes another season to polite applause.`,
+    `${B} closes again to polite applause — the same hands, at the same volume.`,
+    `The applause at ${B} has become contractual.`,
+    `${B} closes. Applause happens. Everyone checks their phones.`];
+    line=t[Math.min(P.applause,t.length)-1]; }
+  return line; }
 
 /* ---------------- stage / runway / resolve ---------------- */
 function stage(){
@@ -1096,9 +1143,14 @@ function showResolution(r, before){
   initNeedles("rg", before);                                          // start sweep from prior values
   G.firedBy = (G.meters.board<=0)?"board":(G.meters.walks<=0)?"walks":(G.meters.census<=0)?"census":null;
   let end=!!G.firedBy;
+  G.notRenewed=null;
   if(!end && G.season>=TENURE_BASE){                                 // contract review at 8 shows
-    const standing = STAKE.every(s=>G.meters[s.id]>=RENEW_BAR);      // renewed only if all panels healthy
-    if(G.season>=TENURE_MAX || !standing) end=true;
+    const failing = STAKE.filter(s=>G.meters[s.id]<RENEW_BAR);       // renewed only if all panels healthy
+    if(G.season>=TENURE_MAX || failing.length){
+      end=true;
+      if(failing.length){ const w=failing.sort((a,b)=>G.meters[a.id]-G.meters[b.id])[0];
+        G.notRenewed={cap:w.cap, val:Math.round(G.meters[w.id])}; }  // the reveal prints this pink slip
+    }
   }
   G._end=end;
   $("resol-next").innerHTML=end?'See the record <span class="ar">→</span>':'Continue <span class="ar">→</span>';
@@ -1158,7 +1210,11 @@ function reveal(){
   /* the helpline travels with every ending — the subject doesn't care how the game went */
   const helpline=`<p class="src">If this subject touches you personally: in the US, the National Alliance for Eating Disorders runs a free, clinician-staffed helpline — <strong>1-866-662-1235</strong>, weekdays. In the UK, Beat listens on <strong>0808 801 0677</strong>; elsewhere in Europe, <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a> lists local support by country.</p>`;
   let cls="", h="", result="You lost.", resCls="lost", why="", punch="", rainbow="";
-  Sfx.ending(end.kind==="everywalk"?"win":"lose");   // lament for fired/usual/token, something almost sacred for the real thing
+  const orBig = end.OR>10 ? "10+" : (end.OR!=null ? end.OR.toFixed(1) : "");        // absurd ratios read as bugs — cap the display
+  const orPhrase = end.OR>10 ? "more than 10×" : (end.OR!=null ? end.OR.toFixed(1)+"×" : "");
+  const slip = (G.notRenewed && end.kind!=="fired")
+    ? `<p class="rv-slip">Contract not renewed — ${G.notRenewed.cap} at ${G.notRenewed.val}/100</p>` : "";
+  Sfx.ending(end.kind==="everywalk" && !G.notRenewed ? "win":"lose");   // a win the house terminated is no hymn
   if(end.kind==="fired"){
     cls="fired";
     if(end.who==="board"){
@@ -1178,15 +1234,25 @@ function reveal(){
   } else if(end.kind==="token"){
     h=`You did it. <em>Sort of.</em>`; result=`You won — on paper.`; resCls="";
     why=`Diversity arrived, but you concentrated it onto a few bodies: the same models carried the size <em>and</em> the colour at once, a quota met by the fewest possible people. That is the paper's central finding, reproduced by your own hand. It counts on paper. It isn't the same as change.`;
-    punch=`<div class="punch"><div class="big">${end.OR.toFixed(1)}×</div><div class="cap">On your runway a larger body was ${end.OR.toFixed(1)}× more likely to be non-white than white. The real industry runs at 4.5×.</div></div>`;
+    punch=`<div class="punch"><div class="big">${orBig}×</div><div class="cap">On your runway a larger body was ${orPhrase} more likely to be non-white than white${end.OR>10?" — off the chart":""}. The real industry runs at 4.5×.</div></div>`;
   } else {
-    cls="good"; h=`Every <em>walk</em>`; result="You won."; resCls="won";
-    why=`You made ${shows} and introduced diversity honestly: step by step, spread across <strong>different bodies</strong> — size on some, colour on others, no single model made to carry the whole story. The median body on your runway actually moved toward the average person. This is the hard version, and the rare one. The house survived it anyway.`;
+    cls="good"; h=`Every <em>walk</em>`;
+    const base=`You made ${shows} and introduced diversity honestly: step by step, spread across <strong>different bodies</strong> — size on some, colour on others, no single model made to carry the whole story.`;
+    if(G.notRenewed){                                   // the record won; the house still let you go
+      result="The record says you won. The house let you go anyway."; resCls="";
+      why=base+` The Board never made its peace with it — the contract died at review — but the record stands, and it is the rare kind.`;
+    } else if(end.smooth){
+      result="You won. Cleanly."; resCls="won";
+      why=base+` And you did it without whiplash: the same steady hand every season, so the house's normal moved with you. This is the hard version, done the rare way — and the house survived it.`;
+    } else {
+      result="You won."; resCls="won";
+      why=base+` This is the hard version, and the rare one. The house survived it anyway — though the clerk's note says steadier hands have managed it with less lurching between seasons.`;
+    }
     rainbow=`<div class="picto">${pictoEveryWalk()}</div>`;
-    punch=`<div class="punch good"><div class="big" style="color:var(--ink)">${end.OR.toFixed(1)}×</div><div class="cap">A larger body was just ${end.OR.toFixed(1)}× more likely to be non-white than white — no concentration. The industry runs at 4.5×.</div></div>`;
+    punch=`<div class="punch good"><div class="big" style="color:var(--ink)">${orBig}×</div><div class="cap">A larger body was just ${orPhrase} more likely to be non-white than white — no concentration. The industry runs at 4.5×.</div></div>`;
   }
   $("reveal-inner").innerHTML=`<div class="${cls}">
-    <div class="rv-hero"><h2 class="rv-h">${h}</h2><p class="rv-result ${resCls}">${result}</p><p class="rv-lead">${why}</p>${rainbow}</div>
+    <div class="rv-hero"><h2 class="rv-h">${h}</h2><p class="rv-result ${resCls}">${result}</p>${slip}<p class="rv-lead">${why}</p>${rainbow}</div>
     <div class="rv-small">
       ${helpline}
       <p class="src">Every number below mirrors a finding in Boucherie et al., “Cultural evolution of beauty standards,” <em>PNAS</em> 2026.</p>
@@ -1232,7 +1298,7 @@ const Briefing=(function(){
       <p class="bl" style="animation-delay:1.2s">Each season, you select the models who will walk for the house.</p>
       <p class="bl" style="animation-delay:2.2s">To keep your job, keep <b>the Board</b> happy: the money has to keep coming.</p>
       <p class="bl" style="animation-delay:3.2s">And try not to enrage the advocates. <b>Body size</b> and <b>ethnic diversity</b> associations are watching every lineup you send out.</p>
-      <p class="bl bs" style="animation-delay:4.2s">Good luck. Let's see how you shape the world of fashion.</p>
+      <p class="bl bs" style="animation-delay:4.2s">Your contract runs <b>ten seasons</b>, with a review after eight. Good luck — let's see how you shape the world of fashion.</p>
       <button class="btn bl" style="animation-delay:4.9s" onclick="Briefing.done(event)">Take the job <span class="ar">→</span></button>`;
   }
   function skip(){ $("brief").classList.add("done"); }               // tap: reveal the whole letter at once
@@ -1242,6 +1308,7 @@ const Briefing=(function(){
 window.Briefing=Briefing;
 function restart(){
   Object.assign(G,{ season:1,tier:0,meters:{board:60,walks:45,census:45}, prev:{L:0,E:0}, streaks:{noColour:0,oneColour:0},
+    press:{timeless:0,applause:0,plot:0}, notRenewed:null,
     stack:[],booked:[],accl:0, since:{nonWhite:0,plus:0,intersx:0}, gen:0,
     everPlus:false,allCast:[],hist:[],
     cum:{total:0,nonWhite:0,plus:0,plusNonWhite:0,plusWhite:0,nonplusNonWhite:0,nonplusWhite:0,regions:new Set(),seasonsWithPlus:0}, firedBy:null,_end:false,_busy:false });
