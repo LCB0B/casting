@@ -11,10 +11,16 @@
   :root{
     --paper:#FAFAF8; --panel:#FFFFFF; --ink:#0A0A0A; --ink2:#575757; --ink3:#9A9A9A;
     --line:#C9C9C9; --hair:#BDBDBD; --accent:#E6007E; --good:#3E7E46; --stage:#0B0B0A;
+    --ok:#7FA33F; --warn:#C97A1F; --bad:#C22B1F;
+    --arc1:#CC6F5E; --arc2:#DD9A63; --arc3:#E3C45F; --arc4:#A7C063; --arc5:#5FA567;
     --serif:'Archivo',system-ui,sans-serif; --ui:'Archivo',system-ui,sans-serif;   /* display face: mastheads, stamps, verdicts */
     --mono:'Courier Prime','Courier New',Courier,monospace;                        /* the typewriter: everything spoken or typed */
     --marker:'Permanent Marker',cursive;                                           /* the pen: scrawled margin notes, used sparingly */
   }
+  /* colour-vision-safe mode: the red→green verdict language becomes orange→blue (Okabe–Ito);
+     the accent pink is safe as-is and stays */
+  body.cvd{--good:#0072B2; --ok:#56B4E9; --warn:#E69F00; --bad:#D55E00;
+    --arc1:#D55E00; --arc2:#E69F00; --arc3:#F0E442; --arc4:#56B4E9; --arc5:#0072B2}
   *{box-sizing:border-box}
   html,body{margin:0; height:100%}
   body{background:var(--paper); color:var(--ink); font-family:var(--mono); line-height:1.45; -webkit-font-smoothing:antialiased; overflow-x:hidden}
@@ -62,19 +68,32 @@
   .top .h{font-family:var(--ui); font-weight:900; font-size:15px; letter-spacing:.16em; text-transform:uppercase; display:inline-block; background:var(--ink); color:var(--paper); padding:3px 14px 4px; transform:rotate(-.6deg)}
   .helpbtn{position:absolute; right:0; top:1px; width:22px; height:22px; border:1.5px solid var(--ink2); background:none; color:var(--ink2); font-family:var(--ui); font-weight:800; font-size:11px; line-height:1; padding:0; transition:color .2s, border-color .2s}
   .helpbtn:hover{color:var(--ink); border-color:var(--ink)}
-  .sndbtn{position:fixed; top:12px; left:12px; z-index:300; width:26px; height:26px; border:1.5px solid var(--ink2); background:var(--paper); color:var(--ink2); font-family:var(--ui); font-weight:800; font-size:12px; line-height:1; padding:0; transition:color .2s, border-color .2s, opacity .2s}
-  .sndbtn:hover{color:var(--ink); border-color:var(--ink)}
-  .sndbtn.off{opacity:.4; text-decoration:line-through}
+  .sndbtn,.a11ybtn{position:fixed; top:12px; z-index:300; width:26px; height:26px; border:1.5px solid var(--ink2); background:var(--paper); color:var(--ink2); padding:0; display:flex; align-items:center; justify-content:center; transition:color .2s, border-color .2s, opacity .2s}
+  .sndbtn{left:12px}
+  .a11ybtn{left:44px}
+  .sndbtn:hover,.a11ybtn:hover,.a11ybtn[aria-expanded="true"]{color:var(--ink); border-color:var(--ink)}
+  .sndbtn svg,.a11ybtn svg{width:15px; height:15px; display:block}
+  .sndbtn .slash{display:none}
+  .sndbtn.off{opacity:.45}
+  .sndbtn.off .waves{display:none}
+  .sndbtn.off .slash{display:block}
+  /* accessibility switches: a pasted paper slip under the button */
+  .a11y-pop{position:fixed; top:46px; left:12px; z-index:310; width:206px; background:var(--paper); border:2px solid var(--ink); box-shadow:0 12px 32px rgba(0,0,0,.3); padding:11px 13px 10px; display:none; transform:rotate(-.5deg)}
+  .a11y-pop.show{display:block}
+  .a11y-pop .ap-h{font-family:var(--ui); font-weight:900; font-size:10px; letter-spacing:.2em; text-transform:uppercase; display:inline-block; background:var(--ink); color:var(--paper); padding:2px 7px 3px; margin-bottom:7px; transform:rotate(-.8deg)}
+  .a11y-pop label{display:flex; align-items:center; gap:9px; font-family:var(--mono); font-weight:700; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); padding:4px 0; cursor:pointer}
+  .a11y-pop input{accent-color:var(--accent); width:14px; height:14px; margin:0; flex-shrink:0}
 
   .gauges{display:grid; grid-template-columns:repeat(3,1fr); gap:0 14px; margin:8px 0 2px; padding:0 20px}
   .gauge{text-align:center}
   .gauge-svg{width:100%; height:auto; display:block; margin:0 auto}
   .needle{transition:transform 1.05s cubic-bezier(.33,1.15,.45,1)}
   .gauge-cap{font-family:var(--ui); font-weight:700; font-size:8.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink2); margin-top:-3px; transform-origin:50% 50%}
-  .gauge-cap.warn{color:#C97A1F; font-weight:800}
-  .gauge-cap.red{color:#C22B1F; font-weight:800}
-  .gauge-cap.crit{color:#C22B1F; font-weight:900; animation:capblink .95s ease-in-out infinite}
-  .gauge-cap.ok{color:#7FA33F; font-weight:800}
+  .g-a1{fill:var(--arc1)} .g-a2{fill:var(--arc2)} .g-a3{fill:var(--arc3)} .g-a4{fill:var(--arc4)} .g-a5{fill:var(--arc5)}
+  .gauge-cap.warn{color:var(--warn); font-weight:800}
+  .gauge-cap.red{color:var(--bad); font-weight:800}
+  .gauge-cap.crit{color:var(--bad); font-weight:900; animation:capblink .95s ease-in-out infinite}
+  .gauge-cap.ok{color:var(--ok); font-weight:800}
   .gauge-cap.happy{color:var(--good); font-weight:800}
   @keyframes capblink{0%,100%{transform:scale(1); opacity:1}50%{transform:scale(1.16); opacity:.7}}
 
@@ -224,7 +243,7 @@
   .rrow .rtext{font-family:var(--mono); font-size:12.5px; line-height:1.45}
   .rdelta{display:inline-block; font-family:var(--ui); font-weight:900; font-size:13px; line-height:1; padding:1.5px 6px 2.5px; border:1.5px solid; margin-left:7px; vertical-align:middle; text-transform:none}
   .rdelta.up{color:var(--good); border-color:var(--good)}
-  .rdelta.down{color:#C22B1F; border-color:#C22B1F}
+  .rdelta.down{color:var(--bad); border-color:var(--bad)}
 
   /* reveal */
   #reveal{display:none}#reveal.active{display:block}
@@ -271,6 +290,7 @@
   .punch.good .big{color:var(--ink)}
   .good .rv-h em{font-style:italic}
   @media(prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+  body.rm *{animation:none!important; transition:none!important}
 
   /* ---------------- appointment briefing (before the tutorial) ---------------- */
   .brief-veil{background:rgba(16,15,14,.82); z-index:150}
@@ -283,6 +303,7 @@
   @keyframes briefin{to{opacity:1; transform:none}}
   .brief.done .bl{animation:none; opacity:1; transform:none}
   @media(prefers-reduced-motion:reduce){.brief .bl,.rrow{opacity:1!important; transform:none!important}}
+  body.rm .brief .bl, body.rm .rrow{opacity:1!important; transform:none!important}
 
   /* envelope that delivers the appointment letter */
   .env-wrap{display:flex; align-items:center; justify-content:center; width:100%}
@@ -347,7 +368,13 @@
 </style>
 </head>
 <body>
-<button class="sndbtn" id="snd-btn" onclick="GAME.sound()" title="Sound on/off" aria-label="Sound on/off">♪</button>
+<button class="sndbtn" id="snd-btn" onclick="GAME.sound()" title="Sound on/off" aria-label="Sound on/off"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.2v5.6h3.6L13 19.2V4.8L7.6 9.2H4z" fill="currentColor"/><g class="waves" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M15.6 9.5a3.9 3.9 0 0 1 0 5"/><path d="M18.2 7.3a7.3 7.3 0 0 1 0 9.4"/></g><line class="slash" x1="4.5" y1="19.5" x2="19.5" y2="4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+<button class="a11ybtn" id="a11y-btn" onclick="GAME.access()" title="Accessibility" aria-label="Accessibility options" aria-expanded="false" aria-controls="a11y-pop"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.9" r="2.1" fill="currentColor" stroke="none"/><path d="M4.6 9.2c2.4.8 4.9 1.2 7.4 1.2s5-.4 7.4-1.2"/><path d="M12 10.4v4.4"/><path d="M12 14.8l-2.7 5.7"/><path d="M12 14.8l2.7 5.7"/></svg></button>
+<div class="a11y-pop" id="a11y-pop" role="group" aria-label="Accessibility options">
+  <span class="ap-h">Access</span>
+  <label><input type="checkbox" id="a11y-rm" onchange="GAME.a11ySet('rm',this.checked)"> Reduce motion</label>
+  <label><input type="checkbox" id="a11y-cvd" onchange="GAME.a11ySet('cvd',this.checked)"> Colour-safe gauges</label>
+</div>
 <div class="wrap">
 
   <!-- INTRO -->
@@ -833,12 +860,12 @@ function figWrap(m){ const d=(-Math.random()*3).toFixed(2); return `<div class="
 
 /* ---------------- gauges ---------------- */
 function gaugeArc(){
-  /* half-DONUT: five thick colored ring segments (red -> green) around an open centre */
+  /* half-DONUT: five thick colored ring segments (bad -> good) around an open centre;
+     fills live in the .g-a* classes so colour-safe mode can repaint them via the --arc vars */
   const cx=50,cy=50,R=48,Ri=27;
-  const C=["#CC6F5E","#DD9A63","#E3C45F","#A7C063","#5FA567"];
   const pt=(t,r)=>{const a=(180-t*180)*Math.PI/180; return (cx+r*Math.cos(a)).toFixed(1)+" "+(cy-r*Math.sin(a)).toFixed(1);};
-  return C.map((c,i)=>{const t0=i/5, t1=(i+1)/5;
-    return `<path d="M ${pt(t0,R)} A ${R} ${R} 0 0 1 ${pt(t1,R)} L ${pt(t1,Ri)} A ${Ri} ${Ri} 0 0 0 ${pt(t0,Ri)} Z" fill="${c}" stroke="var(--paper)" stroke-width="1"/>`;}).join("");
+  return [1,2,3,4,5].map((n,i)=>{const t0=i/5, t1=(i+1)/5;
+    return `<path d="M ${pt(t0,R)} A ${R} ${R} 0 0 1 ${pt(t1,R)} L ${pt(t1,Ri)} A ${Ri} ${Ri} 0 0 0 ${pt(t0,Ri)} Z" class="g-a${n}" stroke="var(--paper)" stroke-width="1"/>`;}).join("");
 }
 const needleAngle=v=>((clamp(v)-50)/50)*90;
 const capClass=v=> v<15?" crit":(v<30?" red":(v<45?" warn":(v>=75?" happy":(v>=60?" ok":""))));   // caption heats with anger, greens with joy
@@ -858,7 +885,7 @@ function setNeedle(el, to){
   const from = (el._ang==null) ? to : el._ang;
   el._ang = to;
   if(el._raf){ cancelAnimationFrame(el._raf); el._raf=null; }
-  const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduce = (window.A11Y && A11Y.rm) || (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   if(reduce || from===to){ el.setAttribute("transform","rotate("+to.toFixed(1)+" 50 50)"); return; }
   const DUR=1050, t0=performance.now(), ease=p=>1-Math.pow(1-p,3);   // easeOutCubic settle
   function frame(now){
@@ -1459,7 +1486,30 @@ const Tutorial = (function(){
 window.Tutorial = Tutorial;
 
 function toggleSound(){ const on=Sfx.toggle(); const b=$("snd-btn"); if(b) b.classList.toggle("off",!on); }
-window.GAME={ begin, swipe:swipeBtn, undo:undoPass, next, reveal, restart, skipRunway, sound:toggleSound };
+
+/* accessibility switches: in-game overrides for people who never touch OS settings.
+   rm mirrors prefers-reduced-motion; cvd repaints the red→green language orange→blue. */
+const A11Y={rm:false, cvd:false};
+function a11yApply(){
+  document.body.classList.toggle("rm",A11Y.rm);
+  document.body.classList.toggle("cvd",A11Y.cvd);
+  const r=$("a11y-rm"), c=$("a11y-cvd");
+  if(r) r.checked=A11Y.rm;
+  if(c) c.checked=A11Y.cvd;
+}
+function a11ySet(k,v){ A11Y[k]=!!v; try{ localStorage.setItem("hoc_"+k, v?"1":"0"); }catch(_){} a11yApply(); }
+function a11yPanel(force){
+  const p=$("a11y-pop"), b=$("a11y-btn"); if(!p||!b) return;
+  const show = force!=null ? force : !p.classList.contains("show");
+  p.classList.toggle("show",show); b.setAttribute("aria-expanded",show?"true":"false");
+}
+try{ A11Y.rm=localStorage.getItem("hoc_rm")==="1"; A11Y.cvd=localStorage.getItem("hoc_cvd")==="1"; }catch(_){}
+a11yApply();
+document.addEventListener("click",e=>{ const p=$("a11y-pop");
+  if(p && p.classList.contains("show") && !p.contains(e.target) && !(e.target.closest && e.target.closest("#a11y-btn"))) a11yPanel(false); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") a11yPanel(false); });
+window.A11Y=A11Y;
+window.GAME={ begin, swipe:swipeBtn, undo:undoPass, next, reveal, restart, skipRunway, sound:toggleSound, access:()=>a11yPanel(), a11ySet };
 if(!Sfx.on) $("snd-btn").classList.add("off");
 renderIntroStrip(); rollHouse();
 </script>
