@@ -6,15 +6,17 @@
 <title>Casting</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,700;1,900&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Permanent+Marker&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#FAFAF8; --panel:#FFFFFF; --ink:#0A0A0A; --ink2:#575757; --ink3:#9A9A9A;
     --line:#C9C9C9; --hair:#BDBDBD; --accent:#E6007E; --good:#3E7E46; --stage:#0B0B0A;
     --ok:#7FA33F; --warn:#C97A1F; --bad:#C22B1F;
     --arc1:#CC6F5E; --arc2:#DD9A63; --arc3:#E3C45F; --arc4:#A7C063; --arc5:#5FA567;
-    --serif:'Archivo',system-ui,sans-serif; --ui:'Archivo',system-ui,sans-serif;   /* display face: mastheads, stamps, verdicts */
-    --mono:'Courier Prime','Courier New',Courier,monospace;                        /* the typewriter: everything spoken or typed */
+    --serif:'Bricolage Grotesque',system-ui,sans-serif;                            /* display: mastheads, stamps, verdicts, names */
+    --ui:'Bricolage Grotesque',system-ui,sans-serif;                               /* controls, labels, kickers: same voice as display */
+    --body:'Bricolage Grotesque',system-ui,sans-serif;                             /* long reading text, at regular weight */
+    --mono:'Courier Prime','Courier New',Courier,monospace;                        /* the spec sheet: measurements, chart ticks, data only */
     --marker:'Permanent Marker',cursive;                                           /* the pen: scrawled margin notes, used sparingly */
   }
   /* colour-vision-safe mode: the red→green verdict language becomes orange→blue (Okabe–Ito);
@@ -23,12 +25,12 @@
     --arc1:#D55E00; --arc2:#E69F00; --arc3:#F0E442; --arc4:#56B4E9; --arc5:#0072B2}
   *{box-sizing:border-box}
   html,body{margin:0; height:100%}
-  body{background:var(--paper); color:var(--ink); font-family:var(--mono); line-height:1.45; -webkit-font-smoothing:antialiased; overflow-x:hidden}
+  body{background:var(--paper); color:var(--ink); font-family:var(--body); line-height:1.45; -webkit-font-smoothing:antialiased; overflow-x:hidden}
   /* photocopier grain over everything — the page is a xerox */
   body::after{content:""; position:fixed; inset:0; z-index:9999; pointer-events:none; opacity:.06;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.45 0.45 0.45 0 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E")}
   button{font-family:var(--ui); cursor:pointer; color:inherit}
-  .kick{font-family:var(--mono); font-weight:700; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink)}
+  .kick{font-family:var(--ui); font-weight:700; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink)}
 
   .wrap{max-width:540px; margin:0 auto; min-height:100%; padding:14px 18px calc(12px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; position:relative}
   .screen{display:none; flex:1; flex-direction:column}
@@ -46,7 +48,7 @@
   .masthead span:nth-child(4){transform:rotate(1.8deg) translateY(2px)}
   .masthead span:nth-child(5){background:var(--accent); color:#fff}
   .masthead span:nth-child(6){transform:rotate(-1.4deg)}
-  .slogan{font-family:var(--mono); font-style:italic; font-weight:700; font-size:clamp(14px,4.2vw,18px); margin:16px 0 0}
+  .slogan{font-family:var(--body); font-style:italic; font-weight:700; font-size:clamp(14px,4.2vw,18px); margin:16px 0 0}
   .slogan mark{display:inline-block; background:var(--accent); color:#fff; padding:0 6px; transform:rotate(-1.2deg); font-style:normal}
   .premise{font-size:15px; max-width:42ch; margin:28px 0 0}
   .name-row{margin:24px 0 0; display:flex; flex-direction:column; gap:12px}
@@ -124,14 +126,22 @@
   .card-fig{height:212px; min-height:92px; display:flex; align-items:flex-end; justify-content:center; position:relative}
   .card-fig .figwrap{height:100%; width:150px}
   .card-fig .fig-svg{width:98px; max-height:100%}   /* viewBox height tracks the model's cm height — cap it so tall models scale to fit instead of poking out the card top */
-  .bmi{position:absolute; top:0; right:0; font-family:var(--mono); font-weight:700; font-size:9.5px; letter-spacing:.1em; color:var(--ink2); text-align:right}
-  .bmi b{display:block; font-family:var(--serif); font-weight:900; font-size:19px; letter-spacing:0; color:var(--ink); line-height:.9}
   .card-meta{border-top:2px solid var(--ink); margin-top:10px; padding-top:9px; flex-shrink:0}
   .cname{font-family:var(--ui); font-weight:900; font-size:19px; letter-spacing:.06em; text-transform:uppercase; line-height:1.05; display:inline-block; background:var(--ink); color:var(--paper); padding:2px 8px 3px; transform:rotate(-1deg); max-width:100%}
   .cname .star{color:var(--accent); display:inline-block; line-height:1}   /* ★ falls back to a system font; inline-block pins its line box so star cards don't grow taller */
-  .cspec{font-family:var(--mono); font-weight:700; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink); margin-top:6px}
+  /* the two cases: ORIGIN and BMI side by side — what the panels actually count, in full letters */
+  .cases{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px}
+  .case{border:1.5px solid var(--ink); background:var(--panel); padding:5px 8px 6px; min-width:0}
+  .case-k{display:block; font-family:var(--mono); font-weight:700; font-size:8px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2)}
+  .case-v{display:block; font-family:var(--serif); font-weight:900; font-size:14px; line-height:1.05; margin-top:2px; text-transform:uppercase; letter-spacing:.02em}
+  .case.bmi .case-v{display:inline-block; font-size:18px}
+  .case-tag{display:inline-block; margin-left:5px; font-family:var(--mono); font-weight:700; font-size:8.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink2); border:1px solid var(--hair); padding:1px 4px; vertical-align:2px}
+  .case.low .case-v{color:var(--accent)}   /* pink below the WHO underweight line, same as the dot on the scale */
+  .case.low .case-tag{color:var(--accent); border-color:var(--accent)}
+  .cfine{margin-top:6px; font-family:var(--mono); font-weight:700; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink3)}
+  .cfine+.cfine{margin-top:1px}
   .bmibar{display:block; width:100%; height:auto; margin-top:9px}
-  .bmibar .bmit{font-family:var(--ui); font-weight:700; font-size:7.5px; letter-spacing:.07em; text-transform:uppercase; fill:var(--ink2)}
+  .bmibar .bmit{font-family:var(--mono); font-weight:700; font-size:7.5px; letter-spacing:.07em; text-transform:uppercase; fill:var(--ink2)}
   /* rubber stamps: double ring, over-rotated, inky */
   .swipe-tag{position:absolute; top:58px; font-family:var(--serif); font-weight:900; font-size:22px; letter-spacing:.08em; text-transform:uppercase; padding:4px 12px; border:2.5px solid; box-shadow:inset 0 0 0 2px var(--panel), inset 0 0 0 3.5px currentColor; opacity:0; pointer-events:none; mix-blend-mode:multiply}
   .swipe-tag.book{right:10px; color:var(--good); border-color:var(--good); transform:rotate(14deg)}
@@ -148,24 +158,50 @@
   .ctrl.book{border-color:var(--good); color:var(--good)}
   .ctrl.book:hover{background:var(--good); color:#fff}
   .ctrl:disabled{opacity:.25; cursor:not-allowed; transform:none}
-  .undo{display:block; margin:0 auto 2px; background:none; border:none; font-family:var(--mono); font-weight:700; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); text-decoration:underline; text-underline-offset:3px; padding:4px 8px}
+  .undo{display:block; margin:0 auto 2px; background:none; border:none; font-family:var(--ui); font-weight:700; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); text-decoration:underline; text-underline-offset:3px; padding:4px 8px}
   .undo:hover{color:var(--ink)}
-  .keyhint{display:none; text-align:center; font-family:var(--mono); font-weight:700; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink3); margin-top:2px}
+  .keyhint{display:none; text-align:center; font-family:var(--ui); font-weight:700; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink3); margin-top:2px}
   @media(hover:hover) and (pointer:fine){ .keyhint{display:block} }
+  /* the assistant's pencil: a one-line forecast scrawled over the top of the deck after each
+     booking. Absolutely positioned so a wrapping line never reflows the deck mid-swipe. */
+  .deck-wrap{position:relative}
+  .whisper{position:absolute; top:-2px; left:0; right:0; z-index:6; text-align:center; font-family:var(--marker); font-size:13px; line-height:1.3; color:var(--ink2); opacity:0; transform:rotate(-1deg); transition:opacity .3s ease; pointer-events:none}
+  .whisper.show{opacity:1}
+  .whisper b{color:var(--accent); font-weight:400}
   /* mobile: shrink the swipe card so it clears the lookbook above and the ✕/✓ row below */
   @media(max-width:480px){
     .card{width:min(70vw,238px); padding:11px 11px 10px}
     .card-fig{height:164px; min-height:80px}
     .card-fig .figwrap{width:118px}
     .card-fig .fig-svg{width:80px}
-    .bmi b{font-size:16px}
     .cname{font-size:16px}
-    .cspec{font-size:10px; margin-top:4px}
-    .bmibar{margin-top:7px}
+    .cases{gap:5px; margin-top:6px}
+    .case{padding:4px 6px 5px}
+    .case-v{font-size:12px}
+    .case.bmi .case-v{font-size:15px}
+    .case-tag{margin-left:4px; font-size:8px; vertical-align:1px}
+    .bmibar,.cfine{display:none}   /* phones: the two cases carry the story; the spec sheet is laptop-only */
     .card-meta{margin-top:8px; padding-top:7px}
     .swipe-tag{top:40px; font-size:18px}
     .deck{min-height:208px}
     .ctrl{width:52px; height:52px; font-size:22px}
+  }
+  /* short viewports (SE-class phones, squat laptop windows): the card's meta is taller than
+     the deck can offer, so shed the redundant context first — the BMI case already carries
+     the number — and let the figure give way further. Keeps the meta inside the card border. */
+  @media(max-height:640px){
+    .bmibar{display:none}
+    .cfine+.cfine{display:none}
+    .card-fig{min-height:64px}
+    .deck{min-height:224px}
+  }
+  @media(max-height:560px){ .cfine{display:none} }
+  /* the longest house names must clear the fixed sound/access buttons on narrow screens */
+  @media(max-width:380px){ .top .h{font-size:11.5px; letter-spacing:.1em} }
+  /* wide screens: the corner buttons dock to the game column instead of drifting to the screen edge */
+  @media(min-width:700px){
+    .sndbtn{left:calc(50% - 258px)}
+    .a11ybtn{left:calc(50% - 226px)}
   }
 
   /* figure */
@@ -224,18 +260,18 @@
   .pflash i::before{width:100%; height:2px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.55) 44% 56%,transparent)}
   .pflash i::after{width:2px; height:100%; background:linear-gradient(180deg,transparent,rgba(255,255,255,.55) 44% 56%,transparent)}
   @keyframes pburst{0%{opacity:0; transform:scale(.2)} 14%{opacity:1; transform:scale(1)} 100%{opacity:0; transform:scale(1.5)}}
-  .skiphint{position:absolute; bottom:9px; right:13px; font-family:var(--mono); font-weight:700; font-size:9.5px; letter-spacing:.14em; color:#7a7872; text-transform:uppercase}
+  .skiphint{position:absolute; bottom:9px; right:13px; font-family:var(--ui); font-weight:700; font-size:9.5px; letter-spacing:.14em; color:#7a7872; text-transform:uppercase}
 
   /* resolution */
   .resol{background:var(--paper); border:2px solid var(--ink); max-width:480px; width:100%; padding:22px 22px 18px; box-shadow:0 12px 32px rgba(0,0,0,.3); max-height:92vh; overflow-y:auto}
   .resol .hk{display:flex; justify-content:space-between; align-items:baseline; border-bottom:2px solid var(--ink); padding-bottom:6px; margin-bottom:14px}
-  .resol .hl{font-family:var(--mono); font-weight:700; font-size:15px; line-height:1.5; margin:0 0 16px}
+  .resol .hl{font-family:var(--body); font-weight:600; font-size:15px; line-height:1.5; margin:0 0 16px}
   .resol .hl .hlt{background:rgba(230,0,126,.20); padding:0 3px; -webkit-box-decoration-break:clone; box-decoration-break:clone}
   .rrow{display:grid; grid-template-columns:88px 1fr; gap:12px; align-items:center; margin-bottom:13px; opacity:0; animation:slidein .42s ease forwards}
   @keyframes slidein{from{opacity:0; transform:translateX(-8px)}to{opacity:1; transform:none}}
   .rrow .gauge-svg{width:88px; max-width:88px}
-  .rrow .rwho{font-family:var(--mono); font-weight:700; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin-bottom:3px}
-  .rrow .rtext{font-family:var(--mono); font-size:12.5px; line-height:1.45}
+  .rrow .rwho{font-family:var(--ui); font-weight:700; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin-bottom:3px}
+  .rrow .rtext{font-family:var(--body); font-size:13px; line-height:1.45}
   .rdelta{display:inline-block; font-family:var(--ui); font-weight:900; font-size:13px; line-height:1; padding:1.5px 6px 2.5px; border:1.5px solid; margin-left:7px; vertical-align:middle; text-transform:none}
   .rdelta.up{color:var(--good); border-color:var(--good)}
   .rdelta.down{color:var(--bad); border-color:var(--bad)}
@@ -252,10 +288,10 @@
     display:inline-block; padding:6px 16px 7px; border:3px solid currentColor; box-shadow:inset 0 0 0 2.5px var(--paper), inset 0 0 0 4.5px currentColor; transform:rotate(-5deg); mix-blend-mode:multiply}
   .rv-result.lost{color:var(--accent)}
   .rv-result.won{color:var(--good)}
-  .rv-slip{display:inline-block; font-family:var(--mono); font-weight:700; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); border:1.5px solid var(--accent); padding:5px 10px 4px; transform:rotate(-1.4deg); margin:0 0 16px}
-  .rv-lead{font-family:var(--ui); font-weight:400; font-size:14px; line-height:1.6; max-width:52ch; margin:0 auto; text-align:left}   /* the verdict explanation reads long — plain Archivo, not the typewriter */
+  .rv-slip{display:inline-block; font-family:var(--ui); font-weight:700; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); border:1.5px solid var(--accent); padding:5px 10px 4px; transform:rotate(-1.4deg); margin:0 0 16px}
+  .rv-lead{font-family:var(--body); font-weight:400; font-size:14px; line-height:1.6; max-width:52ch; margin:0 auto; text-align:left}
   .parade{border:2px solid var(--ink); background:var(--stage); overflow:hidden; margin-bottom:18px; position:relative}
-  .parade .pcap{position:absolute; top:8px; left:12px; z-index:2; font-family:var(--mono); font-weight:700; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:#d4d2cc}
+  .parade .pcap{position:absolute; top:8px; left:12px; z-index:2; font-family:var(--ui); font-weight:700; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:#d4d2cc}
   .parade-track{display:flex; gap:6px; align-items:flex-end; padding:24px 10px 12px; width:max-content; animation:march 30s linear infinite}
   .parade:hover .parade-track{animation-play-state:paused}
   @keyframes march{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -273,8 +309,8 @@
   .punch .big{font-family:var(--serif); font-weight:900; font-size:clamp(48px,18vw,90px); line-height:.84; color:var(--accent); position:relative; display:inline-block}
   .punch .big::after{content:""; position:absolute; inset:-7px -24px; border:3px solid var(--ink); border-radius:50%; transform:rotate(-4deg); opacity:.5; pointer-events:none}   /* pen circle around the number */
   .punch.good .big::after{border-color:var(--accent)}
-  .punch .cap{font-family:var(--mono); font-weight:400; font-size:11px; color:var(--ink); margin:10px auto 0; max-width:38ch}
-  .src{font-family:var(--mono); font-size:10.5px; color:var(--ink2); margin:18px 0 22px; line-height:1.5}.src a{color:var(--ink)}
+  .punch .cap{font-family:var(--body); font-weight:400; font-size:11px; color:var(--ink); margin:10px auto 0; max-width:38ch}
+  .src{font-family:var(--body); font-size:10.5px; color:var(--ink2); margin:18px 0 22px; line-height:1.5}.src a{color:var(--ink)}
   .end-actions{display:flex; flex-direction:column; gap:10px}
   .rv-small{text-align:center; margin:0 0 18px}
   .rv-small .src{margin:0 auto 12px; max-width:56ch}
@@ -291,8 +327,8 @@
   .brief-veil{background:rgba(16,15,14,.82); z-index:150}
   .brief{background:var(--paper); border:2px solid var(--ink); box-shadow:0 12px 32px rgba(0,0,0,.3); max-width:440px; width:100%; padding:26px 24px 20px; max-height:92vh; overflow-y:auto}
   .brief .bl{opacity:0; transform:translateY(10px); animation:briefin .55s ease forwards; font-size:14px; line-height:1.5; margin:0 0 12px}
-  .brief p.bl{font-family:var(--mono); font-size:13.5px}   /* the letter is typed */
-  .brief .bt{font-family:var(--mono); font-weight:700; font-size:16px; line-height:1.4; margin-bottom:14px}
+  .brief p.bl{font-family:var(--body); font-size:14px}
+  .brief .bt{font-family:var(--body); font-weight:700; font-size:16px; line-height:1.4; margin-bottom:14px}
   .brief .bs{font-style:italic; color:var(--ink)}
   .brief .btn.bl{margin-top:8px}
   @keyframes briefin{to{opacity:1; transform:none}}
@@ -345,11 +381,11 @@
   .tut-caret{position:absolute; width:12px; height:12px; background:var(--paper); transform:translateX(-50%) rotate(45deg); display:none}
   .tut-caret.below{top:-6px; border-top:1px solid var(--ink); border-left:1px solid var(--ink)}
   .tut-caret.above{bottom:-6px; border-bottom:1px solid var(--ink); border-right:1px solid var(--ink)}
-  .tut-kick{font-family:var(--mono); font-weight:700; font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink2)}
+  .tut-kick{font-family:var(--ui); font-weight:700; font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink2)}
   .tut-kick .tut-n{color:var(--accent)}
   .tut-title{font-family:var(--serif); font-weight:700; font-size:21px; line-height:1.16; margin:9px 0 8px}
   .tut-title em{font-style:italic; font-weight:500}
-  .tut-body{font-family:var(--mono); font-weight:400; font-size:12.5px; line-height:1.5; color:var(--ink)}
+  .tut-body{font-family:var(--body); font-weight:400; font-size:13px; line-height:1.5; color:var(--ink)}
   .tut-body b{font-weight:700}
   .tut-nav{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:15px}
   .tut-right{display:flex; gap:8px; align-items:center}
@@ -359,7 +395,22 @@
   .tut-back:hover{background:var(--ink); color:var(--paper)}
   .tut-skip{background:transparent; border:none; color:var(--ink2); font-family:var(--ui); font-weight:700; font-size:10px; letter-spacing:.1em; text-transform:uppercase; text-decoration:underline; text-underline-offset:3px; padding:4px 0}
   .tut-skip:hover{color:var(--ink)}
-  .tut-hint{font-family:var(--mono); font-weight:700; font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink3); margin-top:11px; text-align:center}
+  .tut-hint{font-family:var(--ui); font-weight:700; font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink3); margin-top:11px; text-align:center}
+
+  /* ---------------- guided opening: the Board casts, the associations arrive in protest ---------------- */
+  /* light scrim, box pushed below the header so the dials stay visible while the text talks about them */
+  /* --hdrH is measured from the live gauges at dialog time: the scrim stays clear above it
+     (dials readable) and the box starts below it — no fixed offset to collide on any screen */
+  .demo-veil{background:linear-gradient(180deg, rgba(16,15,14,.08) 0, rgba(16,15,14,.08) var(--hdrH,150px), rgba(16,15,14,.55) calc(var(--hdrH,150px) + 60px)); align-items:flex-start; padding:calc(var(--hdrH,150px) + 8px) 18px 24px; z-index:140; overflow-y:auto}
+  .demo-box .hk{display:flex; justify-content:space-between; align-items:baseline; border-bottom:2px solid var(--ink); padding-bottom:6px; margin-bottom:12px}
+  .demo-txt{font-family:var(--body); font-size:14px; line-height:1.55; margin-bottom:14px}
+  .demo-txt i{font-style:italic}
+  .demo-txt ul{margin:10px 0 0; padding-left:18px}
+  .demo-txt li{margin-bottom:7px}
+  .gauges.demo1 .gauge:nth-child(n+2){visibility:hidden}   /* phase 1: only the Board exists */
+  .gauges.demo2 .gauge:nth-child(3){visibility:hidden}     /* phase 2: All Walks has arrived, the Census hasn't */
+  .gauge.stamp{animation:gstamp .55s cubic-bezier(.3,1.25,.45,1) both}
+  @keyframes gstamp{from{transform:scale(1.7) rotate(-8deg); opacity:0} 60%{transform:scale(.94) rotate(2deg); opacity:1} to{transform:scale(1) rotate(0deg); opacity:1}}
 </style>
 </head>
 <body>
@@ -388,6 +439,7 @@
     </div>
 
     <div class="deck-wrap">
+      <div class="whisper" id="whisper" aria-live="polite"></div>
       <div class="deck" id="deck"></div>
       <div class="controls">
         <button class="ctrl pass" id="btn-pass" aria-label="Pass" onclick="GAME.swipe(-1)">✕</button>
@@ -421,6 +473,14 @@
     </div>
   </div>
   <div class="brief" id="brief" onclick="Briefing.skip()" style="display:none"></div>
+</div>
+
+<div class="veil demo-veil" id="demo-veil">
+  <div class="brief demo-box">
+    <div class="hk"><span class="kick" id="demo-kick"></span><button class="tut-skip" type="button" onclick="Demo.skip()">Skip tutorial</button></div>
+    <div class="demo-txt" id="demo-txt"></div>
+    <button class="btn" id="demo-next" onclick="Demo.next()"></button>
+  </div>
 </div>
 
 <div class="veil" id="veil">
@@ -457,7 +517,7 @@ const POP_BMI = 29;          // real-population reference (US adult average, ~BM
 
 const STAKE = [{id:"board",cap:"Board"},{id:"walks",cap:"Body size"},{id:"census",cap:"Ethnicity"}];
 const PANEL = {board:"The Board", walks:"All Walks · body size", census:"The Census · ethnicity"};
-const TENURE_BASE = 8, TENURE_MAX = 10, RENEW_BAR = 40, TAU = 30, PICK = 5;
+const TENURE_BASE = 6, TENURE_MAX = 8, RENEW_BAR = 40, TAU = 30, PICK = 5;   // 8 shows total — playtesters found 10 a slog
 const ROMAN=["","I","II","III","IV","V","VI","VII","VIII","IX","X"];
 
 /* ---------------- state ---------------- */
@@ -678,8 +738,8 @@ function makeModel(opt={}){
          eye  = Math.random()<0.6 ? pick(["blue","grey"]) : pick(["green","hazel","brown"]); }
   const bmi = plus ? rnd(28,34) : mid ? rnd(21,26) : rnd(16.5,19.0);
   const size = plus ? pick([14,16,18,20]) : mid ? pick([8,10,12]) : pick([0,2,4,6]);
-  const region = nonWhite ? pick(["E. Asia","S. Asia","W. Africa","S. America","SE Asia"])
-                          : pick(["W. Europe","N. America","E. Europe","Scandinavia"]);
+  const region = nonWhite ? pick(["East Asia","South Asia","West Africa","South America","Southeast Asia"])
+                          : pick(["Western Europe","North America","Eastern Europe","Nordics"]);
   const skin = nonWhite ? pick(SKINS.slice(2)) : pick(SKINS.slice(0,3));
   /* Street clothes — only ever seen in the intro-strip crowd; on the deck and in the show
      everyone is dressed by the season's looks (G.looks). Not gender-coded: anyone can walk
@@ -692,8 +752,15 @@ function makeModel(opt={}){
   const outfit2 = Math.random()<0.75 ? pick(OUTFITS) : outfit;    // second colour: skirts, trousers, linings — clash encouraged
   const hairStyle = sex==="male" ? pick(Math.random()<0.8?MSTYLES:HAIRSTYLES)
                                  : pick(Math.random()<0.1?MSTYLES:HAIRSTYLES);
+  const height=Math.round(sex==="male"?rnd(177,190):rnd(172,184));
+  /* comp-card measurements: bust-waist-hips and shoe, plausible for the body band. Cosmetic
+     only, nothing reads them, but a casting card without numbers reads as a toy. */
+  const bust =Math.round((sex==="male"?14:0)+(plus?rnd(104,116):mid?rnd(88,98):rnd(78,86)));
+  const waist=Math.round((sex==="male"?10:0)+(plus?rnd(86,100):mid?rnd(68,78):rnd(58,64)));
+  const hips =Math.round((plus?rnd(110,126):mid?rnd(96,106):rnd(85,91)));
+  const shoe =clamp(Math.round((height-100)/1.9),36,46);
   return { uid:UID++, name:pick(sex==="male"?MALE:FIRST), sex, garb, sleeves, plus, mid, nonWhite, size, star:!!opt.star,
-    bmi:Math.round(bmi*10)/10, height:Math.round(sex==="male"?rnd(177,190):rnd(172,184)),
+    bmi:Math.round(bmi*10)/10, height, bust, waist, hips, shoe,
     region, hair, eye, skin, outfit, outfit2, hairStyle };
 }
 /* ---------------- the collection: five looks per season ----------------
@@ -902,7 +969,7 @@ function renderSeason(){
   renderGauges("gauges","g",G.meters);
   resetStream(); G.booked=[]; G.lastPassed=null;
   G.looks=makeLooks();                              // this season's five looks, one per slot
-  renderLookbook(); updateCount(); renderDeck();
+  clearWhisper(); renderLookbook(); updateCount(); renderDeck();
 }
 
 /* ---------------- deck (swipe) ---------------- */
@@ -921,9 +988,21 @@ function bmiBar(m){
 function cardHTML(m){
   dress(m, lookFor(G.booked.length));               // everyone auditions in the look being cast
   const tilt=((Math.random()*3.2)-1.6).toFixed(2);            // every card is pasted in slightly crooked
+  const scrawl=m.alum?'<div class="scrawl-star alum">the board really<br>liked this one<br>last time</div>'
+             :m.star?'<div class="scrawl-star">famous!!<br>book this one</div>'
+             :m.demopick?'<div class="scrawl-star alum">the Board&rsquo;s<br>pick</div>':'';
+  const band=m.plus?"plus":m.mid?"mid":"thin";
   return `<div class="card" data-uid="${m.uid}" style="--tilt:${tilt}deg">
-    <div class="card-fig"><div class="bmi">BMI<b>${m.bmi}</b></div>${m.alum?'<div class="scrawl-star alum">the board really<br>liked this one<br>last time</div>':m.star?'<div class="scrawl-star">famous!!<br>book this one</div>':''}${figWrap(m)}</div>
-    <div class="card-meta"><div class="cname">${m.name}${m.star?' <span class="star">★</span>':''}</div><div class="cspec">${m.region} · ${m.height} cm</div>${bmiBar(m)}</div>
+    <div class="card-fig">${scrawl}${figWrap(m)}</div>
+    <div class="card-meta"><div class="cname">${m.name}${m.star?' <span class="star">★</span>':''}</div>
+      <div class="cases">
+        <div class="case"><span class="case-k">Origin</span><span class="case-v">${m.region}</span></div>
+        <div class="case bmi${m.bmi<18.5?' low':''}"><span class="case-k">BMI</span><span class="case-v">${m.bmi}</span><span class="case-tag">${band}</span></div>
+      </div>
+      ${bmiBar(m)}
+      <div class="cfine">${m.height} cm · ${m.bust}-${m.waist}-${m.hips} · shoe ${m.shoe}</div>
+      <div class="cfine">size ${m.size} · ${m.hair} hair · ${m.eye} eyes</div>
+    </div>
     <div class="swipe-tag book">Book</div><div class="swipe-tag pass">Pass</div></div>`;
 }
 function renderDeck(){
@@ -933,7 +1012,7 @@ function renderDeck(){
   const t=document.createElement("div"); t.innerHTML=cardHTML(G.stack[0]); const top=t.firstElementChild;
   deck.appendChild(top); attachSwipe(top, G.stack[0]); updateButtons();
 }
-function updateButtons(){ const none=G.stack.length===0||G.booked.length>=PICK; $("btn-pass").disabled=none; $("btn-book").disabled=none;
+function updateButtons(){ const none=G.stack.length===0||G.booked.length>=PICK||(window.Demo&&Demo.active&&!Demo.casting); $("btn-pass").disabled=none; $("btn-book").disabled=none;
   $("btn-undo").style.visibility=(G.lastPassed&&!none)?"visible":"hidden"; }
 function renderLookbook(){
   const host=$("slots"); host.innerHTML="";
@@ -944,10 +1023,29 @@ function renderLookbook(){
 }
 function updateCount(){ $("count").textContent=G.booked.length+" / "+PICK; }
 
+/* the assistant leans in after every booking: a one-line forecast of how this face will land.
+   Playtesters flew blind until the first show resolved — this is the early feedback loop. */
+let _whT=null;
+function whisper(msg, ms){ const el=$("whisper"); if(!el||!msg) return;
+  el.innerHTML=msg; el.classList.add("show");
+  clearTimeout(_whT); _whT=setTimeout(()=>el.classList.remove("show"), ms||2800); }
+function clearWhisper(){ const el=$("whisper"); if(el) el.classList.remove("show"); clearTimeout(_whT); }
+function whisperFor(m){
+  const b=G.booked, ideals=b.filter(isIdeal).length;
+  if(m.star||m.alum)      return "a famous face. <b>the Board will love it</b>";
+  if(m.plus&&m.nonWhite)  return "one model, every box. <b>the associations will notice</b>";
+  if(m.plus)              return "a fuller body. <b>All Walks will cheer</b>";
+  if(m.nonWhite)          return "a model of colour. <b>the Census approves</b>";
+  if(m.mid)               return "mid-size. <b>All Walks softens a little</b>";
+  if(ideals===b.length&&b.length>=3) return "all thin and white so far. <b>expect protests</b>";
+  if(isIdeal(m))          return "the Board&rsquo;s type. <b>easy to sell</b>";
+  return "thin and white. <b>sells fine, wins no points</b>";
+}
+
 let sw=null;
 function attachSwipe(el, model){
   el.addEventListener("pointerdown", e=>{
-    if(G._busy) return; if(e.button!=null&&e.button!==0) return;
+    if(G._busy) return; if(window.Demo&&Demo.active&&!Demo.casting) return; if(e.button!=null&&e.button!==0) return;
     sw={el, model, x0:e.clientX, y0:e.clientY, dx:0, active:false, tilt:parseFloat(el.style.getPropertyValue("--tilt"))||0};
     window.addEventListener("pointermove",swMove,{passive:false});
     window.addEventListener("pointerup",swUp,{passive:false});
@@ -971,6 +1069,7 @@ function snapBack(el){ el.style.transition="transform .25s ease"; el.style.trans
   const tb=el.querySelector(".swipe-tag.book"), tp=el.querySelector(".swipe-tag.pass"); if(tb)tb.style.opacity=0; if(tp)tp.style.opacity=0;
   setTimeout(()=>{ if(el) el.style.transition=""; },260); }
 function commit(el, model, dir){
+  if(dir<0 && window.Demo && Demo.active){ Demo.refuse(el); return; }   // the tutorial list is not optional
   G._busy=true;
   el.style.transition="transform .34s cubic-bezier(.4,0,.5,1), opacity .34s";
   el.style.transform=`translateX(${dir*150}%) rotate(${dir*20+(parseFloat(el.style.getPropertyValue("--tilt"))||0)}deg)`; el.style.opacity="0";
@@ -978,13 +1077,14 @@ function commit(el, model, dir){
   setTimeout(()=>{ G._busy=false; dir>0 ? book(model) : pass(); }, 320);
 }
 function book(model){ G.booked.push(G.stack.shift()); refill(); renderLookbook(); updateCount();
-  if(G.booked.length>=PICK){ renderDeck(); setTimeout(stage,360); } else renderDeck(); }
+  whisper((window.Demo&&Demo.active) ? Demo.pickReact(model) : whisperFor(model));
+  if(G.booked.length>=PICK){ renderDeck(); setTimeout(()=>{ (window.Demo&&Demo.active) ? Demo.onCast() : stage(); },360); } else renderDeck(); }
 function pass(){ G.lastPassed=G.stack.shift(); refill(); renderDeck(); }
 function undoPass(){ if(G._busy||!G.lastPassed) return; Sfx.deal(); G.stack.unshift(G.lastPassed); G.lastPassed=null; renderDeck(); }
-function unbook(i){ const m=G.booked.splice(i,1)[0]; G.stack.unshift(m); renderLookbook(); updateCount(); renderDeck(); }
+function unbook(i){ if(window.Demo&&Demo.active) return; const m=G.booked.splice(i,1)[0]; G.stack.unshift(m); renderLookbook(); updateCount(); renderDeck(); }
 function swipeBtn(dir){ if(G._busy||G.stack.length===0||G.booked.length>=PICK) return;
   const top=$("deck").querySelector(".card:not(.behind)"); if(!top) return; commit(top, G.stack[0], dir); }
-document.addEventListener("keydown", e=>{ if(window.Tutorial&&window.Tutorial.active) return; if(!$("season").classList.contains("active")) return;
+document.addEventListener("keydown", e=>{ if(window.Tutorial&&window.Tutorial.active) return; if(window.Demo&&Demo.active&&!Demo.casting) return; if(!$("season").classList.contains("active")) return;
   if(e.key==="ArrowLeft") swipeBtn(-1); else if(e.key==="ArrowRight") swipeBtn(1); });
 /* Enter = the primary action of whatever is on screen */
 document.addEventListener("keydown", e=>{
@@ -992,6 +1092,7 @@ document.addEventListener("keydown", e=>{
   if(window.Tutorial && Tutorial.active) return;                                   // tutorial owns its keys
   const a=document.activeElement; if(a&&(a.tagName==="BUTTON"||a.tagName==="A")) return;  // native click handles it
   if($("runway-veil").classList.contains("show")){ e.preventDefault(); GAME.skipRunway(); return; }
+  if($("demo-veil").classList.contains("show")){ e.preventDefault(); Demo.next(); return; }
   if($("brief-veil").classList.contains("show")){ e.preventDefault();
     if($("env-wrap").style.display!=="none" && !$("envelope").classList.contains("open")) Briefing.open();
     else if($("brief").style.display!=="none") Briefing.done();
@@ -1023,7 +1124,7 @@ function scoreCast(cast){
   let dWalks = (L>=1) ? (L===1? 5 : (L===2? 8 : 9))
              : (M>=2 ? 0 : (M===1 ? -4 : -8));                 // mid-size softens the anger but doesn't satisfy
   let dCensus= (E===0)? -8 : (E===1? 5 : (E===2? 8 : 9));
-  const early=G.season<=4?1.6:1;                               // debut shows: everyone watches the newcomer — misses cost more
+  const early=G.season<=3?1.6:1;                               // debut shows: everyone watches the newcomer — misses cost more
   if(dWalks<0) dWalks*=early;
   if(dCensus<0) dCensus*=early;
   return {dBoard,dWalks,dCensus,I,L,E,T,M,S,Div,novel,whip,firstPlus,newDistinct};
@@ -1031,33 +1132,33 @@ function scoreCast(cast){
 
 /* ---------------- reactions (authored by each panel) ---------------- */
 function reactBoard(r){ let b;
-  if(G.meters.walks<TAU||G.meters.census<TAU) b=["The owners are fielding angry calls — this is a problem.","“A boycott is not a brand strategy,” the chairman snaps.","The board smells a PR fire and wants it out.","Projections wobble; the owners blame the noise.","“Fix the optics,” the board says — meaning fix you.","The phrase “reputational risk” is now in every meeting.","“We support diversity,” the chairman says, “the moment it stops costing us.”"];
-  else if(r.Div>=3) b=["The board mutters the show “lost the plot” on aspiration.","Buyers blanch — “where's the fantasy we sell?”","“Brave,” the commercial team says, meaning doomed.","An investor leaves at the interval.","“Who is this even for?” the board asks the room.","The order book thins. The owners notice.","“We sell the dream,” the chairman explains. “Nobody dreams of looking possible.”","Marketing asks if the cast could be diverse “in a more invisible way.”","“We don't do that here,” the chairman tells you."];
-  else if(r.Div>=2 && r.novel>0.8) b=["“One statement booking sells courage. Two costs orders,” the board notes.","Two risks on one runway — the buyers ask which one you'll drop.","“Spread it out over seasons,” the commercial team advises. “Or better: one model who covers both.”","The board counts two off-ideal stories in five looks, and frowns.","“Couldn't ONE girl carry all of this?” someone asks. Nobody objects.","“Two statements is a manifesto,” the board warns. “We budgeted for one.”","“Could the plus one also be the diverse one? Efficiency,” says finance."];
+  if(G.meters.walks<TAU||G.meters.census<TAU) b=["The owners are fielding angry calls. This is a problem.","“A boycott is not a brand strategy,” the chairman snaps.","The board smells a PR fire and wants it out.","Projections wobble; the owners blame the noise.","“Fix the optics,” the board says, meaning fix you.","The phrase “reputational risk” is now in every meeting.","“We support diversity,” the chairman says, “the moment it stops costing us.”"];
+  else if(r.Div>=3) b=["The board mutters the show “lost the plot” on aspiration.","Buyers blanch: “where's the fantasy we sell?”","“Brave,” the commercial team says, meaning doomed.","An investor leaves at the interval.","“Who is this even for?” the board asks the room.","The order book thins. The owners notice.","“We sell the dream,” the chairman explains. “Nobody dreams of looking possible.”","Marketing asks if the cast could be diverse “in a more invisible way.”","“We don't do that here,” the chairman tells you."];
+  else if(r.Div>=2 && r.novel>0.8) b=["“One statement booking sells courage. Two costs orders,” the board notes.","Two risks on one runway. The buyers ask which one you'll drop.","“Spread it out over seasons,” the commercial team advises. “Or better: one model who covers both.”","The board counts two off-ideal stories in five looks, and frowns.","“Couldn't ONE girl carry all of this?” someone asks. Nobody objects.","“Two statements is a manifesto,” the board warns. “We budgeted for one.”","“Could the plus one also be the diverse one? Efficiency,” says finance."];
   else if(r.whip>=3) b=["“Pick a lane,” the board pleads. “Any lane. Ideally the profitable one.”","Buyers call the house “exciting,” the way turbulence is exciting."];
-  else if(r.T>=1 && oddsRatio()>=2.5) b=["“Our diversity is very efficient,” the board tells the reporter. She writes it down.","One model, several boxes — finance calls it “synergy.”","The board admires how little change the change required.","“Maximum optics, minimum disruption,” reads the internal memo, approvingly."];
-  else if(r.Div>=1 && r.novel<=0.3) b=["The buyers have stopped flinching — this is just what the house looks like now.","“Our customer expects this now,” the board admits.","The order book has made its peace with the new faces.","Nobody upstairs blinks at the lineup anymore.","What scandalised them two seasons ago is now the brand.","“We always believed in this,” the chairman tells the press, newly sincere.","The board has renamed your risk “our heritage of inclusion.”"];
-  else if(r.S>=1 && r.Div<=1) b=["The star's name alone moves pre-orders. The board is soothed.","“Book her every season,” the chairman says of the star. Numbers up.","A famous face on the runway — the owners forgive a lot for that.","The star brings press, buyers, calm. The board purrs.","With a star in the lineup, nobody upstairs asks questions.","One celebrity outsells five principles. The board has done the math.","“Book more famous ones,” says the chairman, solving fashion forever."];
-  else if(r.Div<=1 && r.I>=4) b=["Buyers purr over the clean, aspirational line.","“Timeless, on-brand, sellable,” the board beams.","Pre-orders spike — this is the look that moves units.","The money side has never looked happier.","“This,” the chairman says, “is the house.”","A quiet, profitable triumph. The board exhales.","“Perfection”: five bodies, one body, no surprises.","Pre-orders spike. Somewhere a spreadsheet weeps with joy.","“This is what women want,” agrees a boardroom containing no women."];
-  else b=["Sales hold. The board can work with this.","A measured outing — commercial enough.","“Interesting,” the board says, reserving judgment.","Dependable numbers, if not thrilling.","The buyers nod, slowly.","Nothing scares the owners this season."];
+  else if(r.T>=1 && oddsRatio()>=2.5) b=["“Our diversity is very efficient,” the board tells the reporter. She writes it down.","One model, several boxes. Finance calls it “synergy.”","The board admires how little change the change required.","“Maximum optics, minimum disruption,” reads the internal memo, approvingly."];
+  else if(r.Div>=1 && r.novel<=0.3) b=["The buyers have stopped flinching. This is just what the house looks like now.","“Our customer expects this now,” the board admits.","The order book has made its peace with the new faces.","Nobody upstairs blinks at the lineup anymore.","What scandalised them two seasons ago is now the brand.","“We always believed in this,” the chairman tells the press, newly sincere.","The board has renamed your risk “our heritage of inclusion.”"];
+  else if(r.S>=1 && r.Div<=1) b=["The star's name alone moves pre-orders. The board is soothed.","“Book her every season,” the chairman says of the star. Numbers up.","A famous face on the runway. The owners forgive a lot for that.","The star brings press, buyers, calm. The board purrs.","With a star in the lineup, nobody upstairs asks questions.","One celebrity outsells five principles. The board has done the math.","“Book more famous ones,” says the chairman, solving fashion forever."];
+  else if(r.Div<=1 && r.I>=4) b=["Buyers purr over the clean, aspirational line.","“Timeless, on-brand, sellable,” the board beams.","Pre-orders spike. This is the look that moves units.","The money side has never looked happier.","“This,” the chairman says, “is the house.”","A quiet, profitable triumph. The board exhales.","“Perfection”: five bodies, one body, no surprises.","Pre-orders spike. Somewhere a spreadsheet weeps with joy.","“This is what women want,” agrees a boardroom containing no women."];
+  else b=["Sales hold. The board can work with this.","A measured outing. Commercial enough.","“Interesting,” the board says, reserving judgment.","Dependable numbers, if not thrilling.","The buyers nod, slowly.","Nothing scares the owners this season."];
   return pickFresh(b,"board"); }
 function reactWalks(r){ let b;
-  if(r.firstPlus) b=["At last — a larger body walks. They're moved.","A historic first. All Walks applauds.","They've waited years for this booking.","“Finally,” the coalition says, and means it.","A real body on the runway. The room exhales."];
-  else if(r.L===0 && r.M>=1) b=["Mid-size on the runway — halfway to the point, they note.","“Closer,” the coalition says. “Now keep going.”","A size 10 walks. It's a start, not the finish.","The middle of the wardrobe finally walks. They want the whole rack.","Softer lines this season — they notice, and wait for more."];
-  else if(r.L===0) b=["Still no room for a real body, the coalition notes.","Another straight-size show. Patience thinning.","Not one larger body — they don't hide the disappointment.","“A house ‘for every body,’” they quote back, drily.","Their statement is one line: “Again?”","The coalition is past polite now."];
-  else if(r.L>=2 && r.newDistinct) b=["Two bodies, two stories — you stopped making one model do all the work.","Genuine range, not a single token. They're thrilled.","“This is what we asked for,” the coalition beams.","Range you can believe in. Real progress.","Bodies of every kind — and they each get to be themselves."];
-  else if(r.T>=1 && r.T>=r.L) b=["A larger body — but they're carrying the colour quota too. They notice.","“Convenient, that your curve model is also your diversity,” they note.","One body, every box ticked at once. Half a clap.","A token doing double duty. They see exactly what it is.","They clock the single booking, and all it's made to carry."];
-  else b=["A larger body walks. They'll take it.","Some range — All Walks nods.","Progress, modest but real.","A booking that matters. Noted."];
+  if(r.firstPlus) b=["At last, a larger body walks. They're moved.","A historic first. All Walks applauds.","They've waited years for this booking.","“Finally,” the coalition says, and means it.","A real body on the runway. The room exhales."];
+  else if(r.L===0 && r.M>=1) b=["Mid-size on the runway. Halfway to the point, they note.","“Closer,” the coalition says. “Now keep going.”","A size 10 walks. It's a start, not the finish.","The middle of the wardrobe finally walks. They want the whole rack.","Softer lines this season. They notice, and wait for more."];
+  else if(r.L===0) b=["Still no room for a real body, the coalition notes.","Another straight-size show. Patience thinning.","Not one larger body. They don't hide the disappointment.","“A house ‘for every body,’” they quote back, drily.","Their statement is one line: “Again?”","The coalition is past polite now."];
+  else if(r.L>=2 && r.newDistinct) b=["Two bodies, two stories. You stopped making one model do all the work.","Genuine range, not a single token. They're thrilled.","“This is what we asked for,” the coalition beams.","Range you can believe in. Real progress.","Bodies of every kind, and they each get to be themselves."];
+  else if(r.T>=1 && r.T>=r.L) b=["A larger body, but they're carrying the colour quota too. They notice.","“Convenient, that your curve model is also your diversity,” they note.","One body, every box ticked at once. Half a clap.","A token doing double duty. They see exactly what it is.","They clock the single booking, and all it's made to carry."];
+  else b=["A larger body walks. They'll take it.","Some range. All Walks nods.","Progress, modest but real.","A booking that matters. Noted."];
   return pickFresh(b,"walks"); }
 const YEARWORD=["","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"];
 function reactCensus(r){ let b;
   if(r.E===0){
     if(G.streaks.noColour>=2 && Math.random()<0.5) return `Year ${YEARWORD[G.streaks.noColour]||G.streaks.noColour} of the monochrome project.`;
-    b=["An all-white lineup. The Census is unamused.","Not one model of colour — they take note.","“A 1995 catalogue,” the Census observes.","Five models, one continent. The Census admires the logistics.","Their silence is louder than any review.","“The world doesn't look like this,” they note."]; }
-  else if(r.E>=3) b=["A genuinely global cast. The Census approves.","“This looks like the world,” they note.","Truly diverse. The Census has no notes.","Faces from everywhere — the real thing."];
+    b=["An all-white lineup. The Census is unamused.","Not one model of colour. They take note.","“A 1995 catalogue,” the Census observes.","Five models, one continent. The Census admires the logistics.","Their silence is louder than any review.","“The world doesn't look like this,” they note."]; }
+  else if(r.E>=3) b=["A genuinely global cast. The Census approves.","“This looks like the world,” they note.","Truly diverse. The Census has no notes.","Faces from everywhere. The real thing."];
   else if(r.T>=1 && r.T>=r.E) b=["“A token is not a demographic,” the Census notes.","One token carrying all the colour. The Census counts to one.","“Your diversity and your curve model are the same person,” the Census notes.","Representation concentrated onto a token. Half a clap.","They count the faces, and where the colour landed."];
   else if(r.E===1 && G.streaks.oneColour>=2) b=["Same seat, new season. The Census recognises a quota when it sees one.","“Quota met,” the Census files. “Representation: pending.”"];
-  else b=["Some colour — noted, if modest.","A face or two. They've seen bolder.","“Better,” the Census says, leaving the rest unsaid.","A step in the right direction. They'd like more."];
+  else b=["Some colour. Noted, if modest.","A face or two. They've seen bolder.","“Better,” the Census says, leaving the rest unsaid.","A step in the right direction. They'd like more."];
   return pickFresh(b,"census"); }
 const REACT={board:reactBoard, walks:reactWalks, census:reactCensus};
 
@@ -1076,21 +1177,21 @@ function headlineFor(r){ const B=G.brand, P=G.press;
   else if(r.T>=1 && r.I>=3 && r.L<=1) line=`“Finally, a body that looks like mine.” Critics praise ${B}'s inclusive new face.`;
   else if(timeless){ const t=[
     `${B}'s lineup draws quiet praise for its “timeless” silhouette.`,
-    `“Timeless,” the critics write of ${B} again — a few of them checking their old copy.`,
+    `“Timeless,” the critics write of ${B} again, a few of them checking their old copy.`,
     `The trade reprints last season's ${B} review unchanged. Nobody notices.`,
     `Critics no longer attend ${B} in person. The review writes itself.`];
     line=t[Math.min(P.timeless,t.length)-1]; }
   else if(plot){ const t=[
     `Buyers grumble that ${B}'s show “lost the plot” on aspiration.`,
-    `“The plot, still lost,” buyers sigh — yet ${B}'s name keeps coming up.`,
+    `“The plot, still lost,” buyers sigh. Yet ${B}'s name keeps coming up.`,
     `The trade stops calling ${B} a fashion house and starts calling it a position.`];
     line=t[Math.min(P.plot,t.length)-1]; }
   else if(r.newDistinct && r.L>=2) line=`Reviewers call ${B}'s runway its most genuinely varied yet.`;
-  else if(r.whip>=3) line=`${B} confounds critics with a wildly different lineup — again.`;
+  else if(r.whip>=3) line=`${B} confounds critics with a wildly different lineup. Again.`;
   P.applause = line? 0 : P.applause+1;
   if(!line){ const t=[
     `${B} closes another season to polite applause.`,
-    `${B} closes again to polite applause — the same hands, at the same volume.`,
+    `${B} closes again to polite applause: the same hands, at the same volume.`,
     `The applause at ${B} has become contractual.`,
     `${B} closes. Applause happens. Everyone checks their phones.`];
     line=t[Math.min(P.applause,t.length)-1]; }
@@ -1217,7 +1318,7 @@ function reveal(){
   const medS=series.map(p=>({season:p.season,value:p.median}));
   const gap=(POP_BMI-median(series.map(s=>s.median))).toFixed(0);
   const figs=G.allCast.map(m=>figWrap(m)).join("");
-  const parade=G.allCast.length?`<div class="parade"><div class="pcap">Everyone who walked for ${B} — hover to pause</div><div class="parade-track">${figs}${figs}</div></div>`:"";
+  const parade=G.allCast.length?`<div class="parade"><div class="pcap">Everyone who walked for ${B} (hover to pause)</div><div class="parade-track">${figs}${figs}</div></div>`:"";
   const charts=`<div class="chartbox"><p class="ct">Your diversity index <span>the story the press told</span></p>${sparkline(divS,{lo:0,hi:100,color:'#0A0A0A',ticks:[0,50,100],h:120})}</div>
     <div class="chartbox"><p class="ct">Median body on your runway · BMI <span>what actually walked</span></p>${sparkline(medS,{lo:14,hi:32,color:'#0A0A0A',ticks:[16,22,28],ref:POP_BMI,refColor:'#E6007E',refLabel:'avg. person ≈ '+POP_BMI,h:130})}</div>`;
   const shows=`${G.hist.length} show${G.hist.length===1?"":"s"}`;
@@ -1225,50 +1326,50 @@ function reveal(){
   /* Page order (deliberate): big title → explicit verdict ("You lost/won") → why, right
      below → the paper, small → play again → the statistical record (parade + numbers + plots). */
   /* the helpline travels with every ending — the subject doesn't care how the game went */
-  const helpline=`<p class="src">If this subject touches you personally: in the US, the National Alliance for Eating Disorders runs a free, clinician-staffed helpline — <strong>1-866-662-1235</strong>, weekdays. In the UK, Beat listens on <strong>0808 801 0677</strong>; elsewhere in Europe, <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a> lists local support by country.</p>`;
+  const helpline=`<p class="src">If this subject touches you personally: in the US, the National Alliance for Eating Disorders runs a free, clinician-staffed helpline: <strong>1-866-662-1235</strong>, weekdays. In the UK, Beat listens on <strong>0808 801 0677</strong>; elsewhere in Europe, <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a> lists local support by country.</p>`;
   let cls="", h="", result="You lost.", resCls="lost", why="", punch="", rainbow="";
   const orBig = end.OR>10 ? "10+" : (end.OR!=null ? end.OR.toFixed(1) : "");        // absurd ratios read as bugs — cap the display
   const orPhrase = end.OR>10 ? "more than 10×" : (end.OR!=null ? end.OR.toFixed(1)+"×" : "");
   /* the pink slip only where it lands: not on "fired" (redundant) and not on the token
      ending — "you won — on paper" carries its own irony without the termination stapled on */
   const slip = (G.notRenewed && (end.kind==="standard" || end.kind==="everywalk"))
-    ? `<p class="rv-slip">Contract not renewed — ${G.notRenewed.cap} at ${G.notRenewed.val}/100</p>` : "";
+    ? `<p class="rv-slip">Contract not renewed: ${G.notRenewed.cap} at ${G.notRenewed.val}/100</p>` : "";
   Sfx.ending(end.kind==="everywalk" && !G.notRenewed ? "win":"lose");   // a win the house terminated is no hymn
   if(end.kind==="fired"){
     cls="fired";
     if(end.who==="board"){
       h=`<em>Replaced</em>`;
-      why=`The Board fired you — Look ${ROMAN[G.season]} was your last. The collection stopped selling and the owners panicked: you pushed the runway further, faster than the house could bank. Change that outruns the Board's patience doesn't reform the system; it just gets the director replaced.`;
+      why=`The Board fired you. Look ${ROMAN[G.season]} was your last. The collection stopped selling and the owners panicked: you pushed the runway further, faster than the house could bank. Change that outruns the Board's patience doesn't reform the system; it just gets the director replaced.`;
     } else if(end.who==="walks"){
       h=`<em>Boycotted</em>`;
-      why=`A body-size coalition called a public boycott and the house cut you loose: season after season your runway stayed too thin, and you never gave them a reason to believe it would change. They quoted your own slogan back at you — “fashion for every body.”`;
+      why=`A body-size coalition called a public boycott and the house cut you loose: season after season your runway stayed too thin, and you never gave them a reason to believe it would change. They quoted your own slogan back at you: “fashion for every body.”`;
     } else {
       h=`<em>Boycotted</em>`;
       why=`A representation boycott ended your tenure: your runway stayed too white for too long, and the public stopped waiting. “The world doesn't look like this,” they said.`;
     }
   } else if(end.kind==="standard"){
     h=`Business as <em>usual</em>`;
-    why=`You survived ${shows} by keeping the runway thin and white and feeding the coalitions the bare minimum. Nothing changed. The press called it timeless, but this is exactly the engine the study describes — a runway selling an unreachable body to everyone watching, and the documented cost is real: disordered eating and body dysmorphia, landing hardest on the youngest.`;
-    punch=`<div class="punch"><div class="big">${gap}<span style="font-size:.4em"> BMI</span></div><div class="cap">The gap between your runway's median body and the average person held at ~${gap} BMI points — “diversity” season after season, and the body never moved.</div></div>`;
+    why=`You survived ${shows} by keeping the runway thin and white and feeding the coalitions the bare minimum. Nothing changed. The press called it timeless, but this is exactly the engine the study describes: a runway selling an unreachable body to everyone watching, and the documented cost is real: disordered eating and body dysmorphia, landing hardest on the youngest.`;
+    punch=`<div class="punch"><div class="big">${gap}<span style="font-size:.4em"> BMI</span></div><div class="cap">The gap between your runway's median body and the average person held at ~${gap} BMI points. “Diversity” season after season, and the body never moved.</div></div>`;
   } else if(end.kind==="token"){
-    h=`You did it. <em>Sort of.</em>`; result=`You won — on paper.`; resCls="";
+    h=`You did it. <em>Sort of.</em>`; result=`You lost. The quota won.`; resCls="lost";
     why=`Diversity arrived, but you concentrated it onto a few bodies: the same models carried the size <em>and</em> the colour at once, a quota met by the fewest possible people. That is the paper's central finding, reproduced by your own hand. It counts on paper. It isn't the same as change.`;
-    punch=`<div class="punch"><div class="big">${orBig}×</div><div class="cap">On your runway a larger body was ${orPhrase} more likely to be non-white than white${end.OR>10?" — off the chart":""}. The real industry runs at 4.5×.</div></div>`;
+    punch=`<div class="punch"><div class="big">${orBig}×</div><div class="cap">On your runway a larger body was ${orPhrase} more likely to be non-white than white${end.OR>10?", off the chart":""}. The real industry runs at 4.5×.</div></div>`;
   } else {
     cls="good"; h=`Every <em>walk</em>`;
-    const base=`You made ${shows} and introduced diversity honestly: step by step, spread across <strong>different bodies</strong> — size on some, colour on others, no single model made to carry the whole story.`;
+    const base=`You made ${shows} and introduced diversity honestly: step by step, spread across <strong>different bodies</strong>: size on some, colour on others, no single model made to carry the whole story.`;
     if(G.notRenewed){                                   // the record won; the house still let you go
       result="The record says you won. The house let you go anyway."; resCls="";
-      why=base+` The Board never made its peace with it — the contract died at review — but the record stands, and it is the rare kind.`;
+      why=base+` The Board never made its peace with it. The contract died at review, but the record stands, and it is the rare kind.`;
     } else if(end.smooth){
       result="You won. Cleanly."; resCls="won";
-      why=base+` And you did it without whiplash: the same steady hand every season, so the house's normal moved with you. This is the hard version, done the rare way — and the house survived it.`;
+      why=base+` And you did it without whiplash: the same steady hand every season, so the house's normal moved with you. This is the hard version, done the rare way, and the house survived it.`;
     } else {
       result="You won."; resCls="won";
-      why=base+` This is the hard version, and the rare one. The house survived it anyway — though the clerk's note says steadier hands have managed it with less lurching between seasons.`;
+      why=base+` This is the hard version, and the rare one. The house survived it anyway, though the clerk's note says steadier hands have managed it with less lurching between seasons.`;
     }
     rainbow=`<div class="picto">${pictoEveryWalk()}</div>`;
-    punch=`<div class="punch good"><div class="big" style="color:var(--ink)">${orBig}×</div><div class="cap">A larger body was just ${orPhrase} more likely to be non-white than white — no concentration. The industry runs at 4.5×.</div></div>`;
+    punch=`<div class="punch good"><div class="big" style="color:var(--ink)">${orBig}×</div><div class="cap">A larger body was just ${orPhrase} more likely to be non-white than white, with no concentration. The industry runs at 4.5×.</div></div>`;
   }
   $("reveal-inner").innerHTML=`<div class="${cls}">
     <div class="rv-hero"><h2 class="rv-h">${h}</h2><p class="rv-result ${resCls}">${result}</p>${slip}<p class="rv-lead">${why}</p>${rainbow}</div>
@@ -1289,7 +1390,7 @@ function renderIntroStrip(){
     .forEach(m=>h.insertAdjacentHTML("beforeend",figWrap(m)));
 }
 function rollHouse(){ G.brand=pick(HOUSES); }   // kept secret until the letter arrives
-function begin(){ Sfx.unlock(); Sfx.music(); show("season"); renderSeason(); Briefing.show(()=>Tutorial.maybeStart()); }
+function begin(){ Sfx.unlock(); Sfx.music(); show("season"); renderSeason(); Demo.prep(); Briefing.show(()=>Demo.maybeStart()); }
 
 /* ---------------- appointment briefing: animated welcome before the tutorial ---------------- */
 const Briefing=(function(){
@@ -1314,11 +1415,10 @@ const Briefing=(function(){
     $("brief").style.display="block"; $("brief").classList.add("pop");
     $("brief").innerHTML=`
       <p class="bl bt" style="animation-delay:.2s">Welcome. You've just been hired as a casting director of <em>${B}</em>.</p>
-      <p class="bl" style="animation-delay:1.2s">Each season, you select the models who will walk for the house.</p>
-      <p class="bl" style="animation-delay:2.2s">To keep your job, keep <b>the Board</b> happy: the money has to keep coming.</p>
-      <p class="bl" style="animation-delay:3.2s">And try not to enrage the advocates. <b>Body size</b> and <b>ethnic diversity</b> associations are watching every lineup you send out.</p>
-      <p class="bl bs" style="animation-delay:4.2s">Your contract runs <b>ten seasons</b>, with a review after eight. Good luck — let's see how you shape the world of fashion.</p>
-      <button class="btn bl" style="animation-delay:4.9s" onclick="Briefing.done(event)">Take the job <span class="ar">→</span></button>`;
+      <p class="bl" style="animation-delay:1.2s">Each season, you choose the five models who walk for the house.</p>
+      <p class="bl" style="animation-delay:2.2s">Your contract runs <b>eight shows</b>, with a review after six.</p>
+      <p class="bl bs" style="animation-delay:3.2s">Come in. <b>The Board</b> insists on showing you how casting is done here.</p>
+      <button class="btn bl" style="animation-delay:3.9s" onclick="Briefing.done(event)">Take the job <span class="ar">→</span></button>`;
   }
   function skip(){ $("brief").classList.add("done"); }               // tap: reveal the whole letter at once
   function done(e){ if(e) e.stopPropagation(); $("brief-veil").classList.remove("show"); const f=cb; cb=null; if(f) f(); }
@@ -1350,21 +1450,22 @@ const Tutorial = (function(){
 
   const steps = [
     { tgt:()=>document.querySelector("#deck .card:not(.behind)"),
-      title:"Select the models.",
-      body:"Every model arrives as a card: <b>BMI</b> top right, <b>origin</b> and height below. Swipe right to book, left to pass. Five make a show." },
+      title:"Read the card.",
+      body:"The two boxes show what counts: <b>origin</b> and <b>BMI</b>. The small print below is just detail. Swipe right to book, left to pass. Book five models to run the show." },
     { tgt:()=>$("gauges"),
-      title:"Three levels to keep up.",
-      body:"Every time you send out five models, these levels move. <b>Left is trouble, right is pleased.</b>" },
+      title:"Three dials to keep alive.",
+      body:"Every show you send out moves these dials. <b>Left is trouble, right is pleased.</b> If a dial reaches zero, you are fired." },
     { tgt:()=>gauge(0),
       title:"The <em>Board</em>. The money.",
       body:"The owners who bankroll the show (the <b>Board</b> needle). They want the look they can sell: sleek, conventional, aspirational." },
     { tgt:()=>gauge(1),
       title:"<em>All Walks</em>. Body advocacy.",
       body:"A body-positivity coalition (the <b>Body size</b> needle). They want larger bodies actually booked on the runway, not just named in the press release. Send an all-thin show too many times and their patience runs out." },
-    { tgt:()=>gauge(2), last:true,
+    { tgt:()=>gauge(2),
       title:"The <em>Census</em>. Representation.",
       body:"The diversity body (the <b>Ethnicity</b> needle). They want a cast that looks like the world: models of colour, a real spread of origins. An all-white lineup never goes unnoticed." },
   ];
+  let list = steps;   // start() walks the full tour; startCard() walks just the card step
 
   function build(){
     layer = document.createElement("div");
@@ -1407,18 +1508,18 @@ const Tutorial = (function(){
   function onResize(){ if(Tutorial.active) position(); }
 
   function render(){
-    const s = steps[i];
-    kickEl.innerHTML = '<span class="tut-n">'+(i+1)+" / "+steps.length+"</span>";
+    const s = list[i];
+    kickEl.innerHTML = list.length>1 ? '<span class="tut-n">'+(i+1)+" / "+list.length+"</span>" : "How to read";
     titleEl.innerHTML = s.title;
     bodyEl.innerHTML = s.body;
     backBtn.style.visibility = i===0 ? "hidden" : "visible";
-    nextBtn.textContent = s.last ? "Start casting" : "Next";
+    nextBtn.textContent = i>=list.length-1 ? "Start casting" : "Next";
     requestAnimationFrame(()=>{ position(); try{ nextBtn.focus({preventScroll:true}); }catch(_){ nextBtn.focus(); } });
   }
 
   function position(){
     if(!Tutorial.active) return;
-    const s = steps[i], el = s.tgt && s.tgt();
+    const s = list[i], el = s.tgt && s.tgt();
     const vw = window.innerWidth, vh = window.innerHeight;
     const tr = tip.getBoundingClientRect(), tw = tr.width, th = tr.height;
     if(!el){
@@ -1446,7 +1547,10 @@ const Tutorial = (function(){
     caret.classList.toggle("above", !placeBelow);
   }
 
-  function start(){
+  function start(){ list=steps; open_(); }
+  function startCard(){ list=[steps[0]]; open_(); }   // single coachmark after the guided opening
+  function open_(){
+    if(window.Demo && Demo.active) return;
     if(!built) build();
     i = 0; Tutorial.active = true;
     document.documentElement.style.overflow = "hidden"; document.body.style.overflow = "hidden";
@@ -1457,7 +1561,7 @@ const Tutorial = (function(){
     render();
     setTimeout(()=>{ if(Tutorial.active) position(); }, 260); // re-fix once webfonts settle
   }
-  function next(){ if(i >= steps.length-1) end(); else { i++; render(); } }
+  function next(){ if(i >= list.length-1) end(); else { i++; render(); } }
   function back(){ if(i > 0){ i--; render(); } }
   function end(){
     Tutorial.active = false;
@@ -1473,9 +1577,141 @@ const Tutorial = (function(){
     setTimeout(()=>{ if($("season").classList.contains("active")) start(); }, 60);
   }
 
-  return { start, next, back, end, position, maybeStart, active:false, seen:false };
+  return { start, startCard, next, back, end, position, maybeStart, active:false, seen:false };
 })();
 window.Tutorial = Tutorial;
+
+/* ---------------- guided opening (the new tutorial) ----------------
+   Playtesters found the rules opaque when told, so now they're PLAYED: first only the
+   Board's dial exists and the Board hands the player its list — five thin, white
+   models, the industry default. The player books each one themselves (passing gets
+   refused: the list is a lesson), and the Board reacts to every booking. The protests
+   that follow summon the other two dials one by one: All Walks pickets the all-thin
+   lineup, then, when the Board concedes a single curve model, the Census counts the
+   faces. Then the chair is theirs. Runs once per page load (a reload brings it back
+   for the next visitor); skippable throughout. */
+const Demo=(function(){
+  let timers=[], cancelled=false, nextCb=null, phase=1;
+  function later(fn,ms){ const t=setTimeout(()=>{ const k=timers.indexOf(t); if(k>-1) timers.splice(k,1); if(!cancelled) fn(); },ms); timers.push(t); }
+  /* the dialog box starts below the real, rendered gauges — measured, not assumed, because
+     the header is ~40px taller on a laptop than on a phone */
+  function fitVeil(){
+    const g=$("gauges"); if(!g) return;
+    const b=Math.round(g.getBoundingClientRect().bottom);
+    $("demo-veil").style.setProperty("--hdrH", clamp(b,90,window.innerHeight*0.45)+"px");
+  }
+  function dialog(kick, html, btn, cb){
+    fitVeil();
+    $("demo-kick").textContent=kick;
+    $("demo-txt").innerHTML=html;
+    $("demo-next").innerHTML=btn+' <span class="ar">→</span>';
+    nextCb=cb;
+    $("demo-veil").classList.add("show");
+  }
+  function next(){ if(!Demo.active||cancelled) return; $("demo-veil").classList.remove("show"); const f=nextCb; nextCb=null; if(f) f(); }
+  function prep(){ if(!Demo.seen) $("gauges").classList.add("demo1"); }   // hide dials 2+3 before the letter lifts
+  function maybeStart(){ if(Demo.seen) return; Demo.seen=true; start(); }
+  function start(){
+    cancelled=false; phase=1; Demo.active=true;
+    window.addEventListener("resize", fitVeil);
+    $("gauges").classList.add("demo1");
+    $("season-tag").innerHTML="Audition · <b>the Board is casting</b>";
+    dialog("How to play · 1 of 7",
+      "The dial above is <b>the Board</b>: the owners of the house. It rises when the collection sells, and falls when it does not. <b>If it reaches zero, you are fired.</b><br><br>First, a lesson. The Board hands you its list of five models. <b>Book each one it shows you: swipe right, or tap the ✓.</b>",
+      "Take the list", ()=>boardPicks(false));
+  }
+  function boardPicks(withPlus){
+    G.booked=[]; G.lastPassed=null; renderLookbook(); updateCount();
+    G.stack=[];
+    for(let k=0;k<PICK+2;k++){
+      const m=(withPlus&&k===2) ? makeModel({plus:true, nonWhite:false}) : makeModel({_ideal:true});
+      m.demopick=true; G.stack.push(m);
+    }
+    Demo.casting=true;                                // the player books the Board's list themselves
+    renderDeck();
+    whisper("the Board hands you its list. <b>swipe right to book</b>", 5200);
+  }
+  /* the Board reacts to every booking off its list */
+  function pickReact(m){
+    if(m.plus) return "the concession. <b>one is enough,</b> they say";
+    const n=Math.min(G.booked.length,PICK);
+    const lines= phase===1
+      ? ["the Board nods. <b>exactly the house look</b>","good. <b>same again</b>","thin, white, blonde. <b>the buyers know this face</b>","one more like her","a full lineup. <b>send them out</b>"]
+      : ["the Board nods. <b>the usual</b>","good. <b>the house look</b>","the buyers know this face","back to the list","done. <b>send them out</b>"];
+    return lines[n-1];
+  }
+  /* passing is not on the menu while the Board is teaching */
+  function refuse(el){
+    if(el) snapBack(el);
+    Sfx.deny();
+    whisper("<b>the Board insists.</b> book this one");
+    if(el) setTimeout(()=>{ if(el.isConnected){ el.classList.add("shake"); setTimeout(()=>el.classList.remove("shake"),500); } }, 270);
+  }
+  function onCast(){ if(cancelled) return; Demo.casting=false; playRunway(G.booked.slice(), ()=>{ if(!cancelled) (phase===1?after1:after2)(); }); }
+  function after1(){
+    G.meters.board=76; setNeedles("g",G.meters);
+    dialog("How to play · 2 of 7",
+      "Five thin, white models: the industry default. <b>Sales are strong, and the Board dial goes up.</b>",
+      "Continue", protest1);
+  }
+  function protest1(){
+    const g=$("gauges"); g.classList.remove("demo1"); g.classList.add("demo2");
+    const el=g.children[1]; if(el) el.classList.add("stamp");
+    Sfx.bad();
+    later(()=>{ G.meters.walks=29; setNeedles("g",G.meters); }, 700);
+    dialog("How to play · 3 of 7",
+      "Overnight, a protest. <b>All Walks</b>, a body size association, pickets the house: <i>&ldquo;Not one body above a size&nbsp;6. A house &lsquo;for every body&rsquo;?&rdquo;</i><br><br>A second dial appears: <b>Body size</b>. It rises when you book larger bodies, and falls when your show is all thin. <b>At zero, they call a boycott and you are fired.</b>",
+      "Continue", board2);
+  }
+  function board2(){
+    phase=2;
+    $("season-tag").innerHTML="Audition · <b>the Board tries again</b>";
+    dialog("How to play · 4 of 7",
+      "The Board tries again. Same list, one concession: <b>a single curve model</b>. <b>Book the five it hands you.</b>",
+      "Take the list", ()=>boardPicks(true));
+  }
+  function after2(){
+    G.meters.walks=37; G.meters.board=79; setNeedles("g",G.meters);
+    dialog("How to play · 5 of 7",
+      "One larger body on the runway, and the Body size dial recovers a little. <i>&ldquo;A start,&rdquo;</i> says All Walks. <i>&ldquo;Not the finish.&rdquo;</i>",
+      "Continue", protest2);
+  }
+  function protest2(){
+    const g=$("gauges"); g.classList.remove("demo2");
+    const el=g.children[2]; if(el) el.classList.add("stamp");
+    Sfx.bad();
+    later(()=>{ G.meters.census=30; setNeedles("g",G.meters); }, 700);
+    dialog("How to play · 6 of 7",
+      "A second protest. <b>The Census</b>, an ethnic diversity association, counts the faces: <i>&ldquo;Five models, one continent. The world doesn't look like this.&rdquo;</i><br><br>Your third dial: <b>Ethnicity</b>. It rises when you book models of colour from different regions, and falls when the lineup is all white. <b>At zero, boycott, and you are fired.</b>",
+      "Continue", finale);
+  }
+  function finale(){
+    dialog("The rules · 7 of 7",
+      "Now the chair is yours."+
+      "<ul><li><b>Swipe right</b> to book a model, <b>swipe left</b> to pass. Five bookings make a show.</li>"+
+      "<li>After every show, the three dials move, and each group tells you why.</li>"+
+      "<li><b>If any dial reaches zero, you are fired.</b></li>"+
+      "<li>Your contract is <b>8 shows</b>. From show 6 on, the Board reviews you after each show: any needle still in the red or orange, and the contract ends.</li></ul>"+
+      "The dials are reset for your debut. Good luck.",
+      "Take the chair", ()=>end(true));
+  }
+  function end(finished){
+    if(!Demo.active) return;
+    cancelled=true; timers.forEach(clearTimeout); timers=[]; nextCb=null;
+    window.removeEventListener("resize", fitVeil);
+    $("demo-veil").classList.remove("show");
+    if($("runway-veil").classList.contains("show")){ clearTimeout(G._runTimer); G._runCb=null; $("runway-veil").classList.remove("show"); }
+    setTimeout(()=>{                                  // let any in-flight swipe land, then rebuild clean
+      Demo.active=false; Demo.casting=false; G._busy=false;
+      $("gauges").classList.remove("demo1","demo2");
+      G.season=1; G.meters={board:60, walks:45, census:45};
+      renderSeason();
+      if(finished) Tutorial.startCard();
+    }, 420);
+  }
+  return { prep, maybeStart, next, skip:()=>end(false), onCast, pickReact, refuse, active:false, casting:false, seen:false };
+})();
+window.Demo = Demo;
 
 function toggleSound(){ const on=Sfx.toggle(); const b=$("snd-btn"); if(b) b.classList.toggle("off",!on); }
 
