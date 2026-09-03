@@ -80,10 +80,9 @@
   .btn.line:hover{color:var(--accent)}
 
   /* season header */
-  .top{position:relative; text-align:center; border-bottom:1px solid var(--ink); padding:3px 0 8px}
-  .top .h{font-family:var(--tech); font-weight:900; font-size:20px; text-transform:uppercase; display:inline-block; letter-spacing:-.01em; line-height:1.2}
-  .top .h::before,.top .h::after{content:'"'}
-  .top .co{font-size:11px; font-weight:600; color:var(--ink2); margin-left:8px; vertical-align:2px}
+  /* the house name as in v1: a black label box, pasted on slightly crooked */
+  .top{position:relative; text-align:center; border-bottom:2px solid var(--ink); padding-bottom:7px}
+  .top .h{font-family:var(--brico); font-weight:900; font-size:15px; letter-spacing:.16em; text-transform:uppercase; display:inline-block; background:var(--ink); color:var(--paper); padding:3px 14px 4px; transform:rotate(-.6deg)}
   .helpbtn{position:absolute; right:-4px; top:-4px; width:28px; height:28px; border:none; background:none; color:var(--ink2); font-family:var(--hand); font-weight:700; font-size:24px; line-height:1; padding:0; transition:color .2s}
   .helpbtn:hover{color:var(--ink)}
   .sndbtn,.a11ybtn{position:fixed; top:10px; z-index:300; width:30px; height:30px; border:none; background:none; color:var(--ink2); padding:0; display:flex; align-items:center; justify-content:center; transition:color .2s, opacity .2s}
@@ -241,7 +240,7 @@
   }
   @media(max-height:560px){ .cfine{display:none} }
   /* the longest house names must clear the fixed sound/access buttons on narrow screens */
-  @media(max-width:380px){ .top .h{font-size:15px} .top .co{display:none} }
+  @media(max-width:380px){ .top .h{font-size:11.5px; letter-spacing:.1em} }
   /* wide screens: the corner buttons dock to the game column instead of drifting to the screen edge */
 
   /* figure */
@@ -483,7 +482,7 @@
 
   <!-- SEASON -->
   <section id="season" class="screen">
-    <div class="top"><div class="h" id="house-name">House</div><span class="co">c/o 2026</span><button class="helpbtn" onclick="Tutorial.start()" title="How to play" aria-label="How to play">?</button></div>
+    <div class="top"><div class="h" id="house-name">House</div><button class="helpbtn" onclick="Tutorial.start()" title="How to play" aria-label="How to play">?</button></div>
     <div class="gauges" id="gauges"></div>
 
     <div class="lookbook">
