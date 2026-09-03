@@ -237,10 +237,6 @@
   /* the longest house names must clear the fixed sound/access buttons on narrow screens */
   @media(max-width:380px){ .top .h{font-size:15px} .top .co{display:none} }
   /* wide screens: the corner buttons dock to the game column instead of drifting to the screen edge */
-  @media(min-width:700px){
-    .sndbtn{left:calc(50% - 258px)}
-    .a11ybtn{left:calc(50% - 226px)}
-  }
 
   /* figure */
   .figwrap{display:flex; align-items:flex-end; justify-content:center}
@@ -441,6 +437,22 @@
   .gauges.demo2 .gauge:nth-child(3){visibility:hidden}
   .gauge.stamp{animation:gstamp .55s cubic-bezier(.3,1.25,.45,1) both}
   @keyframes gstamp{from{transform:scale(1.7) rotate(-8deg); opacity:0} 60%{transform:scale(.94) rotate(2deg); opacity:1} to{transform:scale(1) rotate(0deg); opacity:1}}
+
+  /* wide screens, last so it wins over the base sizes above */
+  @media(min-width:700px){
+    .sndbtn{left:calc(50% - 258px)}
+    .a11ybtn{left:calc(50% - 226px)}
+    /* laptops: the pen notes and the tutorial read at arm's length */
+    .whisper{font-size:25px; top:-2px}
+    .demo-txt{font-size:16.5px; line-height:1.55}
+    .brief .bl, .brief p.bl{font-size:16.5px}
+    .brief .bt{font-size:19px}
+    .tut-body{font-size:15.5px}
+    .tut-title{font-size:24px}
+    .tut-tip{width:min(90vw,380px)}
+    .undo,.keyhint{font-size:17px}
+    .case-tag{font-size:18px}
+  }
 </style>
 </head>
 <body>
