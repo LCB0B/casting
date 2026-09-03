@@ -80,9 +80,12 @@
   .btn.line:hover{color:var(--accent)}
 
   /* season header */
-  /* the house name as in v1: a black label box, pasted on slightly crooked */
-  .top{position:relative; text-align:center; border-bottom:2px solid var(--ink); padding-bottom:7px}
-  .top .h{font-family:var(--brico); font-weight:900; font-size:15px; letter-spacing:.16em; text-transform:uppercase; display:inline-block; background:var(--ink); color:var(--paper); padding:3px 14px 4px; transform:rotate(-.6deg)}
+  /* the house name as a garment label: "ARNAMI" in the label voice, on a pen line drawn by hand */
+  .top{position:relative; text-align:center; padding:2px 0 12px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 8' preserveAspectRatio='none'%3E%3Cpath d='M2 4.5 C 60 2.5, 120 6, 200 4 S 330 2.5, 398 4.8' fill='none' stroke='%230A0A0A' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:0 100%; background-size:100% 8px}
+  .top .h{font-family:var(--tech); font-weight:900; font-size:22px; letter-spacing:-.01em; text-transform:uppercase; display:inline-block; color:var(--ink); line-height:1.15}
+  .top .h::before,.top .h::after{content:'"'}
   .helpbtn{position:absolute; right:-4px; top:-4px; width:28px; height:28px; border:none; background:none; color:var(--ink2); font-family:var(--hand); font-weight:700; font-size:24px; line-height:1; padding:0; transition:color .2s}
   .helpbtn:hover{color:var(--ink)}
   .sndbtn,.a11ybtn{position:fixed; top:10px; z-index:300; width:30px; height:30px; border:none; background:none; color:var(--ink2); padding:0; display:flex; align-items:center; justify-content:center; transition:color .2s, opacity .2s}
@@ -102,7 +105,12 @@
   .gauge{text-align:center}
   .gauge-svg{width:100%; height:auto; display:block; margin:0 auto}
   .needle{transition:transform 1.05s cubic-bezier(.33,1.15,.45,1)}
-  .gauge-cap{font-family:var(--tech); font-weight:800; font-size:9.5px; text-transform:uppercase; color:var(--ink2); margin-top:-3px; transform-origin:50% 50%}
+  .gauge-cap{font-family:var(--tech); font-weight:800; font-size:11px; text-transform:uppercase; color:var(--ink); margin-top:-1px; transform-origin:50% 50%}
+  .gauge-cap::before,.gauge-cap::after{content:'"'}
+  /* the dial drawn by hand: a pen outline around the coloured arc, paper gaps, a bent needle on an inked pivot */
+  .gauge-svg .outline{fill:none; stroke:var(--ink); stroke-width:1.4; stroke-linejoin:round}
+  .gauge-svg .needle path{fill:var(--ink)}
+  .gauge-svg .pivot{fill:var(--accent); stroke:var(--ink); stroke-width:1.2}
   .g-a1{fill:var(--arc1)} .g-a2{fill:var(--arc2)} .g-a3{fill:var(--arc3)} .g-a4{fill:var(--arc4)} .g-a5{fill:var(--arc5)}
   .gauge-cap.warn{color:var(--warn); font-weight:800}
   .gauge-cap.red{color:var(--bad); font-weight:800}
@@ -263,7 +271,7 @@
   }
   @media(max-height:560px){ .cfine{display:none} }
   /* the longest house names must clear the fixed sound/access buttons on narrow screens */
-  @media(max-width:380px){ .top .h{font-size:11.5px; letter-spacing:.1em} }
+  @media(max-width:380px){ .top .h{font-size:16px} }
   /* wide screens: the corner buttons dock to the game column instead of drifting to the screen edge */
 
   /* figure */
@@ -1050,16 +1058,18 @@ function gaugeArc(){
      fills live in the .g-a* classes so colour-safe mode can repaint them via the --arc vars */
   const cx=50,cy=50,R=48,Ri=27;
   const pt=(t,r)=>{const a=(180-t*180)*Math.PI/180; return (cx+r*Math.cos(a)).toFixed(1)+" "+(cy-r*Math.sin(a)).toFixed(1);};
-  return [1,2,3,4,5].map((n,i)=>{const t0=i/5, t1=(i+1)/5;
-    return `<path d="M ${pt(t0,R)} A ${R} ${R} 0 0 1 ${pt(t1,R)} L ${pt(t1,Ri)} A ${Ri} ${Ri} 0 0 0 ${pt(t0,Ri)} Z" class="g-a${n}" stroke="var(--paper)" stroke-width="1"/>`;}).join("");
+  const segs=[1,2,3,4,5].map((n,i)=>{const t0=i/5, t1=(i+1)/5;
+    return `<path d="M ${pt(t0,R)} A ${R} ${R} 0 0 1 ${pt(t1,R)} L ${pt(t1,Ri)} A ${Ri} ${Ri} 0 0 0 ${pt(t0,Ri)} Z" class="g-a${n}" stroke="var(--paper)" stroke-width="2"/>`;}).join("");
+  const outline=`<path class="outline" filter="url(#rough3)" d="M ${pt(0,R)} A ${R} ${R} 0 0 1 ${pt(1,R)} L ${pt(1,Ri)} A ${Ri} ${Ri} 0 0 0 ${pt(0,Ri)} Z"/>`;
+  return segs+outline;
 }
 const needleAngle=v=>((clamp(v)-50)/50)*90;
 const capClass=v=> v<15?" crit":(v<30?" red":(v<45?" warn":(v>=75?" happy":(v>=60?" ok":""))));   // caption heats with anger, greens with joy
 function gaugeHTML(key,label,value,idp){
   return `<div class="gauge"><svg viewBox="0 0 100 56" class="gauge-svg">${gaugeArc()}
     <g class="needle" id="${idp}-${key}" transform="rotate(${needleAngle(value).toFixed(1)} 50 50)">
-      <polygon points="48.6,50 51.4,50 50.5,9 49.5,9" fill="var(--ink)"/></g>
-    <circle cx="50" cy="50" r="4.2" fill="var(--accent)"/></svg>
+      <path d="M48.4 50 Q49.3 32 50.3 10.5 Q50.9 32 51.6 50 Z"/></g>
+    <circle class="pivot" cx="50" cy="50" r="4.2"/></svg>
     ${label?`<div class="gauge-cap${capClass(value)}">${label}</div>`:""}</div>`;
 }
 /* Needle rotation uses the SVG `transform` ATTRIBUTE (core SVG 1.1, identical in every engine)
