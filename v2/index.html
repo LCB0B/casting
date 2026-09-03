@@ -53,22 +53,25 @@
     background-repeat:no-repeat; background-position:0 100%; background-size:100% 7px}
   .premise{font-size:15px; max-width:42ch; margin:28px 0 0}
   .name-row{margin:26px 0 0; display:flex; flex-direction:column; gap:12px}
+  #begin-btn{font-size:22px; padding:8px 0 9px}
+  #begin-btn::after{font-size:26px}
   .intro-strip{display:flex; gap:0; height:120px; align-items:flex-end; justify-content:center; margin-top:30px; opacity:.92; pointer-events:none}
   .intro-strip .figwrap{width:50px}
   .intro-strip .fig-svg{max-height:120px}
 
-  /* the one solid element: a black bar reading "LABEL" → */
-  .btn{display:inline-flex; align-items:center; justify-content:flex-start; gap:0; background:var(--ink); color:var(--paper); border:none; padding:15px 18px; font-family:var(--tech); font-weight:800; font-size:13px; text-transform:uppercase; transition:box-shadow .15s, transform .15s; width:100%; box-shadow:0 1px 3px rgba(0,0,0,.22); line-height:1}
-  .btn::before{content:'"'}
+  /* buttons: a bold word, a pen underline, an arrow. No bar, no box. */
+  .btn{display:inline-flex; align-items:center; justify-content:flex-start; gap:12px; background:none; color:var(--ink); border:none; padding:6px 0 7px; font-family:var(--tech); font-weight:900; font-size:16px; text-transform:uppercase; letter-spacing:-.01em; width:auto; align-self:flex-start; box-shadow:none; line-height:1; transition:color .15s;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Cpath d='M1 5 C 15 2, 30 7, 45 4 S 75 2, 99 5' fill='none' stroke='%23E6007E' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:0 100%; background-size:100% 7px}
   .btn .ar{font-size:0; line-height:0}
-  .btn .ar::before{content:'"'; font-size:13px; line-height:1}
-  .btn::after{content:'→'; margin-left:auto; padding-left:14px; font-size:17px; line-height:1}
-  .btn:hover{transform:translateY(1px); box-shadow:0 1px 2px rgba(0,0,0,.2)}
-  .btn:active{transform:translateY(2px); box-shadow:none}
-  .btn:disabled{opacity:.25; cursor:not-allowed; box-shadow:none}
+  .btn::after{content:'→'; font-size:20px; line-height:1; transition:transform .15s}
+  .btn:hover{color:var(--accent)}
+  .btn:hover::after{transform:translateX(4px)}
+  .btn:active::after{transform:translateX(6px)}
+  .btn:disabled{opacity:.25; cursor:not-allowed}
   .btn.center{justify-content:flex-start}
-  .btn.line{background:none; color:var(--ink); border:none; border-bottom:2px solid var(--ink); box-shadow:none; padding:8px 0 5px; border-radius:0}
-  .btn.line:hover{color:var(--accent); border-color:var(--accent); transform:none; box-shadow:none}
+  .btn.line{color:var(--ink)}
+  .btn.line:hover{color:var(--accent)}
 
   /* season header */
   .top{position:relative; text-align:center; border-bottom:1px solid var(--ink); padding:3px 0 8px}
@@ -95,7 +98,6 @@
   .gauge-svg{width:100%; height:auto; display:block; margin:0 auto}
   .needle{transition:transform 1.05s cubic-bezier(.33,1.15,.45,1)}
   .gauge-cap{font-family:var(--tech); font-weight:800; font-size:9.5px; text-transform:uppercase; color:var(--ink2); margin-top:-3px; transform-origin:50% 50%}
-  .gauge-cap::before,.gauge-cap::after{content:'"'}
   .g-a1{fill:var(--arc1)} .g-a2{fill:var(--arc2)} .g-a3{fill:var(--arc3)} .g-a4{fill:var(--arc4)} .g-a5{fill:var(--arc5)}
   .gauge-cap.warn{color:var(--warn); font-weight:800}
   .gauge-cap.red{color:var(--bad); font-weight:800}
@@ -107,7 +109,7 @@
   /* lookbook: five hangers on a rail */
   .lookbook{margin:12px 0 2px; position:relative}
   .lb-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px}
-  #count::before{content:'"Booked" '}
+  #count::before{content:'Booked '}
   .lb-cells{display:grid; grid-template-columns:repeat(5,1fr); gap:6px}
   .lb-cell{height:108px; display:flex; align-items:flex-end; justify-content:center; position:relative; overflow:hidden}
   .lb-cell::before{content:""; position:absolute; left:12%; right:12%; bottom:0; border-bottom:1px solid var(--line)}   /* each look gets a floor */
@@ -172,7 +174,6 @@
   .bmibar .rt{stroke:var(--ink3); stroke-width:.7}
   /* stamps: marker pen inside a wobbly ring */
   .swipe-tag{position:absolute; top:52px; font-family:var(--marker); font-size:24px; text-transform:uppercase; padding:7px 16px 5px; border:3px solid; border-radius:48% 52% 46% 54% / 58% 44% 56% 42%; opacity:0; pointer-events:none; mix-blend-mode:multiply; line-height:1; z-index:3}
-  .swipe-tag::before,.swipe-tag::after{content:'"'}
   .swipe-tag.book{right:10px; color:var(--good); border-color:var(--good); transform:rotate(12deg)}
   .swipe-tag.pass{left:10px; color:var(--accent); border-color:var(--accent); transform:rotate(-12deg)}
   .card.shake{animation:shake .4s ease}
@@ -193,7 +194,7 @@
   .ctrl:active .ring{filter:none}
   .ctrl:disabled{opacity:.25; cursor:not-allowed; transform:none}
   .ctrl:focus-visible{outline:2px dashed var(--pen); outline-offset:5px; border-radius:50%}
-  .btn:focus-visible,.tut-next:focus-visible{outline:2px dashed var(--pen); outline-offset:3px}
+  .btn:focus-visible,.tut-next:focus-visible{outline:none; color:var(--accent)}   /* keyboard focus reads as the hover state, not a box */
   .undo{display:block; margin:0 auto 2px; background:none; border:none; font-family:var(--hand); font-size:16px; color:var(--ink2); text-decoration:underline; text-underline-offset:3px; padding:4px 8px}
   .undo:hover{color:var(--ink)}
   .keyhint{display:none; text-align:center; font-family:var(--hand); font-size:15px; color:var(--ink3); margin-top:2px}
@@ -341,11 +342,11 @@
   .punch.good .big::after{border-color:var(--accent)}
   .punch .cap{font-weight:400; font-size:11.5px; color:var(--ink); margin:12px auto 0; max-width:38ch}
   .src{font-size:11px; color:var(--ink2); margin:18px 0 22px; line-height:1.5}.src a{color:var(--ink)}
-  .end-actions{display:flex; flex-direction:column; gap:10px}
+  .end-actions{display:flex; flex-direction:column; gap:10px; align-items:center}
   .rv-small{text-align:center; margin:0 0 18px}
   .rv-small .src{margin:0 auto 12px; max-width:56ch}
-  .btn.small{display:inline-flex; width:auto; padding:8px 0 5px; font-size:11px}
-  .btn.small::after{font-size:15px; padding-left:10px}
+  .btn.small{font-size:13px}
+  .btn.small::after{font-size:17px}
   .rv-stats{margin-top:28px; border-top:1px solid var(--line); padding-top:22px}
   .fired .rv-h{color:var(--accent)}
   .picto{display:flex; justify-content:center; margin:18px 0 0}
@@ -419,11 +420,12 @@
   .tut-body b{font-weight:700}
   .tut-nav{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:15px}
   .tut-right{display:flex; gap:12px; align-items:center}
-  .tut-next{background:var(--ink); color:var(--paper); border:none; padding:10px 15px; font-weight:800; font-size:11px; text-transform:uppercase; transition:opacity .2s}
-  .tut-next::before,.tut-next::after{content:'"'}
-  .tut-next:hover{opacity:.86}.tut-next:active{transform:scale(.98)}
-  .tut-back{background:transparent; color:var(--ink); border:none; border-bottom:1.5px solid var(--ink); padding:6px 1px 3px; font-weight:800; font-size:11px; text-transform:uppercase; transition:color .2s, border-color .2s}
-  .tut-back:hover{color:var(--accent); border-color:var(--accent)}
+  .tut-next{background:none; color:var(--ink); border:none; padding:6px 0; font-weight:900; font-size:13px; text-transform:uppercase; transition:color .2s; display:inline-flex; align-items:center; gap:8px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Cpath d='M1 5 C 15 2, 30 7, 45 4 S 75 2, 99 5' fill='none' stroke='%23E6007E' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:0 100%; background-size:100% 6px}
+  .tut-next::after{content:'→'; font-size:16px; line-height:1}
+  .tut-next:hover{color:var(--accent)}
+  .tut-back{background:transparent; color:var(--ink2); border:none; padding:6px 1px 3px; font-weight:800; font-size:11px; text-transform:uppercase; transition:color .2s}
+  .tut-back:hover{color:var(--ink)}
   .tut-skip{background:transparent; border:none; color:var(--ink2); font-family:var(--hand); font-size:16px; text-decoration:underline; text-underline-offset:3px; padding:4px 0}
   .tut-skip:hover{color:var(--ink)}
   .tut-hint{font-family:var(--hand); font-size:15px; color:var(--ink3); margin-top:10px; text-align:center}
@@ -1012,7 +1014,7 @@ function renderSeason(){
   G.tier=Math.min(3, Math.floor((G.season-1)/2));
   $("house-name").textContent=G.brand;
   /* the contract prints its terms: the ending should be a countdown, not a surprise */
-  let tag=`<span class="ak">"Season"</span> ${G.season} of ${TENURE_MAX}`;
+  let tag=`<span class="ak">Season</span> ${G.season} of ${TENURE_MAX}`;
   if(G.season>=TENURE_MAX) tag+=` <b>· final show</b>`;
   else if(G.season>=TENURE_BASE) tag+=` <b>· under review</b>`;
   else if(G.season===TENURE_BASE-1) tag+=` <b>· review next show</b>`;
@@ -1038,7 +1040,7 @@ function bmiBar(m){
     <text x="6" y="22" text-anchor="start">${LO}</text><text x="194" y="22" text-anchor="end">${HI}</text>
     <text x="${xw.toFixed(1)}" y="22" text-anchor="middle">18.5</text>
     <path d="M${(xp-3).toFixed(1)} 1.5 L${(xp+3).toFixed(1)} 1.5 L${xp.toFixed(1)} 7.5 Z" fill="var(--ink2)"/>
-    <text x="${xp.toFixed(1)}" y="29.5" text-anchor="middle">"Avg. person" ${POP_BMI}</text>
+    <text x="${xp.toFixed(1)}" y="29.5" text-anchor="middle">Avg. person ${POP_BMI}</text>
     <circle cx="${xm.toFixed(1)}" cy="12" r="3.6" fill="${col}"/></svg>`;
 }
 function cardHTML(m){
@@ -1051,7 +1053,7 @@ function cardHTML(m){
   const ring='<svg class="ring" viewBox="0 0 60 34" preserveAspectRatio="none" aria-hidden="true"><path d="M30 3 C 44 2, 57 8, 57 17 C 57 27, 45 32, 29 31.5 C 14 31, 3 26, 3 17 C 3 8, 16 3.5, 30 3 Z"/></svg>';
   return `<div class="card" data-uid="${m.uid}" style="--tilt:${tilt}deg">
     <div class="card-fig">${scrawl}${figWrap(m,"phone")}${annotated(m)}</div>
-    <div class="card-meta"><div class="cname">"${m.name}"${m.star?' <span class="star">★</span>':''}</div>
+    <div class="card-meta"><div class="cname">${m.name}${m.star?' <span class="star">★</span>':''}</div>
       <div class="cases">
         <div class="case"><span class="case-k">"Origin"</span><span class="case-v">${m.region}</span></div>
         <div class="case bmi${m.bmi<18.5?' low':''}"><span class="case-k">"BMI"</span><span class="case-v">${ring}${m.bmi}</span><span class="case-tag">${band}</span></div>
@@ -1306,7 +1308,7 @@ function playRunway(cast, cb){
 function skipRunway(){ if($("runway-veil").classList.contains("show")) finishRunway(); }
 function finishRunway(){ clearTimeout(G._runTimer); $("runway-veil").classList.remove("show"); const cb=G._runCb; G._runCb=null; if(cb) cb(); }
 function showResolution(r, before){
-  $("resol-kick").innerHTML=`<span class="ak">"Look ${ROMAN[G.season]}"</span> reviews`; $("resol-house").textContent=G.brand;
+  $("resol-kick").innerHTML=`<span class="ak">Look ${ROMAN[G.season]}</span> · reviews`; $("resol-house").textContent=G.brand;
   $("resol-hl").innerHTML='<span class="hlt">'+escHTML(headlineFor(r))+'</span>';   // marker-pen highlight over the press line
   const rows=$("resol-rows"); rows.innerHTML="";
   STAKE.forEach((s,i)=>{ const el=document.createElement("div"); el.className="rrow"; el.style.animationDelay=(i*0.1)+"s";
@@ -1672,7 +1674,7 @@ const Demo=(function(){
     cancelled=false; phase=1; Demo.active=true;
     window.addEventListener("resize", fitVeil);
     $("gauges").classList.add("demo1");
-    $("season-tag").innerHTML='<span class="ak">"Audition"</span> <b>the Board is casting</b>';
+    $("season-tag").innerHTML='<span class="ak">Audition</span> · <b>the Board is casting</b>';
     dialog("How to play · 1 of 7",
       "The dial above is <b>the Board</b>: the owners of the house. It rises when the collection sells, and falls when it does not. <b>If it reaches zero, you are fired.</b><br><br>First, a lesson. The Board hands you its list of five models. <b>Book each one it shows you: swipe right, or tap the ✓.</b>",
       "Take the list", ()=>boardPicks(false));
@@ -1722,7 +1724,7 @@ const Demo=(function(){
   }
   function board2(){
     phase=2;
-    $("season-tag").innerHTML='<span class="ak">"Audition"</span> <b>the Board tries again</b>';
+    $("season-tag").innerHTML='<span class="ak">Audition</span> · <b>the Board tries again</b>';
     dialog("How to play · 4 of 7",
       "The Board tries again. Same list, one concession: <b>a single curve model</b>. <b>Book the five it hands you.</b>",
       "Take the list", ()=>boardPicks(true));
