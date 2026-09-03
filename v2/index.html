@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="version" content="2.1.1 · 2026-09-04">
+<meta name="version" content="2.1.2 · 2026-09-04">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Casting v2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,8 +65,9 @@
   .intro-strip{display:flex; gap:0; height:120px; align-items:flex-end; justify-content:center; margin-top:30px; opacity:.92; pointer-events:none}
   .intro-strip .figwrap{width:50px}
   .intro-strip .fig-svg{max-height:120px}
-  .ver{margin:26px 0 0; font-size:10.5px; font-weight:600; color:var(--ink3); text-transform:uppercase; text-align:center}
-  .ver .ak{color:var(--ink2)}
+  /* the version, bottom of the title page, quiet: a label in the paper's margin */
+  .ver{position:absolute; left:0; right:0; bottom:calc(4px + env(safe-area-inset-bottom)); margin:0; font-size:10px; font-weight:600; letter-spacing:0; color:#B9B9B6; text-transform:uppercase; text-align:center; pointer-events:none}
+  .ver .ak{color:#A5A5A2; font-weight:800}
 
   /* buttons: a bold word, a pen underline, an arrow. No bar, no box. */
   .btn{display:inline-flex; align-items:center; justify-content:flex-start; gap:12px; background:none; color:var(--ink); border:none; padding:6px 0 7px; font-family:var(--tech); font-weight:900; font-size:16px; text-transform:uppercase; letter-spacing:-.01em; width:auto; align-self:flex-start; box-shadow:none; line-height:1; transition:color .15s;
@@ -1987,7 +1988,7 @@ a11yApply();
 window.A11Y=A11Y;
 window.GAME={ begin, swipe:swipeBtn, undo:undoPass, next, reveal, restart, skipRunway, sound:toggleSound, access:a11yToggle };
 if(!Sfx.on) $("snd-btn").classList.add("off");
-const VERSION="2.1.1 · 2026-09-04"; window.VERSION=VERSION; { const v=$("ver"); if(v) v.textContent=VERSION; }
+const VERSION="2.1.2 · 2026-09-04"; window.VERSION=VERSION; { const v=$("ver"); if(v) v.textContent=VERSION; }
 renderIntroStrip(); rollHouse();
 </script>
 </body>
