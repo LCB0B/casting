@@ -115,6 +115,9 @@
   .lookbook{margin:12px 0 2px; position:relative}
   .lb-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px}
   #count::before{content:'Booked '}
+  #count{display:inline-block}
+  #count.pop{animation:pop .35s cubic-bezier(.3,1.5,.5,1)}
+  @keyframes pop{from{transform:scale(1.35)} to{transform:none}}
   .lb-cells{display:grid; grid-template-columns:repeat(5,1fr); gap:6px}
   .lb-cell{height:108px; display:flex; align-items:flex-end; justify-content:center; position:relative; overflow:hidden}
   .lb-cell::before{content:""; position:absolute; left:12%; right:12%; bottom:0; border-bottom:1px solid var(--line)}   /* each look gets a floor */
@@ -127,6 +130,14 @@
   .lb-cell .fig-svg{width:34px}
   .lb-cell.full::after{content:"✕"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--marker); font-size:30px; color:var(--accent); background:rgba(250,250,248,.6); opacity:0; transition:.18s}
   .lb-cell.full:hover::after{opacity:1}
+  /* the booking lands: hidden while the flyer is in the air, then caught with a bounce; the five wave before the show */
+  .lb-cell.landing .figwrap{visibility:hidden}
+  .lb-cell.caught .figwrap{animation:catch .45s cubic-bezier(.3,1.5,.5,1) both; transform-origin:50% 100%}
+  @keyframes catch{from{transform:scale(1.18) translateY(4px)} to{transform:none}}
+  .lb-cell.wave{animation:wave .45s ease both}
+  @keyframes wave{0%,100%{transform:none}40%{transform:translateY(-7px)}}
+  .flyer{position:fixed; z-index:400; pointer-events:none; transform-origin:0 0; transition:transform .55s cubic-bezier(.2,.8,.2,1.05); will-change:transform}
+  .flyer .fig-svg{width:100%; height:100%}
 
   /* deck */
   .deck-wrap{flex:1; display:flex; flex-direction:column; min-height:0; position:relative}
@@ -181,12 +192,22 @@
   .swipe-tag{position:absolute; top:52px; font-family:var(--marker); font-size:24px; text-transform:uppercase; padding:7px 16px 5px; border:3px solid; border-radius:48% 52% 46% 54% / 58% 44% 56% 42%; opacity:0; pointer-events:none; mix-blend-mode:multiply; line-height:1; z-index:3}
   .swipe-tag.book{right:10px; color:var(--good); border-color:var(--good); transform:rotate(12deg)}
   .swipe-tag.pass{left:10px; color:var(--accent); border-color:var(--accent); transform:rotate(-12deg)}
+  /* feel: the card lifts while held, springs back, and the next one is dealt from the pile */
+  .card.lift{box-shadow:0 2px 4px rgba(0,0,0,.14), 0 24px 40px rgba(0,0,0,.2); z-index:5}
+  .card.deal{animation:dealin .38s cubic-bezier(.2,.9,.3,1.15) both}
+  @keyframes dealin{from{transform:scale(.93) translateY(12px) rotate(var(--tilt,0deg)); opacity:.5} to{transform:rotate(var(--tilt,0deg)); opacity:1}}
+  .card.return{animation:returnin .4s cubic-bezier(.2,.9,.3,1.1) both}
+  @keyframes returnin{from{transform:translateX(-150%) rotate(-20deg); opacity:0} to{transform:rotate(var(--tilt,0deg)); opacity:1}}
+  .swipe-tag.book.slam{animation:slamB .28s cubic-bezier(.2,1.6,.4,1) both}
+  .swipe-tag.pass.slam{animation:slamP .28s cubic-bezier(.2,1.6,.4,1) both}
+  @keyframes slamB{from{transform:scale(1.6) rotate(24deg)} to{transform:scale(1) rotate(12deg)}}
+  @keyframes slamP{from{transform:scale(1.6) rotate(-24deg)} to{transform:scale(1) rotate(-12deg)}}
   .card.shake{animation:shake .4s ease}
   @keyframes shake{0%,100%{transform:translateX(0) rotate(var(--tilt,0deg))}20%{transform:translateX(-9px) rotate(-2deg)}40%{transform:translateX(9px) rotate(2deg)}60%{transform:translateX(-6px) rotate(var(--tilt,0deg))}80%{transform:translateX(6px) rotate(var(--tilt,0deg))}}
 
   /* ✕ / ✓ : marker strokes inside a pen ring */
   .controls{display:flex; justify-content:center; gap:36px; margin:2px 0 4px}
-  .ctrl{width:62px; height:62px; border:none; background:none; padding:0; display:flex; align-items:center; justify-content:center; transition:transform .14s}
+  .ctrl{width:62px; height:62px; border:none; background:none; padding:0; display:flex; align-items:center; justify-content:center; transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
   .ctrl svg{width:100%; height:100%; overflow:visible; display:block}
   .ctrl .ring{fill:var(--panel); stroke:currentColor; stroke-width:2.4; transition:fill .2s}
   .ctrl .gl{fill:none; stroke:currentColor; stroke-width:5.5; stroke-linecap:round; stroke-linejoin:round; transition:stroke .2s}
@@ -195,8 +216,10 @@
   .ctrl:hover .ring{fill:currentColor}
   .ctrl:hover .gl{stroke:#fff}
   .ctrl:hover{transform:translateY(1px)}
-  .ctrl:active{transform:translateY(2px)}
+  .ctrl:active,.ctrl.pressed{transform:scale(.86)}
   .ctrl:active .ring{filter:none}
+  .ctrl.armed .ring{fill:currentColor}
+  .ctrl.armed .gl{stroke:#fff}
   .ctrl:disabled{opacity:.25; cursor:not-allowed; transform:none}
   .ctrl:focus-visible{outline:2px dashed var(--pen); outline-offset:5px; border-radius:50%}
   .btn:focus-visible,.tut-next:focus-visible{outline:none; color:var(--accent)}   /* keyboard focus reads as the hover state, not a box */
@@ -304,13 +327,17 @@
     background-image:var(--regs); background-repeat:no-repeat; background-size:9px 9px; background-position:var(--regpos)}
   .resol .hk{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--ink); padding-bottom:6px; margin-bottom:14px}
   .resol .hl{font-weight:600; font-size:15px; line-height:1.5; margin:0 0 16px}
-  .resol .hl .hlt{background:rgba(230,0,126,.20); padding:0 3px; -webkit-box-decoration-break:clone; box-decoration-break:clone}
+  .resol .hl .hlt{background:linear-gradient(rgba(230,0,126,.2),rgba(230,0,126,.2)) no-repeat 0 0 / 0% 100%; padding:0 3px; -webkit-box-decoration-break:clone; box-decoration-break:clone; }   /* the highlighter draws itself (keyframe, see .draw) */
+  .resol .hl .hlt.draw{background-size:100% 100%; animation:hldraw .7s ease .15s both}
+  @keyframes hldraw{from{background-size:0% 100%} to{background-size:100% 100%}}
   .rrow{display:grid; grid-template-columns:88px 1fr; gap:12px; align-items:center; margin-bottom:13px; opacity:0; animation:slidein .42s ease forwards}
   @keyframes slidein{from{opacity:0; transform:translateX(-8px)}to{opacity:1; transform:none}}
   .rrow .gauge-svg{width:88px; max-width:88px}
   .rrow .rwho{font-weight:800; font-size:10.5px; text-transform:uppercase; color:var(--ink2); margin-bottom:3px}
   .rrow .rtext{font-size:13px; line-height:1.45; font-weight:400}
-  .rdelta{display:inline-block; font-family:var(--hand); font-weight:700; font-size:23px; line-height:1; margin-left:8px; vertical-align:middle; transform:rotate(-6deg); text-transform:none}
+  .rdelta{display:inline-block; font-family:var(--hand); font-weight:700; font-size:23px; line-height:1; margin-left:8px; vertical-align:middle; transform:scale(2.2) rotate(-6deg); opacity:0; text-transform:none}
+  .rdelta.in{opacity:1; transform:rotate(-6deg); animation:thump .32s cubic-bezier(.2,1.5,.4,1)}
+  @keyframes thump{from{transform:scale(2.2) rotate(-6deg); opacity:0} to{transform:rotate(-6deg); opacity:1}}
   .rdelta.up{color:var(--good)}
   .rdelta.down{color:var(--bad)}
 
@@ -350,11 +377,20 @@
   .btn.small::after{font-size:17px}
   .rv-stats{margin-top:28px; border-top:1px solid var(--line); padding-top:22px}
   .fired .rv-h{color:var(--accent)}
+  /* endings with weight: paper rain on a clean win, a shudder on a firing */
+  .confetti{position:fixed; inset:0; pointer-events:none; z-index:500; overflow:hidden}
+  .confetti i{position:absolute; top:-20px; display:block; animation:fall 2.6s cubic-bezier(.3,.1,.6,1) both}
+  @keyframes fall{from{transform:translate(0,0) rotate(0)} to{transform:translate(var(--dx,0),105vh) rotate(var(--rz,360deg))}}
+  .rv.shudder{animation:shudder .5s ease}
+  @keyframes shudder{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-6px)}40%,60%{transform:translateX(6px)}}
+  .hap{position:fixed; left:-9999px; top:0; width:1px; height:1px; opacity:0; pointer-events:none}
   .picto{display:flex; justify-content:center; margin:18px 0 0}
   .punch.good .big{color:var(--ink)}
   .good .rv-h em{font-style:italic}
-  @media(prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important} .rdelta{opacity:1; transform:rotate(-6deg)} .resol .hl .hlt{background-size:100% 100%}}
   body.rm *{animation:none!important; transition:none!important}
+  body.rm .rdelta{opacity:1; transform:rotate(-6deg)}
+  body.rm .resol .hl .hlt{background-size:100% 100%}
 
   /* ---------------- appointment briefing (before the tutorial) ---------------- */
   .brief-veil{background:rgba(16,15,14,.82); z-index:150}
@@ -466,6 +502,7 @@
   <filter id="rough2" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
   <filter id="rough3" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="11" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
 </defs></svg>
+<input type="checkbox" switch id="hap" class="hap" tabindex="-1" aria-hidden="true">
 <button class="sndbtn" id="snd-btn" onclick="GAME.sound()" title="Sound on/off" aria-label="Sound on/off"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.2v5.6h3.6L13 19.2V4.8L7.6 9.2H4z" fill="currentColor"/><g class="waves" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M15.6 9.5a3.9 3.9 0 0 1 0 5"/><path d="M18.2 7.3a7.3 7.3 0 0 1 0 9.4"/></g><line class="slash" x1="4.5" y1="19.5" x2="19.5" y2="4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
 <button class="a11ybtn" id="a11y-btn" onclick="GAME.access()" title="Accessibility mode on/off (reduced motion + colour-safe gauges)" aria-label="Accessibility mode on/off" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.9" r="2.1" fill="currentColor" stroke="none"/><path d="M4.6 9.2c2.4.8 4.9 1.2 7.4 1.2s5-.4 7.4-1.2"/><path d="M12 10.4v4.4"/><path d="M12 14.8l-2.7 5.7"/><path d="M12 14.8l2.7 5.7"/></svg></button>
 <div class="wrap">
@@ -584,6 +621,7 @@ const G = {
   cum:{total:0, nonWhite:0, plus:0, plusNonWhite:0, plusWhite:0, nonplusNonWhite:0, nonplusWhite:0, regions:new Set(), seasonsWithPlus:0},
   firedBy:null, _end:false, _runTimer:null, _runCb:null, _busy:false
 };
+G._landing=new Set();   // lookbook slots whose figure is still in the air
 
 /* ---------------- sound (Web Audio, synthesized — no files) ---------------- */
 const Sfx=(function(){
@@ -743,7 +781,14 @@ const Sfx=(function(){
     music:musicStart,
     ending(k){ musicStop(); mWanted=false; const c=ac(); if(c) newThemeOut(); if(k==="win") themeWin(); else themeLose(); },
     pass(){ noise(.08,.045,900); tone(220,.07,"triangle",.035); },
-    book(){ tone(660,.09,"sine",.06); tone(880,.13,"sine",.06,.07); },
+    book(n){ const k=[0,2,4,7,9][Math.max(0,Math.min(4,(n||1)-1))], f=660*Math.pow(2,k/12);   // each booking a step up the scale
+      tone(f,.09,"sine",.06); tone(f*4/3,.13,"sine",.06,.07); },
+    tick(){ noise(.025,.04,5000); tone(1200,.03,"square",.018); },        // the detent
+    ratchet(){ noise(.008,.02,3200); },                                   // needle clicks
+    thud(){ tone(110,.09,"sine",.07,0,70); },                             // a chip lands
+    cast(){ if(!on) return; const c=ac(); if(!c) return; const t0=c.currentTime+.05;   // five booked: a small rising chime
+      [523.3,659.3,784,1046.5].forEach((f,i)=>bell(f,t0+i*.13,1.1,.03));
+      [261.6,329.6,392].forEach(f=>padVoice(f,t0+.4,1.6,.014)); },
     deal(){ noise(.05,.028,2400); },
     deny(){ tone(160,.16,"square",.035); },
     envelope(){ noise(.32,.05,1200); tone(520,.2,"sine",.028,.15,780); },
@@ -762,6 +807,15 @@ const Sfx=(function(){
     if(typeof f==="function") api[k]=function(){ try{ return f.apply(null,arguments); }catch(_){ } }; }
   return api;
 })();
+
+/* ---------------- haptics: Android vibrate, the iOS switch trick, both best-effort ---------------- */
+const Haptic=(function(){
+  const off=()=>document.body.classList.contains("rm");
+  function vib(p){ if(off()) return; try{ if(navigator.vibrate) navigator.vibrate(p); }catch(_){} }
+  function sw(){ if(off()) return; try{ const h=document.getElementById("hap"); if(h) h.click(); }catch(_){} }   // iOS 17.4+: a switch toggled inside a user gesture buzzes
+  return { tick(){ vib(10); }, book(){ vib([12,40,18]); }, deny(){ vib([30,40,30]); sw(); }, fired(){ vib([60,50,60,50,120]); }, gesture(){ sw(); } };
+})();
+const reduceMotion=()=> (window.A11Y&&A11Y.on) || (window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
 /* ---------------- helpers ---------------- */
 const $ = id => document.getElementById(id);
@@ -1007,24 +1061,27 @@ function gaugeHTML(key,label,value,idp){
    instead of CSS transform + `transform-box:view-box`, which WebKit/Blink resolve differently
    from Gecko. The smooth sweep is driven by a tiny rAF tween rather than a CSS transition
    (attribute changes don't transition). prefers-reduced-motion snaps instead of animating. */
-function setNeedle(el, to){
-  if(!el) return;
+function setNeedle(el, to, opts){
+  if(!el) return; opts=opts||{};
   const from = (el._ang==null) ? to : el._ang;
   el._ang = to;
   if(el._raf){ cancelAnimationFrame(el._raf); el._raf=null; }
   const reduce = (window.A11Y && A11Y.on) || (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   if(reduce || from===to){ el.setAttribute("transform","rotate("+to.toFixed(1)+" 50 50)"); return; }
   const DUR=1050, t0=performance.now(), ease=p=>1-Math.pow(1-p,3);   // easeOutCubic settle
+  let last=from;
   function frame(now){
-    const p=Math.min(1,(now-t0)/DUR);
-    el.setAttribute("transform","rotate("+(from+(to-from)*ease(p)).toFixed(2)+" 50 50)");
+    if(opts.ratchet && !$("veil").classList.contains("show")){ el.setAttribute("transform","rotate("+to.toFixed(1)+" 50 50)"); el._raf=null; return; }   // sheet closed early: stop clicking
+    const p=Math.min(1,(now-t0)/DUR), a=from+(to-from)*ease(p);
+    el.setAttribute("transform","rotate("+a.toFixed(2)+" 50 50)");
+    if(opts.ratchet && Math.abs(a-last)>=4){ last=a; Sfx.ratchet(); }
     if(p<1) el._raf=requestAnimationFrame(frame); else el._raf=null;
   }
   el._raf=requestAnimationFrame(frame);
 }
 function initNeedles(idp,v){ STAKE.forEach(s=>{ const el=$(idp+"-"+s.id); if(el) el._ang=needleAngle(v[s.id]); }); }
 function renderGauges(c,idp,v){ $(c).innerHTML=STAKE.map(s=>gaugeHTML(s.id,s.cap,v[s.id],idp)).join(""); initNeedles(idp,v); }
-function setNeedles(idp,v){ STAKE.forEach(s=>{ const el=$(idp+"-"+s.id); if(el) setNeedle(el, needleAngle(v[s.id])); }); }
+function setNeedles(idp,v,opts){ STAKE.forEach(s=>{ const el=$(idp+"-"+s.id); if(el) setNeedle(el, needleAngle(v[s.id]), opts); }); }
 
 /* ---------------- season render ---------------- */
 function renderSeason(){
@@ -1037,7 +1094,7 @@ function renderSeason(){
   else if(G.season===TENURE_BASE-1) tag+=` <b>· review next show</b>`;
   $("season-tag").innerHTML=tag;
   renderGauges("gauges","g",G.meters);
-  resetStream(); G.booked=[]; G.lastPassed=null;
+  resetStream(); G.booked=[]; G.lastPassed=null; G._landing.clear();
   G.looks=makeLooks();                              // this season's five looks, one per slot
   clearWhisper(); renderLookbook(); updateCount(); renderDeck();
 }
@@ -1081,11 +1138,13 @@ function cardHTML(m){
     </div>
     <div class="swipe-tag book">Book</div><div class="swipe-tag pass">Pass</div></div>`;
 }
-function renderDeck(){
+function renderDeck(opts){ opts=opts||{};
   const deck=$("deck"); deck.innerHTML="";
   if(G.booked.length>=PICK || G.stack.length===0){ updateButtons(); return; }
   if(G.stack[1]){ const b=document.createElement("div"); b.innerHTML=cardHTML(G.stack[1]); const be=b.firstElementChild; be.classList.add("behind"); deck.appendChild(be); }
   const t=document.createElement("div"); t.innerHTML=cardHTML(G.stack[0]); const top=t.firstElementChild;
+  if(opts.deal){ top.classList.add("deal"); Sfx.deal(); } else if(opts.from==="left") top.classList.add("return");
+  top.addEventListener("animationend", ()=>top.classList.remove("deal","return"), {once:true});
   deck.appendChild(top); attachSwipe(top, G.stack[0]); updateButtons();
 }
 function updateButtons(){ const none=G.stack.length===0||G.booked.length>=PICK||(window.Demo&&Demo.active&&!Demo.casting); $("btn-pass").disabled=none; $("btn-book").disabled=none;
@@ -1093,7 +1152,7 @@ function updateButtons(){ const none=G.stack.length===0||G.booked.length>=PICK||
 function renderLookbook(){
   const host=$("slots"); host.innerHTML="";
   for(let i=0;i<PICK;i++){ const s=document.createElement("div"); s.className="lb-cell";
-    if(G.booked[i]){ s.classList.add("full"); s.innerHTML=figWrap(dress(G.booked[i], lookFor(i))); s.title="Remove "+G.booked[i].name; s.addEventListener("click",()=>unbook(i)); }
+    if(G.booked[i]){ s.classList.add("full"); if(G._landing.has(i)) s.classList.add("landing"); s.innerHTML=figWrap(dress(G.booked[i], lookFor(i))); s.title="Remove "+G.booked[i].name; s.addEventListener("click",()=>unbook(i)); }
     else { s.classList.add("empty"); s.innerHTML=`<svg class="hanger" viewBox="0 0 64 40" aria-hidden="true"><path filter="url(#rough${(i%3)+1})" d="M32 4.5 c-3.6 0 -5.8 2.2 -5.8 4.8 c0 2.6 2.4 3.6 5.8 6.2 L6 34.5 L58 34.5 Z"/></svg><span>${ROMAN[i+1]}</span>`; }
     host.appendChild(s); }
 }
@@ -1122,7 +1181,7 @@ let sw=null;
 function attachSwipe(el, model){
   el.addEventListener("pointerdown", e=>{
     if(G._busy) return; if(window.Demo&&Demo.active&&!Demo.casting) return; if(e.button!=null&&e.button!==0) return;
-    sw={el, model, x0:e.clientX, y0:e.clientY, dx:0, active:false, tilt:parseFloat(el.style.getPropertyValue("--tilt"))||0};
+    sw={el, model, x0:e.clientX, y0:e.clientY, dx:0, active:false, armed:0, tilt:parseFloat(el.style.getPropertyValue("--tilt"))||0};
     window.addEventListener("pointermove",swMove,{passive:false});
     window.addEventListener("pointerup",swUp,{passive:false});
     window.addEventListener("pointercancel",swCancel,{passive:false});
@@ -1130,36 +1189,85 @@ function attachSwipe(el, model){
 }
 function swMove(e){
   if(!sw) return; sw.dx=e.clientX-sw.x0; const dy=e.clientY-sw.y0;
-  if(!sw.active){ if(Math.hypot(sw.dx,dy)>6) sw.active=true; else return; }
+  if(!sw.active){ if(Math.hypot(sw.dx,dy)>6){ sw.active=true; sw.el.classList.add("lift"); } else return; }
   e.preventDefault();
-  sw.el.style.transform=`translateX(${sw.dx}px) rotate(${(sw.dx*0.045+sw.tilt).toFixed(2)}deg)`;
+  const ry=clamp(sw.dx*0.06,-12,12);   // the card tilts toward the hand that holds it
+  sw.el.style.transform=`perspective(700px) translateX(${sw.dx}px) rotate(${(sw.dx*0.045+sw.tilt).toFixed(2)}deg) rotateY(${ry.toFixed(1)}deg)`;
   const bk=clamp(sw.dx/110,0,1), ps=clamp(-sw.dx/110,0,1);
   const tb=sw.el.querySelector(".swipe-tag.book"), tp=sw.el.querySelector(".swipe-tag.pass");
   if(tb) tb.style.opacity=bk; if(tp) tp.style.opacity=ps;
+  /* the detent: crossing the commit line clicks, buzzes, lights the button and slams the stamp */
+  const armed=sw.dx>92?1:sw.dx<-92?-1:0;
+  if(armed!==sw.armed){ sw.armed=armed; disarm();
+    if(armed){ Sfx.tick(); Haptic.tick(); $(armed>0?"btn-book":"btn-pass").classList.add("armed");
+      const tag=armed>0?tb:tp; if(tag){ tag.classList.remove("slam"); void tag.offsetWidth; tag.classList.add("slam"); } } }
 }
+function disarm(){ ["btn-book","btn-pass"].forEach(id=>{ const b=$(id); if(b) b.classList.remove("armed"); });
+  document.querySelectorAll(".swipe-tag.slam").forEach(t=>t.classList.remove("slam")); }
 function endSwipe(){ window.removeEventListener("pointermove",swMove); window.removeEventListener("pointerup",swUp); window.removeEventListener("pointercancel",swCancel); }
 function swUp(e){ if(!sw) return; const {el,model,dx}=sw; endSwipe(); sw=null;
+  if(Math.abs(dx)>92) Haptic.gesture();
   if(dx>92) commit(el,model,1); else if(dx<-92) commit(el,model,-1); else snapBack(el); }
 function swCancel(){ if(sw){ const el=sw.el; endSwipe(); sw=null; snapBack(el); } }
-function snapBack(el){ el.style.transition="transform .25s ease"; el.style.transform="";
+function snapBack(el){ disarm(); el.style.transition="transform .48s cubic-bezier(.34,1.56,.64,1)"; el.style.transform="";   // springs back with an overshoot
   const tb=el.querySelector(".swipe-tag.book"), tp=el.querySelector(".swipe-tag.pass"); if(tb)tb.style.opacity=0; if(tp)tp.style.opacity=0;
-  setTimeout(()=>{ if(el) el.style.transition=""; },260); }
+  setTimeout(()=>{ if(el){ el.style.transition=""; el.classList.remove("lift"); } },480); }
 function commit(el, model, dir){
-  if(dir<0 && window.Demo && Demo.active){ Demo.refuse(el); return; }   // the tutorial list is not optional
-  G._busy=true;
+  if(dir<0 && window.Demo && Demo.active){ disarm(); Demo.refuse(el); return; }   // the tutorial list is not optional
+  G._busy=true; disarm();
+  /* the stamp lands whichever way the verdict came: drag, button or key */
+  const tag=el.querySelector(dir>0?".swipe-tag.book":".swipe-tag.pass");
+  if(tag && parseFloat(tag.style.opacity||0)<.8){ tag.style.opacity=1; tag.classList.add("slam"); Sfx.tick(); }
+  if(dir>0){ Sfx.book(G.booked.length+1); Haptic.book(); flyToSlot(el, model, G.booked.length); } else Sfx.pass();
   el.style.transition="transform .34s cubic-bezier(.4,0,.5,1), opacity .34s";
   el.style.transform=`translateX(${dir*150}%) rotate(${dir*20+(parseFloat(el.style.getPropertyValue("--tilt"))||0)}deg)`; el.style.opacity="0";
-  (dir>0?Sfx.book:Sfx.pass)();
   setTimeout(()=>{ G._busy=false; dir>0 ? book(model) : pass(); }, 320);
+}
+/* the booked figure leaves the card and flies into its hanger. FLIP: measure the figure on the
+   card and the slot it will fill, clone, move. The slot renders hidden until the flyer lands. */
+function flyToSlot(card, model, slot){
+  if(reduceMotion()) return;
+  const cell=$("slots").children[slot]; if(!cell) return;
+  const vbH=Math.round(128+(model.height-178)*2.0)+9, cr=cell.getBoundingClientRect();
+  /* the figure's 64×vbH viewport in screen px. getBoundingClientRect on SVG content gives the
+     drawn bbox, so derive it from the root svg's box and its xMidYMid letterboxing instead. */
+  let src=null, sr=null;
+  const tech=card.querySelector(".figwrap.tech .anno"), phone=card.querySelector(".figwrap.phone .fig-svg");
+  if(tech && tech.getBoundingClientRect().width>0){ const r=tech.getBoundingClientRect(), k=Math.min(r.width/200, r.height/vbH);
+    src=tech; sr={left:r.left+(r.width-200*k)/2+58*k, top:r.top+(r.height-vbH*k)/2, width:64*k, height:vbH*k}; }
+  else if(phone && phone.getBoundingClientRect().width>0){ const r=phone.getBoundingClientRect(), k=Math.min(r.width/64, r.height/vbH);
+    src=phone; sr={left:r.left+(r.width-64*k)/2, top:r.top+(r.height-vbH*k)/2, width:64*k, height:vbH*k}; }
+  if(!src) return;
+  const tw=34, th=tw*vbH/64, tx=cr.left+(cr.width-tw)/2, ty=cr.bottom-th;
+  const f=document.createElement("div"); f.className="flyer"; f.innerHTML=figure(model);
+  f.style.left=sr.left+"px"; f.style.top=sr.top+"px"; f.style.width=sr.width+"px"; f.style.height=sr.height+"px";
+  document.body.appendChild(f);
+  const wrap=src.closest(".figwrap"); if(wrap) wrap.style.visibility="hidden";
+  G._landing.add(slot);
+  void f.offsetWidth;   // lay the flyer out at the source before moving it
+  setTimeout(()=>{ f.style.transform=`translate(${(tx-sr.left).toFixed(1)}px,${(ty-sr.top).toFixed(1)}px) scale(${(tw/sr.width).toFixed(3)})`; },20);
+  let done=false;
+  const land=()=>{ if(done) return; done=true; f.remove(); G._landing.delete(slot);
+    const c=$("slots").children[slot]; if(c && c.classList.contains("landing")){ c.classList.remove("landing"); c.classList.add("caught"); }
+    const n=$("count"); if(n){ n.classList.remove("pop"); void n.offsetWidth; n.classList.add("pop"); }
+    Haptic.tick(); };
+  f.addEventListener("transitionend", e=>{ if(e.propertyName==="transform") land(); });
+  setTimeout(land, 700);
 }
 function book(model){ G.booked.push(G.stack.shift()); refill(); renderLookbook(); updateCount();
   whisper((window.Demo&&Demo.active) ? Demo.pickReact(model) : whisperFor(model));
-  if(G.booked.length>=PICK){ renderDeck(); setTimeout(()=>{ (window.Demo&&Demo.active) ? Demo.onCast() : stage(); },360); } else renderDeck(); }
-function pass(){ G.lastPassed=G.stack.shift(); refill(); renderDeck(); }
-function undoPass(){ if(G._busy||!G.lastPassed) return; Sfx.deal(); G.stack.unshift(G.lastPassed); G.lastPassed=null; renderDeck(); }
-function unbook(i){ if(window.Demo&&Demo.active) return; const m=G.booked.splice(i,1)[0]; G.stack.unshift(m); renderLookbook(); updateCount(); renderDeck(); }
+  if(G.booked.length>=PICK){ renderDeck(); G._busy=true;                    // the show is cast: nothing moves until the runway
+    const rm=reduceMotion();
+    if(!rm) setTimeout(()=>{ Sfx.cast(); $("slots").querySelectorAll(".lb-cell.full").forEach((c,i)=>{ c.style.animationDelay=(i*70)+"ms"; c.classList.add("wave"); }); }, 420);
+    setTimeout(()=>{ G._busy=false; (window.Demo&&Demo.active) ? Demo.onCast() : stage(); }, rm?360:1100); }
+  else renderDeck({deal:true}); }
+function pass(){ G.lastPassed=G.stack.shift(); refill(); renderDeck({deal:true}); }
+function undoPass(){ if(G._busy||!G.lastPassed) return; Sfx.deal(); G.stack.unshift(G.lastPassed); G.lastPassed=null; renderDeck({from:"left"}); }
+function unbook(i){ if(G._busy||(window.Demo&&Demo.active)) return; const m=G.booked.splice(i,1)[0]; G.stack.unshift(m); renderLookbook(); updateCount(); renderDeck(); }
 function swipeBtn(dir){ if(G._busy||G.stack.length===0||G.booked.length>=PICK) return;
-  const top=$("deck").querySelector(".card:not(.behind)"); if(!top) return; commit(top, G.stack[0], dir); }
+  const top=$("deck").querySelector(".card:not(.behind)"); if(!top) return;
+  const b=$(dir>0?"btn-book":"btn-pass"); if(b){ b.classList.add("pressed"); setTimeout(()=>b.classList.remove("pressed"),200); }
+  Haptic.gesture(); commit(top, G.stack[0], dir); }
 document.addEventListener("keydown", e=>{ if(window.Tutorial&&window.Tutorial.active) return; if(window.Demo&&Demo.active&&!Demo.casting) return; if(!$("season").classList.contains("active")) return;
   if(e.key==="ArrowLeft") swipeBtn(-1); else if(e.key==="ArrowRight") swipeBtn(1); });
 /* Enter = the primary action of whatever is on screen */
@@ -1349,7 +1457,9 @@ function showResolution(r, before){
   G._end=end;
   $("resol-next").innerHTML=end?'See the record <span class="ar">→</span>':'Continue <span class="ar">→</span>';
   $("veil").classList.add("show");
-  setTimeout(()=>setNeedles("rg",G.meters),90);
+  { const h=$("resol-hl").querySelector(".hlt"); if(h){ void h.offsetWidth; setTimeout(()=>h.classList.add("draw"),30); } }   // the highlighter draws itself (reflow first so the transition runs)
+  setTimeout(()=>setNeedles("rg",G.meters,{ratchet:true}),90);
+  rows.querySelectorAll(".rdelta").forEach((c,i)=>setTimeout(()=>{ if(!$("veil").classList.contains("show")) return; c.classList.add("in"); Sfx.thud(); Haptic.tick(); }, 900+i*180));
 }
 function next(){ $("veil").classList.remove("show");
   if(G._end) return reveal();
@@ -1457,6 +1567,32 @@ function reveal(){
     <div class="end-actions"><button class="btn" onclick="GAME.restart()">Play again <span class="ar">→</span></button></div>
     <div class="rv-stats">${parade}${punch}${charts}</div>
   </div>`;
+  /* weight: the number counts up, a clean win rains paper, a firing shakes the sheet */
+  if(!reduceMotion()){
+    document.querySelectorAll("#reveal .punch .big").forEach(countUp);
+    if(end.kind==="everywalk" && !G.notRenewed) confetti();
+    if(end.kind==="fired"){ const rv=$("reveal-inner"); rv.classList.remove("shudder"); void rv.offsetWidth; rv.classList.add("shudder"); }
+  }
+  if(end.kind==="fired") Haptic.fired();
+}
+function countUp(el){
+  const html=el.innerHTML, node=el.firstChild; if(!node || node.nodeType!==3) return;
+  const mm=node.nodeValue.match(/^([0-9]+(?:\.[0-9]+)?)([\s\S]*)$/); if(!mm) return;
+  const num=parseFloat(mm[1]), dec=(mm[1].split(".")[1]||"").length, suffix=mm[2];
+  const t0=performance.now(), DUR=1200, ease=p=>1-Math.pow(1-p,3);
+  (function f(now){ const p=Math.min(1,(now-t0)/DUR); node.nodeValue=(num*ease(p)).toFixed(dec)+suffix;
+    if(p<1) requestAnimationFrame(f); else el.innerHTML=html; })(t0);
+}
+function confetti(){
+  const layer=document.createElement("div"); layer.className="confetti";
+  const cols=["#E6007E","#0A0A0A","#C9C9C9","#E6007E"];
+  for(let i=0;i<70;i++){ const q=document.createElement("i"), strip=Math.random()<.6;
+    q.style.left=(Math.random()*100)+"%"; q.style.background=cols[i%cols.length];
+    q.style.width=(strip?5:7)+"px"; q.style.height=(strip?14:7)+"px"; q.style.borderRadius=strip?"2px":"50%";
+    q.style.animationDelay=(Math.random()*.9).toFixed(2)+"s"; q.style.animationDuration=(2.2+Math.random()*1.2).toFixed(2)+"s";
+    q.style.setProperty("--dx",((Math.random()*2-1)*120).toFixed(0)+"px"); q.style.setProperty("--rz",((Math.random()*2-1)*720).toFixed(0)+"deg");
+    layer.appendChild(q); }
+  document.body.appendChild(layer); setTimeout(()=>layer.remove(),4500);
 }
 
 /* ---------------- lifecycle ---------------- */
