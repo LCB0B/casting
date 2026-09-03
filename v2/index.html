@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="version" content="2.1.2 · 2026-09-04">
+<meta name="version" content="2.1.3 · 2026-09-04">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Casting v2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -131,11 +131,16 @@
   @keyframes pop{from{transform:scale(1.35)} to{transform:none}}
   .lb-cells{display:grid; grid-template-columns:repeat(5,1fr); gap:6px}
   .lb-cell{height:108px; display:flex; align-items:flex-end; justify-content:center; position:relative; overflow:hidden}
-  .lb-cell::before{content:""; position:absolute; left:12%; right:12%; bottom:0; border-bottom:1px solid var(--line)}   /* each look gets a floor */
+  /* each look stands on a floor drawn by hand, no two strokes alike */
+  .lb-cell::before{content:""; position:absolute; left:8%; right:8%; bottom:0; height:7px; background-repeat:no-repeat; background-size:100% 100%; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Cpath d='M2 4 C 20 2.5, 45 6, 62 4 S 88 2.5, 98 4.5' fill='none' stroke='%23BDBDBD' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E")}
+  .lb-cell:nth-child(2)::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Cpath d='M2 4.5 C 25 6, 40 2, 60 3.5 S 85 6, 98 4' fill='none' stroke='%23BDBDBD' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E")}
+  .lb-cell:nth-child(3)::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Cpath d='M2 3.5 C 15 5.5, 50 2.5, 70 4.5 S 90 3, 98 4' fill='none' stroke='%23BDBDBD' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E")}
+  .lb-cell:nth-child(4)::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Cpath d='M2 4 C 30 2, 55 6.5, 75 3.5 S 92 5, 98 3.5' fill='none' stroke='%23BDBDBD' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E")}
+  .lb-cell:nth-child(5)::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Cpath d='M2 5 C 18 3, 35 3, 55 5 S 80 2.5, 98 4.5' fill='none' stroke='%23BDBDBD' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E")}
   .lb-cell.empty{align-items:center; flex-direction:column; justify-content:center; gap:3px}
   .lb-cell.empty .hanger{width:46px; height:auto; display:block}
-  .lb-cell.empty .hanger path{fill:none; stroke:var(--ink3); stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
-  .lb-cell.empty span{font-family:var(--tech); font-weight:800; font-size:12px; color:var(--ink3)}
+  .lb-cell.empty .hanger path{fill:none; stroke:var(--ink2); stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+  .lb-cell.empty span{font-family:var(--hand); font-weight:700; font-size:17px; line-height:1; color:var(--ink2)}
   .lb-cell.full{cursor:pointer}
   .lb-cell .figwrap{height:100px; width:100%}
   .lb-cell .fig-svg{width:34px}
@@ -1172,7 +1177,7 @@ function renderLookbook(){
   const host=$("slots"); host.innerHTML="";
   for(let i=0;i<PICK;i++){ const s=document.createElement("div"); s.className="lb-cell";
     if(G.booked[i]){ s.classList.add("full"); if(G._landing.has(i)) s.classList.add("landing"); s.innerHTML=figWrap(dress(G.booked[i], lookFor(i))); s.title="Remove "+G.booked[i].name; s.addEventListener("click",()=>unbook(i)); }
-    else { s.classList.add("empty"); s.innerHTML=`<svg class="hanger" viewBox="0 0 64 40" aria-hidden="true"><path filter="url(#rough${(i%3)+1})" d="M32 4.5 c-3.6 0 -5.8 2.2 -5.8 4.8 c0 2.6 2.4 3.6 5.8 6.2 L6 34.5 L58 34.5 Z"/></svg><span>${ROMAN[i+1]}</span>`; }
+    else { s.classList.add("empty"); s.innerHTML=`<svg class="hanger" viewBox="0 0 64 40" aria-hidden="true"><path filter="url(#rough${(i%3)+1})" d="M33 3.5 c-4.2 -.6 -6.6 2.4 -6 5.2 c.5 2.4 2.8 3.4 5.4 6.4 C 24 22 14 29 6.5 34.2 C 22 35.5 42 34 57.5 34.8 C 50 29 40 22 32.4 15.1"/></svg><span>${ROMAN[i+1]}</span>`; }
     host.appendChild(s); }
 }
 function updateCount(){ $("count").textContent=G.booked.length+" / "+PICK; }
@@ -1988,7 +1993,7 @@ a11yApply();
 window.A11Y=A11Y;
 window.GAME={ begin, swipe:swipeBtn, undo:undoPass, next, reveal, restart, skipRunway, sound:toggleSound, access:a11yToggle };
 if(!Sfx.on) $("snd-btn").classList.add("off");
-const VERSION="2.1.2 · 2026-09-04"; window.VERSION=VERSION; { const v=$("ver"); if(v) v.textContent=VERSION; }
+const VERSION="2.1.3 · 2026-09-04"; window.VERSION=VERSION; { const v=$("ver"); if(v) v.textContent=VERSION; }
 renderIntroStrip(); rollHouse();
 </script>
 </body>
