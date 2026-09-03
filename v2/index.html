@@ -786,9 +786,8 @@ const Sfx=(function(){
     tick(){ noise(.025,.04,5000); tone(1200,.03,"square",.018); },        // the detent
     ratchet(){ noise(.008,.02,3200); },                                   // needle clicks
     thud(){ tone(110,.09,"sine",.07,0,70); },                             // a chip lands
-    cast(){ if(!on) return; const c=ac(); if(!c) return; const t0=c.currentTime+.05;   // five booked: a small rising chime
-      [523.3,659.3,784,1046.5].forEach((f,i)=>bell(f,t0+i*.13,1.1,.03));
-      [261.6,329.6,392].forEach(f=>padVoice(f,t0+.4,1.6,.014)); },
+    cast(){ if(!on) return; const c=ac(); if(!c) return; const t0=c.currentTime+.05;   // five booked: two soft bell notes, barely there
+      bell(784,t0,.7,.011); bell(1046.5,t0+.16,.9,.009); },
     deal(){ noise(.05,.028,2400); },
     deny(){ tone(160,.16,"square",.035); },
     envelope(){ noise(.32,.05,1200); tone(520,.2,"sine",.028,.15,780); },
