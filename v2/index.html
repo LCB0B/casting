@@ -275,6 +275,9 @@
   .fig .eyes{transform-box:fill-box; transform-origin:50% 50%; animation:blink 5.4s steps(1,end) infinite}
   .fig .leg{transform-box:fill-box; transform-origin:50% 6%}
   .fig .spot{transition:opacity .25s}
+  /* while a dialog is up, or on the card behind, the figures hold still: every SVG limb animation is a repaint */
+  body.dim .fig, body.dim .fig .arm, body.dim .fig .eyes, body.dim .fig .leg, body.dim .needle,
+  .card.behind .fig, .card.behind .fig .arm, .card.behind .fig .eyes{animation-play-state:paused}
   .fig.walking{animation:walkbob .52s ease-in-out infinite}
   .fig.walking .leg.l{animation:stepL .52s ease-in-out infinite}
   .fig.walking .leg.r{animation:stepR .52s ease-in-out infinite}
@@ -439,13 +442,16 @@
   /* ---------------- first-run tutorial (spotlight coachmarks) ---------------- */
   .tut-layer{position:fixed; inset:0; z-index:200; display:none}
   .tut-layer.show{display:block; animation:fade .22s ease both}
-  .tut-hole{position:absolute; left:0; top:0; width:0; height:0; border-radius:14px; border:2px solid var(--accent);
-    box-shadow:0 0 0 9999px rgba(16,15,14,.74); pointer-events:none;
-    transition:left .35s cubic-bezier(.33,1.05,.45,1), top .35s cubic-bezier(.33,1.05,.45,1), width .35s cubic-bezier(.33,1.05,.45,1), height .35s cubic-bezier(.33,1.05,.45,1), opacity .25s ease}
+  /* the scrim is one SVG path with the hole cut out (evenodd); the old 9999px box-shadow
+     repainted a giant layer on every frame of the move and crawled on phones */
+  .tut-scrim{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; display:block}
+  .tut-scrim path{fill:rgba(16,15,14,.74)}
+  .tut-scrim rect{fill:none; stroke:var(--accent); stroke-width:2}
+  .tut-hole{display:none}
   .tut-tip{position:absolute; left:0; top:0; width:min(90vw,338px); background:var(--paper); border:none;
-    box-shadow:0 12px 30px rgba(0,0,0,.3); padding:16px 16px 12px; pointer-events:auto;
+    box-shadow:0 12px 30px rgba(0,0,0,.3); padding:16px 16px 12px; pointer-events:auto; will-change:transform;
     background-image:var(--regs); background-repeat:no-repeat; background-size:9px 9px; background-position:var(--regpos);
-    transition:left .35s cubic-bezier(.33,1.05,.45,1), top .35s cubic-bezier(.33,1.05,.45,1)}
+    transition:transform .35s cubic-bezier(.33,1.05,.45,1)}
   .tut-caret{position:absolute; width:12px; height:12px; background:var(--paper); transform:translateX(-50%) rotate(45deg); display:none}
   .tut-caret.below{top:-6px}
   .tut-caret.above{bottom:-6px}
@@ -1683,7 +1689,7 @@ const Tutorial = (function(){
     layer.className = "tut-layer"; layer.id = "tut-layer";
     layer.setAttribute("role","dialog"); layer.setAttribute("aria-modal","true"); layer.setAttribute("aria-label","How to play");
     layer.innerHTML =
-      '<div class="tut-hole" id="tut-hole"></div>' +
+      '<svg class="tut-scrim" id="tut-scrim" aria-hidden="true"><path id="tut-scrim-path" fill-rule="evenodd" d=""/><rect id="tut-ring" rx="14" ry="14" x="0" y="0" width="0" height="0"/></svg>' +
       '<div class="tut-tip" id="tut-tip">' +
         '<div class="tut-caret" id="tut-caret"></div>' +
         '<div class="tut-kick" id="tut-kick"></div>' +
@@ -1699,7 +1705,7 @@ const Tutorial = (function(){
         '<div class="tut-hint">tap anywhere to continue</div>' +
       '</div>';
     document.body.appendChild(layer);
-    hole=$("tut-hole"); tip=$("tut-tip"); caret=$("tut-caret");
+    hole={path:$("tut-scrim-path"), ring:$("tut-ring"), cur:null, raf:null}; tip=$("tut-tip"); caret=$("tut-caret");
     kickEl=$("tut-kick"); titleEl=$("tut-title"); bodyEl=$("tut-body");
     backBtn=$("tut-back"); nextBtn=$("tut-next"); skipBtn=$("tut-skip");
     layer.addEventListener("click", ()=>next());
@@ -1716,7 +1722,25 @@ const Tutorial = (function(){
     else if(e.key==="Enter"||e.key==="ArrowRight"||e.key===" "){ e.preventDefault(); e.stopPropagation(); next(); }
     else if(e.key==="ArrowLeft"){ e.preventDefault(); e.stopPropagation(); back(); }
   }
-  function onResize(){ if(Tutorial.active) position(); }
+  let posRaf=null;
+  function onResize(){ if(Tutorial.active && !posRaf) posRaf=requestAnimationFrame(()=>{ posRaf=null; position(); }); }
+  /* draw the scrim: full viewport minus a rounded hole; tween the hole between steps in JS */
+  function drawHole(r, vw, vh){
+    const rx=Math.min(14, r.w/2, r.h/2);
+    const rr=`M${(r.x+rx).toFixed(1)} ${r.y.toFixed(1)}h${(r.w-2*rx).toFixed(1)}a${rx} ${rx} 0 0 1 ${rx} ${rx}v${(r.h-2*rx).toFixed(1)}a${rx} ${rx} 0 0 1 -${rx} ${rx}h-${(r.w-2*rx).toFixed(1)}a${rx} ${rx} 0 0 1 -${rx} -${rx}v-${(r.h-2*rx).toFixed(1)}a${rx} ${rx} 0 0 1 ${rx} -${rx}z`;
+    hole.path.setAttribute("d", r.w>0 ? `M0 0H${vw}V${vh}H0Z ${rr}` : `M0 0H${vw}V${vh}H0Z`);
+    hole.ring.setAttribute("x",r.x); hole.ring.setAttribute("y",r.y); hole.ring.setAttribute("width",Math.max(0,r.w)); hole.ring.setAttribute("height",Math.max(0,r.h));
+    hole.ring.style.display = r.w>0 ? "" : "none";
+  }
+  function moveHole(to, vw, vh){
+    if(hole.raf){ cancelAnimationFrame(hole.raf); hole.raf=null; }
+    const from=hole.cur, reduce=(window.A11Y&&A11Y.on)||(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    if(!from || reduce || from.w===0 || to.w===0){ hole.cur=to; drawHole(to,vw,vh); return; }
+    const t0=performance.now(), DUR=350, ease=p=>1-Math.pow(1-p,3);
+    (function f(now){ const p=Math.min(1,(now-t0)/DUR), e=ease(p);
+      const r={x:from.x+(to.x-from.x)*e, y:from.y+(to.y-from.y)*e, w:from.w+(to.w-from.w)*e, h:from.h+(to.h-from.h)*e};
+      drawHole(r,vw,vh); if(p<1) hole.raf=requestAnimationFrame(f); else { hole.raf=null; hole.cur=to; } })(t0);
+  }
 
   function render(){
     const s = list[i];
@@ -1734,15 +1758,13 @@ const Tutorial = (function(){
     const vw = window.innerWidth, vh = window.innerHeight;
     const tr = tip.getBoundingClientRect(), tw = tr.width, th = tr.height;
     if(!el){
-      hole.style.opacity = "0"; caret.style.display = "none";
-      tip.style.left = Math.max(MARGIN,(vw-tw)/2)+"px";
-      tip.style.top  = Math.max(MARGIN,(vh-th)/2)+"px";
+      moveHole({x:0,y:0,w:0,h:0},vw,vh); caret.style.display = "none";
+      tip.style.transform = `translate(${Math.max(MARGIN,(vw-tw)/2)}px,${Math.max(MARGIN,(vh-th)/2)}px)`;
       return;
     }
-    hole.style.opacity = "1";
     const r = el.getBoundingClientRect();
     const hx = Math.max(0,r.left-PAD), hy = Math.max(0,r.top-PAD), hw = r.width+PAD*2, hh = r.height+PAD*2;
-    hole.style.left=hx+"px"; hole.style.top=hy+"px"; hole.style.width=hw+"px"; hole.style.height=hh+"px";
+    moveHole({x:hx,y:hy,w:hw,h:hh},vw,vh);
     const holeCx = hx+hw/2, holeBottom = hy+hh, holeTop = hy;
     const roomBelow = (holeBottom+GAP+th+MARGIN) <= vh;
     const roomAbove = (holeTop-GAP-th-MARGIN) >= 0;
@@ -1751,7 +1773,7 @@ const Tutorial = (function(){
     top = Math.max(MARGIN, Math.min(top, vh-th-MARGIN));
     let left = holeCx - tw/2;
     left = Math.max(MARGIN, Math.min(left, vw-tw-MARGIN));
-    tip.style.left=left+"px"; tip.style.top=top+"px";
+    tip.style.transform=`translate(${Math.round(left)}px,${Math.round(top)}px)`;
     caret.style.display = "block";
     caret.style.left = Math.max(14, Math.min(holeCx-left, tw-14))+"px";
     caret.classList.toggle("below", placeBelow);
@@ -1763,7 +1785,7 @@ const Tutorial = (function(){
   function open_(){
     if(window.Demo && Demo.active) return;
     if(!built) build();
-    i = 0; Tutorial.active = true;
+    i = 0; Tutorial.active = true; hole.cur=null;
     document.documentElement.style.overflow = "hidden"; document.body.style.overflow = "hidden";
     layer.classList.add("show");
     window.addEventListener("keydown", onKey, true);
@@ -1775,7 +1797,7 @@ const Tutorial = (function(){
   function next(){ if(i >= list.length-1) end(); else { i++; render(); } }
   function back(){ if(i > 0){ i--; render(); } }
   function end(){
-    Tutorial.active = false;
+    Tutorial.active = false; if(hole && hole.raf){ cancelAnimationFrame(hole.raf); hole.raf=null; }
     if(layer) layer.classList.remove("show");
     document.documentElement.style.overflow = ""; document.body.style.overflow = "";
     window.removeEventListener("keydown", onKey, true);
@@ -1791,6 +1813,16 @@ const Tutorial = (function(){
   return { start, startCard, next, back, end, position, maybeStart, active:false, seen:false };
 })();
 window.Tutorial = Tutorial;
+/* any open dialog dims the page: the figures and needles pause so the sheet on top scrolls and moves smoothly */
+(function(){
+  const ids=["tut-layer","demo-veil","brief-veil","veil","runway-veil"], seen=new Set();
+  const mo=new MutationObserver(sync);
+  function sync(){
+    ids.forEach(id=>{ const e=$(id); if(e && !seen.has(e)){ seen.add(e); mo.observe(e,{attributes:true, attributeFilter:["class"]}); } });   // the tutorial layer is built late
+    document.body.classList.toggle("dim", ids.some(id=>{ const e=$(id); return e && e.classList.contains("show"); }));
+  }
+  mo.observe(document.body,{childList:true}); sync();
+})();
 
 /* ---------------- guided opening (the new tutorial) ----------------
    Playtesters found the rules opaque when told, so now they're PLAYED: first only the
