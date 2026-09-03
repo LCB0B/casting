@@ -14,6 +14,10 @@ spreading representation across distinct bodies is the hard one. That friction i
 
 Play online: **https://lcb0b.github.io/casting/**
 
+A visual redesign is in progress at **https://lcb0b.github.io/casting/v2/** (`v2/index.html`):
+same game, same rules, comp cards drawn like a tech pack instead of boxed type. The root
+game stays as it is until v2 is done.
+
 Or open `index.html` in any modern browser. No build step, no dependencies — everything
 (art, animation, logic) lives in the one file.
 

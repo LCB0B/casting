@@ -1,0 +1,1794 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Casting v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Caveat:wght@400;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAFAF8; --panel:#FFFFFF; --ink:#0A0A0A; --ink2:#575757; --ink3:#9A9A9A;
+    --line:#C9C9C9; --hair:#BDBDBD; --accent:#E6007E; --good:#3E7E46; --stage:#0B0B0A;
+    --ok:#7FA33F; --warn:#C97A1F; --bad:#C22B1F; --pen:#1E2A78;
+    --arc1:#CC6F5E; --arc2:#DD9A63; --arc3:#E3C45F; --arc4:#A7C063; --arc5:#5FA567;
+    --tech:'Archivo',system-ui,sans-serif;        /* the label: every key, value, kicker, button, heading. Bold caps, never tracked, never tiny */
+    --marker:'Permanent Marker',cursive;           /* the stamp: swipe verdicts, stars, the loud scrawls */
+    --hand:'Caveat',cursive;                       /* the pen: margin notes, whispers, hints */
+    /* registration cross, drawn in the corners of every sheet of paper instead of a border */
+    --reg:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 9'%3E%3Cpath d='M4.5 0v9M0 4.5h9' stroke='%230A0A0A' stroke-width='.9'/%3E%3C/svg%3E");
+    --regs:var(--reg),var(--reg),var(--reg),var(--reg);
+    --regpos:6px 6px, calc(100% - 6px) 6px, 6px calc(100% - 6px), calc(100% - 6px) calc(100% - 6px);
+  }
+  /* colour-vision-safe mode: the red→green verdict language becomes orange→blue (Okabe–Ito);
+     the accent pink is safe as-is and stays */
+  body.cvd{--good:#0072B2; --ok:#56B4E9; --warn:#E69F00; --bad:#D55E00;
+    --arc1:#D55E00; --arc2:#E69F00; --arc3:#F0E442; --arc4:#56B4E9; --arc5:#0072B2}
+  *{box-sizing:border-box}
+  html,body{margin:0; height:100%}
+  body{background:var(--paper); color:var(--ink); font-family:var(--tech); line-height:1.45; -webkit-font-smoothing:antialiased; overflow-x:hidden}
+  /* a whisper of photocopier grain over everything */
+  body::after{content:""; position:fixed; inset:0; z-index:9999; pointer-events:none; opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.45 0.45 0.45 0 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E")}
+  button{font-family:var(--tech); cursor:pointer; color:inherit}
+  .kick{font-family:var(--tech); font-weight:800; font-size:11px; text-transform:uppercase; color:var(--ink)}
+  .kick b{color:var(--accent); font-weight:800}
+  .ak{font-weight:800; text-transform:uppercase}
+  .av{font-weight:600; text-transform:uppercase}
+  .defs{position:absolute; width:0; height:0; overflow:hidden}
+
+  .wrap{max-width:540px; margin:0 auto; min-height:100%; padding:14px 18px calc(12px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; position:relative}
+  .screen{display:none; flex:1; flex-direction:column}
+  .screen.active{display:flex; animation:fade .5s ease both}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+
+  /* intro */
+  #intro{justify-content:center}
+  .masthead{font-family:var(--tech); font-weight:900; font-size:clamp(38px,13vw,76px); line-height:.95; letter-spacing:-.025em; margin:0; text-transform:uppercase}
+  .masthead::before,.masthead::after{content:'"'; font-weight:700}
+  .slogan{font-family:var(--tech); font-weight:700; font-size:clamp(13px,4vw,17px); text-transform:uppercase; margin:14px 0 0}
+  .slogan mark{background:none; color:inherit; padding:0 1px 4px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Cpath d='M1 5 C 15 2, 30 7, 45 4 S 75 2, 99 5' fill='none' stroke='%23E6007E' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:0 100%; background-size:100% 7px}
+  .premise{font-size:15px; max-width:42ch; margin:28px 0 0}
+  .name-row{margin:26px 0 0; display:flex; flex-direction:column; gap:12px}
+  .intro-strip{display:flex; gap:0; height:120px; align-items:flex-end; justify-content:center; margin-top:30px; opacity:.92; pointer-events:none}
+  .intro-strip .figwrap{width:50px}
+  .intro-strip .fig-svg{max-height:120px}
+
+  /* the one solid element: a black bar reading "LABEL" → */
+  .btn{display:inline-flex; align-items:center; justify-content:flex-start; gap:0; background:var(--ink); color:var(--paper); border:none; padding:15px 18px; font-family:var(--tech); font-weight:800; font-size:13px; text-transform:uppercase; transition:box-shadow .15s, transform .15s; width:100%; box-shadow:0 1px 3px rgba(0,0,0,.22); line-height:1}
+  .btn::before{content:'"'}
+  .btn .ar{font-size:0; line-height:0}
+  .btn .ar::before{content:'"'; font-size:13px; line-height:1}
+  .btn::after{content:'→'; margin-left:auto; padding-left:14px; font-size:17px; line-height:1}
+  .btn:hover{transform:translateY(1px); box-shadow:0 1px 2px rgba(0,0,0,.2)}
+  .btn:active{transform:translateY(2px); box-shadow:none}
+  .btn:disabled{opacity:.25; cursor:not-allowed; box-shadow:none}
+  .btn.center{justify-content:flex-start}
+  .btn.line{background:none; color:var(--ink); border:none; border-bottom:2px solid var(--ink); box-shadow:none; padding:8px 0 5px; border-radius:0}
+  .btn.line:hover{color:var(--accent); border-color:var(--accent); transform:none; box-shadow:none}
+
+  /* season header */
+  .top{position:relative; text-align:center; border-bottom:1px solid var(--ink); padding:3px 0 8px}
+  .top .h{font-family:var(--tech); font-weight:900; font-size:20px; text-transform:uppercase; display:inline-block; letter-spacing:-.01em; line-height:1.2}
+  .top .h::before,.top .h::after{content:'"'}
+  .top .co{font-size:11px; font-weight:600; color:var(--ink2); margin-left:8px; vertical-align:2px}
+  .helpbtn{position:absolute; right:-4px; top:-4px; width:28px; height:28px; border:none; background:none; color:var(--ink2); font-family:var(--hand); font-weight:700; font-size:24px; line-height:1; padding:0; transition:color .2s}
+  .helpbtn:hover{color:var(--ink)}
+  .sndbtn,.a11ybtn{position:fixed; top:10px; z-index:300; width:30px; height:30px; border:none; background:none; color:var(--ink2); padding:0; display:flex; align-items:center; justify-content:center; transition:color .2s, opacity .2s}
+  .sndbtn{left:10px}
+  .a11ybtn{left:42px}
+  .sndbtn:hover,.a11ybtn:hover{color:var(--ink)}
+  /* on: a pen ring around the icon, no filled square */
+  .a11ybtn[aria-pressed="true"]{color:var(--pen);
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16.5 3.5 C 23 3, 29 8, 28.5 16 C 28 24, 22 29.5, 15 28.5 C 8 27.5, 3.5 22, 3.5 15.5 C 3.5 9, 9 4, 16.5 3.5 Z' fill='none' stroke='%231E2A78' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+  .sndbtn svg,.a11ybtn svg{width:17px; height:17px; display:block}
+  .sndbtn .slash{display:none}
+  .sndbtn.off{opacity:.45}
+  .sndbtn.off .waves{display:none}
+  .sndbtn.off .slash{display:block}
+
+  .gauges{display:grid; grid-template-columns:repeat(3,1fr); gap:0 14px; margin:8px 0 2px; padding:0 20px}
+  .gauge{text-align:center}
+  .gauge-svg{width:100%; height:auto; display:block; margin:0 auto}
+  .needle{transition:transform 1.05s cubic-bezier(.33,1.15,.45,1)}
+  .gauge-cap{font-family:var(--tech); font-weight:800; font-size:9.5px; text-transform:uppercase; color:var(--ink2); margin-top:-3px; transform-origin:50% 50%}
+  .gauge-cap::before,.gauge-cap::after{content:'"'}
+  .g-a1{fill:var(--arc1)} .g-a2{fill:var(--arc2)} .g-a3{fill:var(--arc3)} .g-a4{fill:var(--arc4)} .g-a5{fill:var(--arc5)}
+  .gauge-cap.warn{color:var(--warn); font-weight:800}
+  .gauge-cap.red{color:var(--bad); font-weight:800}
+  .gauge-cap.crit{color:var(--bad); font-weight:900; animation:capblink .95s ease-in-out infinite}
+  .gauge-cap.ok{color:var(--ok); font-weight:800}
+  .gauge-cap.happy{color:var(--good); font-weight:800}
+  @keyframes capblink{0%,100%{transform:scale(1); opacity:1}50%{transform:scale(1.16); opacity:.7}}
+
+  /* lookbook: five hangers on a rail */
+  .lookbook{margin:12px 0 2px; position:relative}
+  .lb-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px}
+  #count::before{content:'"Booked" '}
+  .lb-cells{display:grid; grid-template-columns:repeat(5,1fr); gap:6px}
+  .lb-cell{height:108px; display:flex; align-items:flex-end; justify-content:center; position:relative; overflow:hidden}
+  .lb-cell::before{content:""; position:absolute; left:12%; right:12%; bottom:0; border-bottom:1px solid var(--line)}   /* each look gets a floor */
+  .lb-cell.empty{align-items:center; flex-direction:column; justify-content:center; gap:3px}
+  .lb-cell.empty .hanger{width:46px; height:auto; display:block}
+  .lb-cell.empty .hanger path{fill:none; stroke:var(--ink3); stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
+  .lb-cell.empty span{font-family:var(--tech); font-weight:800; font-size:12px; color:var(--ink3)}
+  .lb-cell.full{cursor:pointer}
+  .lb-cell .figwrap{height:100px; width:100%}
+  .lb-cell .fig-svg{width:34px}
+  .lb-cell.full::after{content:"✕"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--marker); font-size:30px; color:var(--accent); background:rgba(250,250,248,.6); opacity:0; transition:.18s}
+  .lb-cell.full:hover::after{opacity:1}
+
+  /* deck */
+  .deck-wrap{flex:1; display:flex; flex-direction:column; min-height:0; position:relative}
+  .deck{position:relative; flex:1; min-height:244px; margin:8px 0 4px; display:flex; align-items:center; justify-content:center}
+  /* the comp card: a sheet of paper with registration crosses, no border, no tape.
+     It may never outgrow the deck: it caps at the deck's height and the figure is the
+     flex child that gives way — meta and name stay intact */
+  .card{position:absolute; max-height:calc(100% - 22px); display:flex; flex-direction:column; width:min(76vw,320px); background:var(--panel); border:none; box-shadow:0 1px 2px rgba(0,0,0,.12), 0 10px 26px rgba(0,0,0,.12); touch-action:pan-y; -webkit-user-select:none; user-select:none; will-change:transform; cursor:grab; padding:16px 16px 13px; transform:rotate(var(--tilt,0deg));
+    background-image:var(--regs); background-repeat:no-repeat; background-size:9px 9px; background-position:var(--regpos)}
+  .card.behind{transform:scale(.93) translateY(12px) rotate(var(--tilt,0deg)); opacity:.5; pointer-events:none; box-shadow:none}
+  .scrawl-star{position:absolute; left:0; top:2px; font-family:var(--marker); font-size:12.5px; color:var(--accent); transform:rotate(-8deg); max-width:86px; line-height:1.2; pointer-events:none; z-index:2}
+  .scrawl-star.alum{font-size:11px; max-width:92px}
+  .card:active{cursor:grabbing}
+  .card-fig{height:212px; min-height:92px; display:flex; align-items:flex-end; justify-content:center; position:relative}
+  .card-fig .figwrap{height:100%; width:100%}
+  .card-fig .figwrap.phone{display:none; width:150px}
+  .card-fig .figwrap.phone .fig-svg{width:98px; max-height:100%}
+  /* the annotated figure: figure + leader lines + measurements share one viewBox, so the
+     lines always land on the body whatever the card's size */
+  .card-fig .anno{width:100%; height:auto; max-height:100%; display:block; overflow:visible}
+  .anno .ln{stroke:var(--ink); stroke-width:.65; fill:none; stroke-linecap:round}
+  .anno .tk{stroke:var(--ink); stroke-width:.9; stroke-linecap:round}
+  .anno text{font-family:var(--tech); font-size:8px; fill:var(--ink); text-transform:uppercase}
+  .anno .ak{font-weight:800}
+  .anno .av{font-weight:600}
+  .anno .fig-body{animation:bob 2.8s ease-in-out infinite; transform-box:fill-box; transform-origin:50% 100%}
+  .card-fig .figwrap.tech .fig{animation:none}
+  .card-meta{border-top:1px solid var(--ink); margin-top:10px; padding-top:9px; flex-shrink:0}
+  .cname{font-family:var(--tech); font-weight:900; font-size:20px; text-transform:uppercase; line-height:1.05; letter-spacing:-.01em; max-width:100%}
+  .cname .star{font-family:var(--marker); color:var(--accent); display:inline-block; line-height:1; font-size:18px; margin-left:5px; transform:rotate(8deg)}
+  /* the two cases: ORIGIN and BMI, what the panels actually count, in full letters and no box */
+  .cases{display:grid; grid-template-columns:1.35fr 1fr; gap:8px; margin-top:8px}
+  .case{min-width:0}
+  .case-k{display:block; font-family:var(--tech); font-weight:800; font-size:11px; text-transform:uppercase; color:var(--ink)}
+  .case-v{display:block; font-family:var(--tech); font-weight:600; font-size:14px; line-height:1.1; margin-top:3px; text-transform:uppercase}
+  .case.bmi .case-v{display:inline-block; position:relative; font-size:22px; font-weight:800; padding:0 2px; line-height:1}
+  .case.bmi .ring{position:absolute; left:-8px; top:-6px; width:calc(100% + 16px); height:calc(100% + 12px); display:none; pointer-events:none}
+  .case.bmi .ring path{fill:none; stroke:var(--accent); stroke-width:2.2; stroke-linecap:round}
+  .case.low .ring{display:block}     /* pen ring below the WHO underweight line, same as the dot on the ruler */
+  .case-tag{font-family:var(--hand); font-size:16px; color:var(--pen); margin-left:8px; vertical-align:4px; line-height:1}
+  .case.low .case-tag{color:var(--accent)}
+  .cfine{display:none; margin-top:6px; font-family:var(--tech); font-weight:700; font-size:10.5px; text-transform:uppercase; color:var(--ink2)}
+  .cfine+.cfine{margin-top:1px}
+  .cfine .ak{color:var(--ink)}
+  /* BMI ruler: where this body sits between the industry floor and the average person */
+  .bmibar{display:block; width:100%; height:auto; margin-top:9px; overflow:visible}
+  .bmibar text{font-family:var(--tech); font-weight:700; font-size:8.5px; text-transform:uppercase; fill:var(--ink2)}
+  .bmibar .bmv{font-weight:800; fill:var(--ink)}
+  .bmibar .rl{stroke:var(--ink); stroke-width:.8}
+  .bmibar .rt{stroke:var(--ink3); stroke-width:.7}
+  /* stamps: marker pen inside a wobbly ring */
+  .swipe-tag{position:absolute; top:52px; font-family:var(--marker); font-size:24px; text-transform:uppercase; padding:7px 16px 5px; border:3px solid; border-radius:48% 52% 46% 54% / 58% 44% 56% 42%; opacity:0; pointer-events:none; mix-blend-mode:multiply; line-height:1; z-index:3}
+  .swipe-tag::before,.swipe-tag::after{content:'"'}
+  .swipe-tag.book{right:10px; color:var(--good); border-color:var(--good); transform:rotate(12deg)}
+  .swipe-tag.pass{left:10px; color:var(--accent); border-color:var(--accent); transform:rotate(-12deg)}
+  .card.shake{animation:shake .4s ease}
+  @keyframes shake{0%,100%{transform:translateX(0) rotate(var(--tilt,0deg))}20%{transform:translateX(-9px) rotate(-2deg)}40%{transform:translateX(9px) rotate(2deg)}60%{transform:translateX(-6px) rotate(var(--tilt,0deg))}80%{transform:translateX(6px) rotate(var(--tilt,0deg))}}
+
+  /* ✕ / ✓ : marker strokes inside a pen ring */
+  .controls{display:flex; justify-content:center; gap:36px; margin:2px 0 4px}
+  .ctrl{width:62px; height:62px; border:none; background:none; padding:0; display:flex; align-items:center; justify-content:center; transition:transform .14s}
+  .ctrl svg{width:100%; height:100%; overflow:visible; display:block}
+  .ctrl .ring{fill:var(--panel); stroke:currentColor; stroke-width:2.4; transition:fill .2s}
+  .ctrl .gl{fill:none; stroke:currentColor; stroke-width:5.5; stroke-linecap:round; stroke-linejoin:round; transition:stroke .2s}
+  .ctrl.pass{color:var(--accent)}
+  .ctrl.book{color:var(--good)}
+  .ctrl:hover .ring{fill:currentColor}
+  .ctrl:hover .gl{stroke:#fff}
+  .ctrl:hover{transform:translateY(1px)}
+  .ctrl:active{transform:translateY(2px)}
+  .ctrl:active .ring{filter:none}
+  .ctrl:disabled{opacity:.25; cursor:not-allowed; transform:none}
+  .ctrl:focus-visible{outline:2px dashed var(--pen); outline-offset:5px; border-radius:50%}
+  .btn:focus-visible,.tut-next:focus-visible{outline:2px dashed var(--pen); outline-offset:3px}
+  .undo{display:block; margin:0 auto 2px; background:none; border:none; font-family:var(--hand); font-size:16px; color:var(--ink2); text-decoration:underline; text-underline-offset:3px; padding:4px 8px}
+  .undo:hover{color:var(--ink)}
+  .keyhint{display:none; text-align:center; font-family:var(--hand); font-size:15px; color:var(--ink3); margin-top:2px}
+  @media(hover:hover) and (pointer:fine){ .keyhint{display:block} }
+  /* the assistant's pencil: a one-line forecast over the top of the deck after each booking.
+     Absolutely positioned so a wrapping line never reflows the deck mid-swipe. */
+  .whisper{position:absolute; top:3px; left:0; right:0; z-index:6; text-align:center; font-family:var(--hand); font-size:18px; line-height:1.25; color:var(--pen); opacity:0; transform:rotate(-1deg); transition:opacity .3s ease; pointer-events:none}
+  .whisper.show{opacity:1}
+  .whisper b{color:var(--accent); font-weight:700}
+  /* phones: the annotated figure gives way to the plain figure; the two cases carry the story,
+     the measurements collapse to one label line */
+  @media(max-width:480px){
+    .card{width:min(70vw,238px); padding:12px 12px 15px}
+    .card-fig{height:164px; min-height:80px}
+    .card-fig .figwrap.tech{display:none}
+    .card-fig .figwrap.phone{display:flex; width:118px}
+    .card-fig .figwrap.phone .fig-svg{width:80px}
+    .cname{font-size:17px}
+    .cases{gap:6px; margin-top:6px}
+    .case-k{font-size:10px}
+    .case-v{font-size:12.5px}
+    .case.bmi .case-v{font-size:18px}
+    .case-tag{font-size:14px; margin-left:6px; vertical-align:3px}
+    .bmibar{display:none}
+    .cfine{display:block; font-size:10px}
+    .cfine+.cfine{display:none}   /* hair and eyes are in the drawing */
+    .card-meta{margin-top:8px; padding-top:7px}
+    .swipe-tag{top:36px; font-size:19px}
+    .deck{min-height:208px}
+    .ctrl{width:54px; height:54px}
+  }
+  /* short viewports: shed the ruler first, then the second label line, and let the figure give way */
+  @media(max-height:700px){ .bmibar{display:none} }
+  @media(max-height:640px){
+    .cfine+.cfine{display:none}
+    .card-fig{min-height:64px}
+    .deck{min-height:224px}
+  }
+  @media(max-height:560px){ .cfine{display:none} }
+  /* the longest house names must clear the fixed sound/access buttons on narrow screens */
+  @media(max-width:380px){ .top .h{font-size:15px} .top .co{display:none} }
+  /* wide screens: the corner buttons dock to the game column instead of drifting to the screen edge */
+  @media(min-width:700px){
+    .sndbtn{left:calc(50% - 258px)}
+    .a11ybtn{left:calc(50% - 226px)}
+  }
+
+  /* figure */
+  .figwrap{display:flex; align-items:flex-end; justify-content:center}
+  .figwrap .fig{width:100%; height:100%; display:flex; justify-content:center; align-items:flex-end; animation:bob 2.8s ease-in-out infinite; transform-origin:50% 100%}
+  .fig-svg{display:block; overflow:visible; height:auto; width:100%}
+  .fig .arm{transform-box:fill-box; transform-origin:50% 8%; animation:armsway 3.6s ease-in-out infinite}
+  .fig .arm.r{animation-delay:-1.3s}
+  .fig .eyes{transform-box:fill-box; transform-origin:50% 50%; animation:blink 5.4s steps(1,end) infinite}
+  .fig .leg{transform-box:fill-box; transform-origin:50% 6%}
+  .fig .spot{transition:opacity .25s}
+  .fig.walking{animation:walkbob .52s ease-in-out infinite}
+  .fig.walking .leg.l{animation:stepL .52s ease-in-out infinite}
+  .fig.walking .leg.r{animation:stepR .52s ease-in-out infinite}
+  .fig.walking .arm{animation:armswing .52s ease-in-out infinite}
+  .fig.walking .arm.r{animation-delay:-.26s}.fig.walking .spot{opacity:.3}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  @keyframes armsway{0%,100%{transform:rotate(3deg)}50%{transform:rotate(-4deg)}}
+  @keyframes blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+  @keyframes stepL{0%,100%{transform:rotate(15deg)}50%{transform:rotate(-15deg)}}
+  @keyframes stepR{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(15deg)}}
+  @keyframes armswing{0%,100%{transform:rotate(20deg)}50%{transform:rotate(-20deg)}}
+  @keyframes walkbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+
+  /* runway overlay */
+  .veil{position:fixed; inset:0; background:rgba(16,15,14,.66); display:none; align-items:center; justify-content:center; padding:18px; z-index:30}
+  .veil.show{display:flex; animation:fade .25s ease both}
+  .runway-veil{background:rgba(12,11,10,.94)}
+  .stagebox{position:relative; width:100%; max-width:540px; height:min(66vh,520px); overflow:hidden; cursor:pointer;
+    --sky:#0B0B0A; --beam:rgba(255,255,255,.16); --run-a:#E9E5DA; --run-b:#C4BFB2;
+    background:radial-gradient(120% 60% at 50% -8%, var(--beam), transparent 60%), var(--sky)}
+  .stagebox .floor{position:absolute; left:50%; bottom:0; transform:translateX(-50%); width:80%; height:66%; background:linear-gradient(var(--run-a),var(--run-b)); -webkit-clip-path:polygon(34% 0,66% 0,100% 100%,0 100%); clip-path:polygon(34% 0,66% 0,100% 100%,0 100%)}
+  .stagebox .floor::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent 32%,rgba(255,255,255,.26) 50%,transparent 68%)}
+  .lights{position:absolute; top:0; left:0; right:0; height:42%; pointer-events:none; background:radial-gradient(50% 100% at 50% 0, var(--beam), transparent 72%)}
+  .rw-blanc{--sky:#E8E6DF; --beam:rgba(255,255,255,.9); --run-a:#FBFAF6; --run-b:#D9D6CC}
+  .rw-rose{--sky:#150710; --beam:rgba(230,0,126,.34); --run-a:#F2CFE3; --run-b:#D79ABE}
+  .rw-or{--sky:#171106; --beam:rgba(255,200,120,.30); --run-a:#EBD9AE; --run-b:#C6A96E}
+  .rw-beton{--sky:#14171A; --beam:rgba(185,210,255,.22); --run-a:#B8BBB4; --run-b:#8E928B}
+  .rw-nuit{--sky:#07211C; --beam:rgba(150,255,215,.16); --run-a:#D8D5C6; --run-b:#AFACA0}
+  .rw-cristal{--sky:#0D1118; --beam:rgba(205,222,255,.26); --run-a:#E2E6ED; --run-b:#A9B1BF}
+  .rw-damier{--sky:#101010; --beam:rgba(255,255,255,.2)}
+  .rw-damier .floor{background:repeating-conic-gradient(#F0EEE7 0 25%, #131210 0 50%) 50% 0/36px 36px}
+  .walkers{position:absolute; left:0; right:0; bottom:7%; display:flex; justify-content:center; align-items:flex-end; gap:1.5%; padding:0 4%}
+  .walker{width:clamp(52px,13vw,86px); animation:walkin 1s cubic-bezier(.2,.7,.3,1) both}
+  @keyframes walkin{from{transform:translateY(46px) scale(.62); opacity:0}to{transform:none; opacity:1}}
+  .walker .fig-svg{width:100%}
+  .pflash{position:absolute; pointer-events:none; z-index:3;
+    background:radial-gradient(circle, rgba(255,255,255,.98) 0%, rgba(255,255,255,.5) 16%, transparent 40%);
+    opacity:0; animation:pburst .45s ease-out forwards}
+  .pflash::before,.pflash::after,.pflash i::before,.pflash i::after{content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%)}
+  .pflash::before{width:100%; height:2.5px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.95) 42% 58%,transparent)}
+  .pflash::after{width:2.5px; height:100%; background:linear-gradient(180deg,transparent,rgba(255,255,255,.95) 42% 58%,transparent)}
+  .pflash i{position:absolute; inset:0; transform:rotate(45deg) scale(.6)}
+  .pflash i::before{width:100%; height:2px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.55) 44% 56%,transparent)}
+  .pflash i::after{width:2px; height:100%; background:linear-gradient(180deg,transparent,rgba(255,255,255,.55) 44% 56%,transparent)}
+  @keyframes pburst{0%{opacity:0; transform:scale(.2)} 14%{opacity:1; transform:scale(1)} 100%{opacity:0; transform:scale(1.5)}}
+  .skiphint{position:absolute; bottom:8px; right:13px; font-family:var(--hand); font-size:16px; color:#9a9891}
+
+  /* resolution: a review sheet */
+  .resol{background:var(--paper); border:none; max-width:480px; width:100%; padding:22px 22px 18px; box-shadow:0 14px 36px rgba(0,0,0,.32); max-height:92vh; overflow-y:auto;
+    background-image:var(--regs); background-repeat:no-repeat; background-size:9px 9px; background-position:var(--regpos)}
+  .resol .hk{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--ink); padding-bottom:6px; margin-bottom:14px}
+  .resol .hl{font-weight:600; font-size:15px; line-height:1.5; margin:0 0 16px}
+  .resol .hl .hlt{background:rgba(230,0,126,.20); padding:0 3px; -webkit-box-decoration-break:clone; box-decoration-break:clone}
+  .rrow{display:grid; grid-template-columns:88px 1fr; gap:12px; align-items:center; margin-bottom:13px; opacity:0; animation:slidein .42s ease forwards}
+  @keyframes slidein{from{opacity:0; transform:translateX(-8px)}to{opacity:1; transform:none}}
+  .rrow .gauge-svg{width:88px; max-width:88px}
+  .rrow .rwho{font-weight:800; font-size:10.5px; text-transform:uppercase; color:var(--ink2); margin-bottom:3px}
+  .rrow .rtext{font-size:13px; line-height:1.45; font-weight:400}
+  .rdelta{display:inline-block; font-family:var(--hand); font-weight:700; font-size:23px; line-height:1; margin-left:8px; vertical-align:middle; transform:rotate(-6deg); text-transform:none}
+  .rdelta.up{color:var(--good)}
+  .rdelta.down{color:var(--bad)}
+
+  /* reveal */
+  #reveal{display:none}#reveal.active{display:block}
+  .rv{max-width:540px; margin:0 auto; padding:24px 18px 56px}
+  .rv-kick{display:flex; justify-content:space-between; border-bottom:1px solid var(--ink); padding-bottom:7px}
+  .rv-hero{display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:30px 0 26px; border-bottom:1px solid var(--line); margin-bottom:22px}
+  .rv-h{font-family:var(--tech); font-weight:900; font-size:clamp(32px,11.5vw,64px); line-height:.92; margin:0 0 18px; text-transform:uppercase; letter-spacing:-.025em}
+  .rv-h em{font-style:italic; font-weight:900}
+  .rv-result{font-family:var(--marker); font-size:clamp(18px,5.4vw,26px); line-height:1.1; margin:2px 0 20px; text-transform:uppercase;
+    display:inline-block; padding:9px 18px 7px; border:3px solid currentColor; border-radius:48% 52% 46% 54% / 58% 44% 56% 42%; transform:rotate(-4deg); mix-blend-mode:multiply}
+  .rv-result.lost{color:var(--accent)}
+  .rv-result.won{color:var(--good)}
+  .rv-slip{display:inline-block; font-family:var(--hand); font-size:18px; color:var(--accent); transform:rotate(-1.5deg); margin:0 0 16px}
+  .rv-lead{font-weight:400; font-size:14px; line-height:1.6; max-width:52ch; margin:0 auto; text-align:left}
+  .parade{background:var(--stage); overflow:hidden; margin-bottom:18px; position:relative}
+  .parade .pcap{position:absolute; top:8px; left:12px; z-index:2; font-weight:700; font-size:10.5px; text-transform:uppercase; color:#d4d2cc}
+  .parade-track{display:flex; gap:6px; align-items:flex-end; padding:24px 10px 12px; width:max-content; animation:march 30s linear infinite}
+  .parade:hover .parade-track{animation-play-state:paused}
+  @keyframes march{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .parade .figwrap{height:116px; width:52px}.parade .fig-svg{width:46px}
+  /* charts: plain plots under a rule, labels in the label voice, the aside in pen */
+  .chartbox{padding:12px 0 6px; margin-bottom:18px; position:relative; border-top:1px solid var(--ink)}
+  .chartbox .ct{font-weight:800; font-size:11px; text-transform:uppercase; margin:0 0 8px; display:flex; justify-content:space-between; align-items:baseline; gap:10px}
+  .chartbox .ct span{color:var(--pen); font-weight:400; font-family:var(--hand); font-size:16px; text-transform:none; display:inline-block; transform:rotate(-2deg); text-align:right}
+  .punch{padding:18px 12px; margin:22px 0; text-align:center}
+  .punch .big{font-weight:900; font-size:clamp(48px,18vw,90px); line-height:.84; color:var(--accent); position:relative; display:inline-block; letter-spacing:-.03em}
+  .punch .big::after{content:""; position:absolute; inset:-8px -26px; border:2.5px solid var(--pen); border-radius:48% 52% 46% 54% / 58% 44% 56% 42%; transform:rotate(-4deg); opacity:.7; pointer-events:none}   /* pen circle around the number */
+  .punch.good .big::after{border-color:var(--accent)}
+  .punch .cap{font-weight:400; font-size:11.5px; color:var(--ink); margin:12px auto 0; max-width:38ch}
+  .src{font-size:11px; color:var(--ink2); margin:18px 0 22px; line-height:1.5}.src a{color:var(--ink)}
+  .end-actions{display:flex; flex-direction:column; gap:10px}
+  .rv-small{text-align:center; margin:0 0 18px}
+  .rv-small .src{margin:0 auto 12px; max-width:56ch}
+  .btn.small{display:inline-flex; width:auto; padding:8px 0 5px; font-size:11px}
+  .btn.small::after{font-size:15px; padding-left:10px}
+  .rv-stats{margin-top:28px; border-top:1px solid var(--line); padding-top:22px}
+  .fired .rv-h{color:var(--accent)}
+  .picto{display:flex; justify-content:center; margin:18px 0 0}
+  .punch.good .big{color:var(--ink)}
+  .good .rv-h em{font-style:italic}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+  body.rm *{animation:none!important; transition:none!important}
+
+  /* ---------------- appointment briefing (before the tutorial) ---------------- */
+  .brief-veil{background:rgba(16,15,14,.82); z-index:150}
+  .brief{background:var(--paper); border:none; box-shadow:0 14px 36px rgba(0,0,0,.32); max-width:440px; width:100%; padding:26px 24px 20px; max-height:92vh; overflow-y:auto;
+    background-image:var(--regs); background-repeat:no-repeat; background-size:9px 9px; background-position:var(--regpos)}
+  .brief .bl{opacity:0; transform:translateY(10px); animation:briefin .55s ease forwards; font-size:14px; line-height:1.5; margin:0 0 12px}
+  .brief p.bl{font-size:14px; font-weight:400}
+  .brief .bt{font-weight:700; font-size:16px; line-height:1.4; margin-bottom:14px}
+  .brief .bs{font-style:italic; color:var(--ink)}
+  .brief .btn.bl{margin-top:8px}
+  @keyframes briefin{to{opacity:1; transform:none}}
+  .brief.done .bl{animation:none; opacity:1; transform:none}
+  @media(prefers-reduced-motion:reduce){.brief .bl,.rrow{opacity:1!important; transform:none!important}}
+  body.rm .brief .bl, body.rm .rrow{opacity:1!important; transform:none!important}
+
+  /* envelope that delivers the appointment letter (the envelope is a drawing: its lines stay) */
+  .env-wrap{display:flex; align-items:center; justify-content:center; width:100%}
+  .envelope{position:relative; width:min(80vw,330px); height:205px; cursor:pointer; perspective:700px; animation:envdrop .85s cubic-bezier(.25,1.2,.4,1) both}
+  @keyframes envdrop{from{transform:translateY(-55vh) rotate(-7deg); opacity:0} 70%{transform:translateY(12px) rotate(1.6deg); opacity:1} to{transform:none; opacity:1}}
+  .env-back{position:absolute; inset:0; background:var(--panel); border:1.5px solid var(--ink); box-shadow:0 10px 26px rgba(0,0,0,.4)}
+  .env-letter{position:absolute; left:6%; right:6%; top:7%; bottom:12%; background:#fff; border:1px solid var(--hair); z-index:1;
+    background-image:repeating-linear-gradient(var(--hair) 0 1px, transparent 1px 12px); background-size:72% 60%; background-position:14% 78%; background-repeat:no-repeat;
+    transition:transform .6s cubic-bezier(.3,1,.4,1) .28s}
+  .env-front{position:absolute; inset:0; background:var(--panel); border:1.5px solid var(--ink); z-index:2;
+    -webkit-clip-path:polygon(0 0,50% 36%,100% 0,100% 100%,0 100%); clip-path:polygon(0 0,50% 36%,100% 0,100% 100%,0 100%);
+    display:flex; align-items:flex-end; justify-content:center; padding-bottom:14px}
+  .env-flap{position:absolute; inset:0 0 auto 0; height:53%; background:var(--paper); border:1.5px solid var(--ink); z-index:3;
+    -webkit-clip-path:polygon(0 0,100% 0,50% 100%); clip-path:polygon(0 0,100% 0,50% 100%);
+    transform-origin:top; transition:transform .5s ease, opacity .25s ease .3s}
+  .env-seal{position:absolute; top:calc(53% - 19px); left:50%; margin-left:-19px; width:38px; height:38px; z-index:4;
+    background:radial-gradient(circle at 35% 30%, #F04FA0, var(--accent) 55%, #B3005F);
+    border-radius:46% 54% 52% 48% / 52% 46% 54% 48%; transform:rotate(-7deg);
+    color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px;
+    text-shadow:0 -1px 0 rgba(0,0,0,.3), 0 1px 0 rgba(255,255,255,.3);
+    box-shadow:inset 0 0 0 3.5px rgba(255,255,255,.22), 0 1px 3px rgba(0,0,0,.3); transition:opacity .3s}
+  .env-hint{position:absolute; bottom:-32px; left:0; right:0; text-align:center; transition:opacity .3s; color:#BDBBB6; font-family:var(--hand); font-size:17px; font-weight:400; text-transform:none}
+  .envelope.open .env-flap{transform:rotateX(180deg); opacity:0}
+  .envelope.open .env-seal{opacity:0}
+  .envelope.open .env-hint{opacity:0}
+  .envelope.open .env-letter{transform:translateY(-72%)}
+  .env-wrap{transition:opacity .3s ease}
+  .env-wrap.fade{opacity:0}
+  .brief.pop{animation:briefpop .5s cubic-bezier(.3,1.12,.4,1) both}
+  @keyframes briefpop{from{opacity:0; transform:translateY(52px) scale(.7)} to{opacity:1; transform:none}}
+
+  /* ---------------- first-run tutorial (spotlight coachmarks) ---------------- */
+  .tut-layer{position:fixed; inset:0; z-index:200; display:none}
+  .tut-layer.show{display:block; animation:fade .22s ease both}
+  .tut-hole{position:absolute; left:0; top:0; width:0; height:0; border-radius:14px; border:2px solid var(--accent);
+    box-shadow:0 0 0 9999px rgba(16,15,14,.74); pointer-events:none;
+    transition:left .35s cubic-bezier(.33,1.05,.45,1), top .35s cubic-bezier(.33,1.05,.45,1), width .35s cubic-bezier(.33,1.05,.45,1), height .35s cubic-bezier(.33,1.05,.45,1), opacity .25s ease}
+  .tut-tip{position:absolute; left:0; top:0; width:min(90vw,338px); background:var(--paper); border:none;
+    box-shadow:0 12px 30px rgba(0,0,0,.3); padding:16px 16px 12px; pointer-events:auto;
+    background-image:var(--regs); background-repeat:no-repeat; background-size:9px 9px; background-position:var(--regpos);
+    transition:left .35s cubic-bezier(.33,1.05,.45,1), top .35s cubic-bezier(.33,1.05,.45,1)}
+  .tut-caret{position:absolute; width:12px; height:12px; background:var(--paper); transform:translateX(-50%) rotate(45deg); display:none}
+  .tut-caret.below{top:-6px}
+  .tut-caret.above{bottom:-6px}
+  .tut-kick{font-weight:800; font-size:10.5px; text-transform:uppercase; color:var(--ink2)}
+  .tut-kick .tut-n{color:var(--accent)}
+  .tut-title{font-weight:800; font-size:21px; line-height:1.15; margin:8px 0 8px; letter-spacing:-.01em}
+  .tut-title em{font-style:italic; font-weight:500}
+  .tut-body{font-weight:400; font-size:13.5px; line-height:1.5; color:var(--ink)}
+  .tut-body b{font-weight:700}
+  .tut-nav{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:15px}
+  .tut-right{display:flex; gap:12px; align-items:center}
+  .tut-next{background:var(--ink); color:var(--paper); border:none; padding:10px 15px; font-weight:800; font-size:11px; text-transform:uppercase; transition:opacity .2s}
+  .tut-next::before,.tut-next::after{content:'"'}
+  .tut-next:hover{opacity:.86}.tut-next:active{transform:scale(.98)}
+  .tut-back{background:transparent; color:var(--ink); border:none; border-bottom:1.5px solid var(--ink); padding:6px 1px 3px; font-weight:800; font-size:11px; text-transform:uppercase; transition:color .2s, border-color .2s}
+  .tut-back:hover{color:var(--accent); border-color:var(--accent)}
+  .tut-skip{background:transparent; border:none; color:var(--ink2); font-family:var(--hand); font-size:16px; text-decoration:underline; text-underline-offset:3px; padding:4px 0}
+  .tut-skip:hover{color:var(--ink)}
+  .tut-hint{font-family:var(--hand); font-size:15px; color:var(--ink3); margin-top:10px; text-align:center}
+
+  /* ---------------- guided opening: the Board casts, the associations arrive in protest ---------------- */
+  .demo-veil{background:linear-gradient(180deg, rgba(16,15,14,.08) 0, rgba(16,15,14,.08) var(--hdrH,150px), rgba(16,15,14,.55) calc(var(--hdrH,150px) + 60px)); align-items:flex-start; padding:calc(var(--hdrH,150px) + 8px) 18px 24px; z-index:140; overflow-y:auto}
+  .demo-box .hk{display:flex; justify-content:space-between; align-items:baseline; border-bottom:1px solid var(--ink); padding-bottom:6px; margin-bottom:12px}
+  .demo-txt{font-weight:400; font-size:14px; line-height:1.55; margin-bottom:14px}
+  .demo-txt i{font-style:italic}
+  .demo-txt ul{margin:10px 0 0; padding-left:18px}
+  .demo-txt li{margin-bottom:7px}
+  .gauges.demo1 .gauge:nth-child(n+2){visibility:hidden}
+  .gauges.demo2 .gauge:nth-child(3){visibility:hidden}
+  .gauge.stamp{animation:gstamp .55s cubic-bezier(.3,1.25,.45,1) both}
+  @keyframes gstamp{from{transform:scale(1.7) rotate(-8deg); opacity:0} 60%{transform:scale(.94) rotate(2deg); opacity:1} to{transform:scale(1) rotate(0deg); opacity:1}}
+</style>
+</head>
+<body>
+<svg class="defs" aria-hidden="true" focusable="false"><defs>
+  <filter id="rough1" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+  <filter id="rough2" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+  <filter id="rough3" x="-8%" y="-8%" width="116%" height="116%"><feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="11" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+</defs></svg>
+<button class="sndbtn" id="snd-btn" onclick="GAME.sound()" title="Sound on/off" aria-label="Sound on/off"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.2v5.6h3.6L13 19.2V4.8L7.6 9.2H4z" fill="currentColor"/><g class="waves" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M15.6 9.5a3.9 3.9 0 0 1 0 5"/><path d="M18.2 7.3a7.3 7.3 0 0 1 0 9.4"/></g><line class="slash" x1="4.5" y1="19.5" x2="19.5" y2="4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+<button class="a11ybtn" id="a11y-btn" onclick="GAME.access()" title="Accessibility mode on/off (reduced motion + colour-safe gauges)" aria-label="Accessibility mode on/off" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.9" r="2.1" fill="currentColor" stroke="none"/><path d="M4.6 9.2c2.4.8 4.9 1.2 7.4 1.2s5-.4 7.4-1.2"/><path d="M12 10.4v4.4"/><path d="M12 14.8l-2.7 5.7"/><path d="M12 14.8l2.7 5.7"/></svg></button>
+<div class="wrap">
+
+  <!-- INTRO -->
+  <section id="intro" class="screen active">
+    <h1 class="masthead" aria-label="Casting">Casting</h1>
+    <p class="slogan">fashion for <mark>every body</mark></p>
+    <div class="name-row">
+      <button class="btn center" id="begin-btn" onclick="GAME.begin()">Play <span class="ar">→</span></button>
+    </div>
+    <div class="intro-strip" id="intro-strip"></div>
+  </section>
+
+  <!-- SEASON -->
+  <section id="season" class="screen">
+    <div class="top"><div class="h" id="house-name">House</div><span class="co">c/o 2026</span><button class="helpbtn" onclick="Tutorial.start()" title="How to play" aria-label="How to play">?</button></div>
+    <div class="gauges" id="gauges"></div>
+
+    <div class="lookbook">
+      <div class="lb-head"><span class="kick" id="season-tag"></span><span class="kick" id="count">0 / 5</span></div>
+      <div class="lb-cells" id="slots"></div>
+    </div>
+
+    <div class="deck-wrap">
+      <div class="whisper" id="whisper" aria-live="polite"></div>
+      <div class="deck" id="deck"></div>
+      <div class="controls">
+        <button class="ctrl pass" id="btn-pass" aria-label="Pass" onclick="GAME.swipe(-1)"><svg viewBox="0 0 64 64" aria-hidden="true"><path class="ring" filter="url(#rough1)" d="M32 5 C 47 4.5, 59.5 17, 59 32 C 58.5 47, 46.5 59.5, 31.5 59 C 17 58.5, 4.5 46, 5 31.5 C 5.5 17, 18 5.5, 32 5 Z"/><path class="gl" d="M22.5 22 L42 42.5 M41.5 21.5 L22 42"/></svg></button>
+        <button class="ctrl book" id="btn-book" aria-label="Book" onclick="GAME.swipe(1)"><svg viewBox="0 0 64 64" aria-hidden="true"><path class="ring" filter="url(#rough2)" d="M31 5 C 46 4, 59 16.5, 59 31.5 C 59 47, 47 59, 32 59 C 17 59, 5 47, 5 32 C 5 17.5, 16.5 6, 31 5 Z"/><path class="gl" d="M19.5 33.5 L28 42 L45 22.5"/></svg></button>
+      </div>
+      <button class="undo" id="btn-undo" style="visibility:hidden" onclick="GAME.undo()">↩ undo pass</button>
+      <div class="keyhint">keys · ← pass · book →</div>
+    </div>
+  </section>
+
+  <!-- REVEAL -->
+  <section id="reveal"><div class="rv" id="reveal-inner"></div></section>
+</div>
+
+<div class="veil runway-veil" id="runway-veil">
+  <div class="stagebox" id="stagebox" onclick="GAME.skipRunway()">
+    <div class="lights"></div><div class="floor"></div><div class="walkers" id="walkers"></div>
+    <div class="skiphint">tap to skip</div>
+  </div>
+</div>
+
+<div class="veil brief-veil" id="brief-veil">
+  <div class="env-wrap" id="env-wrap">
+    <div class="envelope" id="envelope" onclick="Briefing.open()">
+      <div class="env-back"></div>
+      <div class="env-letter"></div>
+      <div class="env-front"></div>
+      <div class="env-flap"></div>
+      <div class="env-seal" id="env-seal">★</div>
+      <div class="env-hint">tap to open</div>
+    </div>
+  </div>
+  <div class="brief" id="brief" onclick="Briefing.skip()" style="display:none"></div>
+</div>
+
+<div class="veil demo-veil" id="demo-veil">
+  <div class="brief demo-box">
+    <div class="hk"><span class="kick" id="demo-kick"></span><button class="tut-skip" type="button" onclick="Demo.skip()">Skip tutorial</button></div>
+    <div class="demo-txt" id="demo-txt"></div>
+    <button class="btn" id="demo-next" onclick="Demo.next()"></button>
+  </div>
+</div>
+
+<div class="veil" id="veil">
+  <div class="resol">
+    <div class="hk"><span class="kick" id="resol-kick">Look I · reviews</span><span class="kick" id="resol-house"></span></div>
+    <p class="hl" id="resol-hl"></p>
+    <div id="resol-rows"></div>
+    <div style="margin-top:8px"><button class="btn" id="resol-next" onclick="GAME.next()">Continue <span class="ar">→</span></button></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ---------------- data ---------------- */
+const FIRST = ["Anouk","Sasha","Imani","Lía","Wren","Talia","Yuki","Mara","Senna","Noa","Isolde","Amara",
+  "Fatou","Priya","Mei","Suki","Nadia","Cleo","Esme","Rin","Ada","Lux","Vesna","Oona",
+  "Dália","Inès","Zola","Hana","Liv","Tao","Yara","Kira","Saoirse",
+  "Bella","Gigi","Clara","Anok","Irina","Kate","Gisele","Kendall","Adriana","Nina","Katharina","Karo"];
+const MALE = ["Matteo","Kofi","Ravi","Otis","Sven","Emil","Dae","Nuno","Tariq","Leon","Idris",
+  "Bram","Yusuf","Kenji","Ezra","Luca","Omar","Joaquín","Nils","Adé","Theo","Jalen"
+  ,"Tyson","Mark","Marcus","Awwal","Babacar","Cherif","Long","Lux","Mohamed","Mamadou","Louis","Sagar","August"];
+const HAIR = {blonde:"#E6C572",light:"#C49A5E",brown:"#6B4A2E",dark:"#2E2018",black:"#161015",red:"#A8451F",auburn:"#7A3318"};
+const EYE = {blue:"#4F86C6",green:"#4E8B4A",hazel:"#9A7338",brown:"#523A22",grey:"#8C9196"};
+const HAIRSTYLES = ["long","short","curly","bun"];
+const MSTYLES = ["crop","side","buzz"];
+const SKINS = ["#F6D9BE","#ECC09A","#D9A579","#BE8456","#9A6238","#79492B","#5A3420"];
+const OUTFITS = ["#C5234B","#1F6F8B","#D87A1F","#4E7A33","#6A3FA0","#1E2A78","#0B7C72","#D81E78","#262524","#C79A2E","#9C1C3C","#2E8B7F","#D9A32B","#4A6FA5",
+  "#1A1918","#262524","#3B3936","#57544F","#8A867F"];   // fashion wears a lot of black & grey
+const DRESSY=["aline","column","gown","wrap","twopiece"];      // the dress family: A-line, sheath, ballgown, wrap, crop + skirt
+const TROUSER=["pants","pants","wide"];                        // straight trousers twice as common as palazzo
+const HOUSES = ["GOCCI","BRADA","PALIENCIAGO","ARNAMI","BOLCE & GOBONO"];
+const POP_BMI = 29;          // real-population reference (US adult average, ~BMI 29)
+
+const STAKE = [{id:"board",cap:"Board"},{id:"walks",cap:"Body size"},{id:"census",cap:"Ethnicity"}];
+const PANEL = {board:"The Board", walks:"All Walks · body size", census:"The Census · ethnicity"};
+const TENURE_BASE = 6, TENURE_MAX = 8, RENEW_BAR = 40, TAU = 30, PICK = 5;   // 8 shows total — playtesters found 10 a slog
+const ROMAN=["","I","II","III","IV","V","VI","VII","VIII","IX","X"];
+
+/* ---------------- state ---------------- */
+const G = {
+  brand:"HOUSE", season:1, tier:0,
+  meters:{board:60, walks:45, census:45},
+  prev:{L:0, E:0}, streaks:{noColour:0, oneColour:0},
+  press:{timeless:0, applause:0, plot:0}, notRenewed:null,
+  stack:[], booked:[], lastPassed:null, accl:0,
+  since:{nonWhite:0, plus:0, intersx:0}, gen:0,
+  everPlus:false, allCast:[], hist:[],
+  cum:{total:0, nonWhite:0, plus:0, plusNonWhite:0, plusWhite:0, nonplusNonWhite:0, nonplusWhite:0, regions:new Set(), seasonsWithPlus:0},
+  firedBy:null, _end:false, _runTimer:null, _runCb:null, _busy:false
+};
+
+/* ---------------- sound (Web Audio, synthesized — no files) ---------------- */
+const Sfx=(function(){
+  let ctx=null, on=true;
+  try{ on = localStorage.getItem("hoc_snd")!=="0"; }catch(_){}
+  function ac(){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null;
+    if(!ctx) ctx=new AC(); if(ctx.state==="suspended") ctx.resume(); return ctx; }
+  function env(g,t0,a,d,peak){ g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(peak,t0+a); g.gain.exponentialRampToValueAtTime(0.0001,t0+a+d); }
+  function tone(freq,dur,type,peak,when,slide){ if(!on) return; const c=ac(); if(!c) return; const t0=c.currentTime+(when||0);
+    const o=c.createOscillator(), g=c.createGain(); o.type=type||"sine"; o.frequency.setValueAtTime(freq,t0);
+    if(slide) o.frequency.exponentialRampToValueAtTime(slide,t0+dur);
+    env(g,t0,.005,dur,peak||.07); o.connect(g).connect(c.destination); o.start(t0); o.stop(t0+dur+.05); }
+  function noise(dur,peak,fc,when){ if(!on) return; const c=ac(); if(!c) return; const t0=c.currentTime+(when||0);
+    const len=Math.max(1,Math.floor(c.sampleRate*dur)), buf=c.createBuffer(1,len,c.sampleRate), d=buf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+    const src=c.createBufferSource(); src.buffer=buf;
+    const f=c.createBiquadFilter(); f.type="bandpass"; f.frequency.value=fc||1800; f.Q.value=.8;
+    const g=c.createGain(); env(g,t0,.005,dur,peak||.05);
+    src.connect(f).connect(g).connect(c.destination); src.start(t0); }
+  /* --- tiny ambient loop: two chords, a muted pulse, the odd sparkle. whisper-quiet. --- */
+  let mTimer=null, mStep=0, mNext=0, mWanted=false;
+  const SPB=60/116/2;                                        // one eighth note at 116bpm — ballroom tempo
+  const pk=a=>a[Math.floor(Math.random()*a.length)];
+  const CH={                                                 // chord palette in A minor
+    Am:{root:110,   notes:[220,261.6,329.6,392]},   Dm:{root:146.8, notes:[293.7,349.2,440,523.3]},
+    F :{root:87.31, notes:[174.6,220,261.6,329.6]}, G :{root:98,    notes:[196,246.9,293.7,392]},
+    Em:{root:82.41, notes:[164.8,196,246.9,293.7]}, C :{root:130.8, notes:[261.6,329.6,392,523.3]}};
+  const PROGS=[["Am","Am","Dm","G"],["F","G","Am","Em"],["Am","C","F","G"],["Dm","F","Am","G"]];
+  const MEL=[440,523.3,587.3,659.3,784,880];                 // A-minor pentatonic for the lead
+  let curProg=PROGS[0], lastProg=0, melIdx=2, bs=null;       // bar-level state, rolled fresh each bar
+  function newBar(bar){
+    if(bar%4===0 && (bar%16!==0 || true)){                   // new 4-bar progression, avoid repeating the last one
+      let i; do{ i=Math.floor(Math.random()*PROGS.length); }while(i===lastProg && Math.random()<.75);
+      lastProg=i; curProg=PROGS[i]; }
+    const ph=bar%16;
+    bs={ ch:CH[curProg[bar%4]],
+      breakdown: ph===12||ph===13,                           // drums out, pads breathe
+      fill: ph===15,                                         // rising hat roll into the next phrase
+      melOn: (ph>=4&&ph<12)||ph===14,
+      stabs: pk([[2,5],[2,6],[3,6],[2,4,7],[1,5]]),
+      bassPat: pk([[0,3,4,7],[0,4],[0,3,4,6],[0,2,4,7]]),
+      padBar: bar%2===0 };
+  }
+  function mKick(t){ const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type="sine"; o.frequency.setValueAtTime(105,t); o.frequency.exponentialRampToValueAtTime(48,t+.09);
+    env(g,t,.002,.11,.045); o.connect(g).connect(ctx.destination); o.start(t); o.stop(t+.16); }
+  function mHat(t,dur,peak){ const len=Math.floor(ctx.sampleRate*(dur||.03)), b=ctx.createBuffer(1,len,ctx.sampleRate), d=b.getChannelData(0);
+    for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+    const src=ctx.createBufferSource(); src.buffer=b;
+    const f=ctx.createBiquadFilter(); f.type="highpass"; f.frequency.value=6500;
+    const g=ctx.createGain(); env(g,t,.001,dur||.03,peak||.011); src.connect(f).connect(g).connect(ctx.destination); src.start(t); }
+  function mClap(t,peak){                                    // 909 clap: retriggered noise bursts
+    for(const d of [0,.012,.026]){ const len=Math.floor(ctx.sampleRate*.05), b=ctx.createBuffer(1,len,ctx.sampleRate), dd=b.getChannelData(0);
+      for(let i=0;i<len;i++) dd[i]=Math.random()*2-1;
+      const src=ctx.createBufferSource(); src.buffer=b;
+      const f=ctx.createBiquadFilter(); f.type="bandpass"; f.frequency.value=1400; f.Q.value=1.4;
+      const g=ctx.createGain(); env(g,t+d,.001,.05,peak*(d?0.6:1));
+      src.connect(f).connect(g).connect(ctx.destination); src.start(t+d); } }
+  function mSnare(t,peak){                                   // 909 snare: noise crack + 190Hz thump
+    const len=Math.floor(ctx.sampleRate*.09), b=ctx.createBuffer(1,len,ctx.sampleRate), dd=b.getChannelData(0);
+    for(let i=0;i<len;i++) dd[i]=Math.random()*2-1;
+    const src=ctx.createBufferSource(); src.buffer=b;
+    const f=ctx.createBiquadFilter(); f.type="highpass"; f.frequency.value=1600;
+    const g=ctx.createGain(); env(g,t,.001,.08,peak);
+    src.connect(f).connect(g).connect(ctx.destination); src.start(t);
+    const o=ctx.createOscillator(), g2=ctx.createGain(); o.type="sine"; o.frequency.value=190;
+    env(g2,t,.001,.07,peak*.8); o.connect(g2).connect(ctx.destination); o.start(t); o.stop(t+.1); }
+  function mOrchHit(ch,t){                                   // sharp M1-style orchestral hit
+    for(const n of [ch.root*2,...ch.notes.map(x=>x*2)]){
+      const o=ctx.createOscillator(), f=ctx.createBiquadFilter(), g=ctx.createGain();
+      o.type="sawtooth"; o.frequency.value=n; f.type="lowpass"; f.frequency.setValueAtTime(4200,t);
+      f.frequency.exponentialRampToValueAtTime(600,t+.28);
+      env(g,t,.003,.28,.014); o.connect(f).connect(g).connect(ctx.destination); o.start(t); o.stop(t+.4); } }
+  function mNote(fr,t,dur,peak,type,out){ const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=type||"triangle"; o.frequency.value=fr; env(g,t,dur*.4,dur,peak);
+    o.connect(g).connect(out||ctx.destination); o.start(t); o.stop(t+dur*1.7); }
+  function mSynth(fr,t,dur,peak,cutoff,attack){              // two detuned saws through a lowpass — the 90s synth voice
+    const f=ctx.createBiquadFilter(); f.type="lowpass"; f.frequency.setValueAtTime(cutoff,t);
+    f.frequency.exponentialRampToValueAtTime(Math.max(200,cutoff*.35),t+dur);
+    const g=ctx.createGain(); env(g,t,attack||.012,dur,peak);
+    for(const det of [-8,8]){ const o=ctx.createOscillator(); o.type="sawtooth";
+      o.frequency.value=fr; o.detune.value=det; o.connect(f); o.start(t); o.stop(t+dur*1.7); }
+    f.connect(g).connect(ctx.destination); }
+  function mPlay(st,t){
+    const bp=st%8; if(bp===0||!bs) newBar(st>>3);
+    const V=bs.ch, jit=()=>.85+Math.random()*.3;             // velocity jitter keeps it human
+    if(!bs.breakdown){
+      if(st%2===0) mKick(t);                                 // 909 four-on-the-floor
+      else mHat(t,.07,.013*jit());                           // open hat on every offbeat
+      if(st%4===2) mClap(t,.02*jit());                       // backbeat clap
+    }
+    if(bs.fill) mSnare(t,.005+bp/8*.02);                     // 909 snare roll into the next phrase
+    if(bp===0 && (st>>3)%4===0 && !bs.breakdown && Math.random()<.5) mOrchHit(bs.ch,t);   // occasional orchestral smash
+    if(!bs.breakdown && bs.bassPat.includes(bp)){            // bass: randomized pattern, octave pops on late steps
+      const oct=(bp>=3&&bp%2===1)?2:1;
+      mNote(V.root*oct,t,SPB*1.5,(oct===1?.04:.03)*jit(),"triangle");
+      if(oct===1) mSynth(V.root,t,SPB*1.3,.018,420); }
+    if(!bs.breakdown && bs.stabs.includes(bp))               // stabs: pattern + filter reroll every bar
+      for(const n of V.notes) mSynth(n,t,SPB*1.15,.01*jit(),2000+Math.random()*900);
+    if(bs.melOn && st%2===1 && Math.random()<.42){           // lead: pentatonic random walk
+      melIdx=Math.max(0,Math.min(MEL.length-1,melIdx+pk([-2,-1,-1,1,1,2])));
+      mSynth(MEL[melIdx],t,SPB*(1.5+Math.random()*1.5),.011*jit(),3000); }
+    if(bp===0 && (bs.padBar||bs.breakdown)){                 // pad every other bar, swelling in breakdowns
+      const p=bs.breakdown?.014:.008;
+      mSynth(V.root*2,t,SPB*15,p,900,SPB*4); mSynth(V.root*3,t,SPB*15,p*.75,900,SPB*4); }
+  }
+  function musicStart(){ mWanted=true; if(!on) return; const c=ac(); if(!c||mTimer) return; killTheme();
+    mStep=0; mNext=c.currentTime+.1;
+    (function tick(){ if(!ctx||!on){ mTimer=null; return; }
+      while(mNext<ctx.currentTime+.35){ mPlay(mStep,mNext); mStep=(mStep+1)%128; mNext+=SPB; }
+      mTimer=setTimeout(tick,140); })(); }
+  function musicStop(){ if(mTimer){ clearTimeout(mTimer); mTimer=null; } }
+  let themeOut=null;                                          // every theme note routes here so a replay can cut it dead
+  function killTheme(){ if(!themeOut||!ctx) return; const o=themeOut; themeOut=null;
+    o.gain.setValueAtTime(o.gain.value,ctx.currentTime); o.gain.linearRampToValueAtTime(0,ctx.currentTime+.25);
+    setTimeout(()=>{ try{o.disconnect();}catch(_){} },500); }
+  function newThemeOut(){ killTheme(); themeOut=ctx.createGain(); themeOut.connect(ctx.destination); return themeOut; }
+  /* --- ending themes (one-shot, ~20s, scheduled up front) --- */
+  function padVoice(f,t,dur,peak){ for(const det of [-5,4]){ const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type="sine"; o.frequency.value=f; o.detune.value=det;
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(peak,t+dur*.35); g.gain.linearRampToValueAtTime(0,t+dur);
+    o.connect(g).connect(themeOut||ctx.destination); o.start(t); o.stop(t+dur+.1); } }
+  function bell(f,t,dur,peak){ for(const [m,a] of [[1,1],[2,.38],[3,.14]]){ const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type="sine"; o.frequency.value=f*m; env(g,t,.012,dur,peak*a);
+    o.connect(g).connect(themeOut||ctx.destination); o.start(t); o.stop(t+dur+.3); } }
+  function womp(f,t,dur,peak,fall){                           // the sad brass: a note that droops as it goes
+    const o=ctx.createOscillator(), fl=ctx.createBiquadFilter(), g=ctx.createGain();
+    o.type="sawtooth"; o.frequency.setValueAtTime(f,t); o.frequency.exponentialRampToValueAtTime(f*(fall||.86),t+dur*.85);
+    fl.type="lowpass"; fl.frequency.value=950;
+    env(g,t,.04,dur,peak); o.connect(fl).connect(g).connect(themeOut||ctx.destination); o.start(t); o.stop(t+dur+.1); }
+  function themeLose(){ const c=ac(); if(!c||!on) return; const t0=c.currentTime+.15;
+    womp(220,t0,.75,.05); womp(196,t0+.9,.75,.05);            // pown pown...
+    womp(174.6,t0+1.8,.8,.05);
+    womp(164.8,t0+2.75,1.9,.055,.68);                         // ...pooooown (the long droop)
+    const L=t0+5.2;                                           // then the lament, twice through
+    const bass=[110,98,87.31,82.41];                          // A G F E, falling
+    const chords=[[220,261.6,329.6],[196,246.9,293.7],[174.6,220,261.6],[164.8,207.7,246.9]];
+    for(let r=0;r<2;r++) bass.forEach((f,i)=>{ const t=L+r*12.8+i*3.2;
+      padVoice(f,t,3.4,r?.026:.032); padVoice(f*2,t,3.4,.012);
+      if(r===0) chords[i].forEach((n,j)=> mNote(n,t+.5+j*.85,1.7,.02,"sine",themeOut));
+      else chords[i].slice(0,2).forEach((n,j)=> bell(n,t+.6+j*1.3,2,.013)); });   // second pass: sparser, bells
+    padVoice(110,L+25.6,6,.028); bell(220,L+26,5,.015);
+    womp(110,L+26.5,3.2,.032,.72);                            // one last low sigh
+  }
+  function themeWin(){ const c=ac(); if(!c||!on) return; const t0=c.currentTime+.15;
+    for(const [f,p] of [[65.41,.03],[98,.026],[130.8,.028],[196,.018],[261.6,.012]])
+      padVoice(f,t0,20,p);                                    // open-fifth drone, swelling like a choir
+    const mel=[261.6,329.6,392,440,523.3,659.3,784,1046.5];   // a slow rising line into the light
+    mel.forEach((f,i)=>{ const t=t0+2.2+i*1.5, last=i===mel.length-1;
+      bell(f,t,last?7:2.4,.026+i*.0025);
+      if(i>=4) padVoice(f/2,t,last?8:2.8,.012); });           // voices join underneath as it climbs
+  }
+  document.addEventListener("visibilitychange",()=>{ if(document.hidden) musicStop(); else if(mWanted&&on&&!mTimer) musicStart(); });
+
+  const api={
+    unlock(){ ac(); },
+    music:musicStart,
+    ending(k){ musicStop(); mWanted=false; const c=ac(); if(c) newThemeOut(); if(k==="win") themeWin(); else themeLose(); },
+    pass(){ noise(.08,.045,900); tone(220,.07,"triangle",.035); },
+    book(){ tone(660,.09,"sine",.06); tone(880,.13,"sine",.06,.07); },
+    deal(){ noise(.05,.028,2400); },
+    deny(){ tone(160,.16,"square",.035); },
+    envelope(){ noise(.32,.05,1200); tone(520,.2,"sine",.028,.15,780); },
+    snap(){ noise(.04,.07,3400); },
+    walk(){ tone(392,.12,"sine",.05); tone(494,.12,"sine",.05,.12); tone(587,.18,"sine",.05,.24); },
+    good(){ tone(523,.12,"sine",.055); tone(659,.12,"sine",.055,.1); tone(784,.22,"sine",.055,.2); },
+    bad(){ tone(233,.3,"sawtooth",.04); tone(175,.4,"sawtooth",.04,.12); },
+    toggle(){ on=!on; try{ localStorage.setItem("hoc_snd",on?"1":"0"); }catch(_){}
+      if(!on){ musicStop(); killTheme(); } else { ac(); if(mWanted) musicStart(); }
+      return on; },
+    get on(){ return on; }
+  };
+  /* Sound must never break the game: some WebKit/Safari builds are picky about Web Audio,
+     and an exception inside e.g. book() would strand the deck mid-swipe. Fail silent. */
+  for(const k of Object.keys(api)){ const f=api[k];
+    if(typeof f==="function") api[k]=function(){ try{ return f.apply(null,arguments); }catch(_){ } }; }
+  return api;
+})();
+
+/* ---------------- helpers ---------------- */
+const $ = id => document.getElementById(id);
+const rnd = (a,b)=> a + Math.random()*(b-a);
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const clamp = (x,lo=0,hi=100)=> Math.max(lo,Math.min(hi,x));
+function median(xs){ const s=[...xs].sort((a,b)=>a-b); const m=s.length>>1; return s.length%2 ? s[m] : (s[m-1]+s[m])/2; }
+function show(scr){ document.querySelectorAll(".screen,#reveal").forEach(s=>s.classList.remove("active")); $(scr).classList.add("active"); window.scrollTo(0,0); }
+const isBlonde=m=>m.hair==="blonde"||m.hair==="light";
+const isLightEye=m=>m.eye==="blue"||m.eye==="grey";
+const isIdeal=m=> !m.plus && !m.mid && !m.nonWhite && isBlonde(m) && isLightEye(m);
+
+/* ---------------- models (realistic dominant ideal; diversity is the outlier) ---------------- */
+let UID = 100;
+function makeModel(opt={}){
+  const sex = opt.sex ?? (Math.random()<0.25 ? "male" : "female");   // cosmetic only — men feed the same panels
+  let nonWhite = opt.nonWhite ?? (Math.random()<0.34);
+  let plus = opt.plus!=null ? opt.plus
+           : (nonWhite ? (Math.random()<0.36) : (Math.random()<0.085));   // plus ~4.5–6× likelier if non-white
+  let mid = opt.mid!=null ? opt.mid : (!plus && Math.random()<0.14);       // the invisible middle: sizes 8–12
+  if(plus) mid=false;
+  let hair, eye;
+  if(opt._ideal){ nonWhite=false; plus=false; mid=false; hair=pick(["blonde","light"]); eye=pick(["blue","grey"]); }
+  else if(nonWhite){ hair=pick(["black","dark","brown","auburn"]); eye=pick(["brown","brown","hazel","green"]); }
+  else { hair = Math.random()<0.6 ? pick(["blonde","light"]) : pick(["brown","auburn","red","dark"]);
+         eye  = Math.random()<0.6 ? pick(["blue","grey"]) : pick(["green","hazel","brown"]); }
+  const bmi = plus ? rnd(28,34) : mid ? rnd(21,26) : rnd(16.5,19.0);
+  const size = plus ? pick([14,16,18,20]) : mid ? pick([8,10,12]) : pick([0,2,4,6]);
+  const region = nonWhite ? pick(["East Asia","South Asia","West Africa","South America","Southeast Asia"])
+                          : pick(["Western Europe","North America","Eastern Europe","Nordics"]);
+  const skin = nonWhite ? pick(SKINS.slice(2)) : pick(SKINS.slice(0,3));
+  /* Street clothes — only ever seen in the intro-strip crowd; on the deck and in the show
+     everyone is dressed by the season's looks (G.looks). Not gender-coded: anyone can walk
+     in a gown, trousers or a coat — only a mild lean by sex. Hairstyles cross over too. */
+  const r=Math.random();
+  const garb = sex==="male" ? (r<0.14? pick(DRESSY) : r<0.66? pick(TROUSER) : r<0.82? "shorts" : "coat")
+                            : (r<0.54? pick(DRESSY) : r<0.80? pick(TROUSER) : r<0.92? "shorts" : "coat");
+  const sleeves = pick(["none","short","long"]);
+  const outfit = pick(OUTFITS);
+  const outfit2 = Math.random()<0.75 ? pick(OUTFITS) : outfit;    // second colour: skirts, trousers, linings — clash encouraged
+  const hairStyle = sex==="male" ? pick(Math.random()<0.8?MSTYLES:HAIRSTYLES)
+                                 : pick(Math.random()<0.1?MSTYLES:HAIRSTYLES);
+  const height=Math.round(sex==="male"?rnd(177,190):rnd(172,184));
+  /* comp-card measurements: bust-waist-hips and shoe, plausible for the body band. Cosmetic
+     only, nothing reads them, but a casting card without numbers reads as a toy. */
+  const bust =Math.round((sex==="male"?14:0)+(plus?rnd(104,116):mid?rnd(88,98):rnd(78,86)));
+  const waist=Math.round((sex==="male"?10:0)+(plus?rnd(86,100):mid?rnd(68,78):rnd(58,64)));
+  const hips =Math.round((plus?rnd(110,126):mid?rnd(96,106):rnd(85,91)));
+  const shoe =clamp(Math.round((height-100)/1.9),36,46);
+  return { uid:UID++, name:pick(sex==="male"?MALE:FIRST), sex, garb, sleeves, plus, mid, nonWhite, size, star:!!opt.star,
+    bmi:Math.round(bmi*10)/10, height, bust, waist, hips, shoe,
+    region, hair, eye, skin, outfit, outfit2, hairStyle };
+}
+/* ---------------- the collection: five looks per season ----------------
+   The house designs the clothes, not the models. Slot N of the show is look N: every
+   candidate auditions wearing the look being cast right now, so the swipe compares
+   bodies inside the same garment. Five distinct cuts per season, colours re-rolled. */
+const CUTS=[...DRESSY,...new Set(TROUSER),"shorts","coat"];
+function makeLooks(){
+  const cuts=CUTS.slice();
+  for(let i=cuts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=cuts[i]; cuts[i]=cuts[j]; cuts[j]=t; }
+  return cuts.slice(0,PICK).map(garb=>{
+    const outfit=pick(OUTFITS);
+    return { garb, sleeves:pick(["none","short","long"]),
+             outfit, outfit2: Math.random()<0.75 ? pick(OUTFITS) : outfit };
+  });
+}
+function lookFor(i){ return G.looks ? G.looks[Math.min(i,PICK-1)] : null; }
+function dress(m,look){ if(look) Object.assign(m,look); return m; }
+
+/* ---------------- streaming candidate generation (infinite casting call) ----------------
+   No fixed deck: every card that leaves (booked OR passed) is replaced by a freshly
+   generated submission, so ANY show is composable — five non-white, five plus-size, etc.
+   The thin-white ideal dominates the OPENING of the stream (IDEAL_RATE), so the player
+   meets the industry default first — that friction is the point. But hunting rare
+   intersections (thin non-white, plus-size white) must not take endless swiping, so the
+   draw fades to uniform: the first UNIFORM_RAMP.hold cards keep the house odds as-is,
+   then the uniform share ramps linearly until card UNIFORM_RAMP.full, after which origin
+   is a coin flip and body size (thin/mid/plus) is an even three-way. The counter (G.gen)
+   resets each round, so every casting call re-opens on the industry default before the
+   stream loosens up. A pity guarantee stops RNG droughts on top of that. */
+const BUFFER = 4;                                  // cards kept ready (current + peek + a little runway)
+const IDEAL_RATE = 0.64;                           // share of the stream that is the thin-white-blonde ideal  ← rarity knob (higher = diversity costs more swipes)
+const UNIFORM_RAMP = { hold:5, full:10 };          // cards 1–5: house odds; blend to fully uniform origin+BMI from card 10 on
+const PITY = { nonWhite:6, plus:8, intersx:11 };   // force the trait if this many cards stream past without it (drought safety-net, not the main driver)
+
+function streamStar(){ return (G.tier>=3 && Math.random()<0.10) || (G.tier>=2 && Math.random()<0.12); }
+/* The Board's favourite resurfaces: sometimes an ideal model who already walked for the
+   house is re-proposed with a pink note attached — the default selling itself back to you.
+   At most once a season, never in season 1. */
+function alumProposal(){
+  if(G._alumDone || G.season<2 || G.gen<3 || Math.random()>=0.3) return null;
+  const pool=G.allCast.filter(a=>!a.plus && !a.nonWhite);
+  if(!pool.length) return null;
+  G._alumDone=true;
+  return {...pick(pool), uid:UID++, alum:true};
+}
+function makeStreamModel(){
+  G.gen++; G.since.nonWhite++; G.since.plus++; G.since.intersx++;
+  const t = clamp((G.gen-UNIFORM_RAMP.hold)/(UNIFORM_RAMP.full-UNIFORM_RAMP.hold), 0, 1);  // 0 = house odds, 1 = fully uniform
+  let m;
+  if(G.since.intersx>=PITY.intersx)        m=makeModel({plus:true, nonWhite:true});  // guarantee the intersectional token
+  else if(G.since.nonWhite>=PITY.nonWhite) m=makeModel({nonWhite:true});             // guarantee a face of colour
+  else if(G.since.plus>=PITY.plus)         m=makeModel({plus:true});                 // guarantee a larger body
+  else if((m=alumProposal())){ }                                                     // the Board's pet, back in the pile
+  else if(Math.random()<t){                                                          // uniform draw: origin 50/50, body an even three-way
+    const band=Math.floor(Math.random()*3);
+    m=makeModel({nonWhite:Math.random()<0.5, plus:band===2, mid:band===1});
+  }
+  else if(Math.random()<IDEAL_RATE)        m=makeModel({_ideal:true});               // the dominant default
+  else                                     m=makeModel();                            // realistic remainder
+  if(streamStar() && isIdeal(m)) m.star=true;   // fame only ever wears the house ideal — that's the trade
+  if(m.nonWhite) G.since.nonWhite=0;
+  if(m.plus)     G.since.plus=0;
+  if(m.plus && m.nonWhite) G.since.intersx=0;
+  return m;
+}
+function refill(){ while(G.stack.length < BUFFER) G.stack.push(makeStreamModel()); }
+function resetStream(){ G.stack=[]; G.gen=0; G.since={nonWhite:0, plus:0, intersx:0}; G._alumDone=false; refill(); }
+
+/* ---------------- SVG figure ---------------- */
+function figure(m){
+  const skin=m.skin, hair=HAIR[m.hair]||"#444", outfit=m.outfit, eye=EYE[m.eye]||"#333";
+  const garb=m.garb||"aline", bottom=m.outfit2||outfit;        // garb + sleeves, not sex, decide the clothes
+  const band=m.plus?2:m.mid?1:0;                               // thin / mid-size / plus
+  const shoulder=[11,14,17][band]+(m.sex==="male"?1:0);        // sexes differ only subtly in frame
+  const wa=[8,11,14.5][band], hip=[11.5,15.5,20][band], flare=[19,24,29][band];   // waist / hip / skirt hem half-widths
+  const feetY=Math.round(128+(m.height-178)*2.0), legH=feetY-93, vbH=feetY+9;   // height -> figure height
+  const trousered=garb==="pants"||garb==="wide";
+  const legW=trousered?6.4:5.2, legFill=garb==="pants"?bottom:skin;   // straight trousers colour the whole leg
+  const lx=trousered?26:27, rx=trousered?31.6:31.8;
+  const shortsH=[16,17.5,19][band];
+  const shortsAt=x=>garb==="shorts"?`<rect x="${(x-0.7).toFixed(1)}" y="93" width="${(legW+1.4).toFixed(1)}" height="${shortsH}" rx="2.4" fill="${bottom}"/>`:"";
+  const slH=m.sleeves==="long"?34:15;
+  const sleeveAt=x=>(m.sleeves&&m.sleeves!=="none")?`<rect x="${x}" y="45" width="4.6" height="${slH}" rx="2.3" fill="${outfit}"/>`:"";
+  const alx=(32-shoulder-3).toFixed(1), arx=(32+shoulder-1.6).toFixed(1);
+  /* ---- the wardrobe: each garb cuts its own garment — flat colour, waists and hips, no outlines ---- */
+  const Lt=x=>(32-x).toFixed(1), Rt=x=>(32+x).toFixed(1);
+  const fitTop=`<path d="M ${Lt(shoulder)} 43 L ${Lt(wa)} 63 L ${Lt(wa+1)} 72 L ${Rt(wa+1)} 72 L ${Rt(wa)} 63 L ${Rt(shoulder)} 43 Z" fill="${outfit}"/>`;
+  const hipBlock=`<rect x="${Lt(hip-1.5)}" y="68" width="${((hip-1.5)*2).toFixed(1)}" height="26" rx="2" fill="${bottom}"/>`;
+  const GARB={
+    aline(){ return `<path d="M ${Lt(shoulder)} 43 L ${Lt(wa)} 63 L ${Lt(flare)} 97 L ${Rt(flare)} 95.5 L ${Rt(wa)} 63 L ${Rt(shoulder)} 43 Z" fill="${outfit}"/>`; },
+    column(){ return `<path d="M ${Lt(shoulder)} 43 L ${Lt(wa)} 63 L ${Lt(wa+2)} 106 L ${Rt(wa+2)} 106 L ${Rt(wa)} 63 L ${Rt(shoulder)} 43 Z" fill="${outfit}"/>`; },
+    gown(){ const gy=feetY-5, gw=flare+5;
+      return `<path d="M ${Lt(shoulder)} 43 L ${Lt(wa)} 60 Q ${Lt(gw)} ${gy-26} ${Lt(gw)} ${gy} Q 32 ${gy+6} ${Rt(gw)} ${gy} Q ${Rt(gw)} ${gy-26} ${Rt(wa)} 60 L ${Rt(shoulder)} 43 Z" fill="${outfit}"/>`; },
+    wrap(){ const ov=bottom!==outfit?bottom:"rgba(0,0,0,.16)";
+      return `<path d="M ${Lt(shoulder)} 43 L ${Lt(wa)} 63 L ${Lt(flare)} 97 L ${Rt(flare)} 97 L ${Rt(wa)} 63 L ${Rt(shoulder)} 43 Z" fill="${outfit}"/>
+        <path d="M ${Rt(shoulder)} 43 L ${Rt(wa)} 63 L ${Rt(flare)} 97 L ${Lt(flare)} 97 Z" fill="${ov}"/>`; },
+    twopiece(){ return `<rect x="${Lt(wa-1)}" y="58" width="${((wa-1)*2).toFixed(1)}" height="14" fill="${skin}"/>
+        <path d="M ${Lt(shoulder)} 43 L ${Lt(wa)} 65 L ${Rt(wa)} 65 L ${Rt(shoulder)} 43 Z" fill="${outfit}"/>
+        <path d="M ${Lt(hip-1)} 70 L ${Lt(flare-2)} 97 L ${Rt(flare-2)} 97 L ${Rt(hip-1)} 70 Z" fill="${bottom}"/>`; },
+    coat(){ const lining=bottom!==outfit?bottom:"rgba(255,255,255,.28)";
+      return `<path d="M ${Lt(shoulder+1.5)} 43 L ${Lt(wa+4)} 108 L ${Rt(wa+4)} 108 L ${Rt(shoulder+1.5)} 43 Z" fill="${outfit}"/>
+        <rect x="29.4" y="50" width="5.2" height="58" rx="1" fill="${lining}"/>`; },
+    pants(){ return hipBlock+fitTop; },
+    wide(){ return hipBlock+fitTop; },
+    shorts(){ return hipBlock+fitTop; },
+  };
+  const garment=(GARB[garb]||GARB.aline)();
+  const legShape=x=>garb==="wide"                              // palazzo legs flare out over the shoe
+    ? `<path d="M ${(x-1).toFixed(1)} 93 L ${(x+legW+1).toFixed(1)} 93 L ${(x+legW+3).toFixed(1)} ${feetY} L ${(x-3).toFixed(1)} ${feetY} Z" fill="${bottom}"/>`
+    : `<rect x="${x}" y="93" width="${legW}" height="${legH}" rx="2.6" fill="${legFill}"/>`;
+  const cap=`<path d="M18 25 Q17 9 32 8 Q47 9 46 25 Q44 17 32 16 Q20 17 18 25 Z" fill="${hair}"/>`;
+  const crop=`<path d="M19 23 Q18 9 32 8 Q46 9 45 23 Q42 14 32 14 Q22 14 19 23 Z" fill="${hair}"/>`;
+  let hairBack="",hairFront="",strands="";
+  switch(m.hairStyle){
+    case "crop":
+      hairBack=crop;
+      hairFront=`<path d="M21 19.5 Q24 13 32 13 Q40 13 43 19.5 Q38 16 32 16 Q26 16 21 19.5 Z" fill="${hair}"/>`; break;
+    case "side":
+      hairBack=crop;
+      hairFront=`<path d="M20 20 Q21 12 33 11.5 Q43 12 44 18.5 Q35 14 27 16 Q22 18 20 20 Z" fill="${hair}"/>`; break;
+    case "buzz":  /* close crop: drawn in FRONT of the head or the circle swallows it */
+      hairFront=`<path d="M19.5 20 Q20.5 10.5 32 10 Q43.5 10.5 44.5 20 Q40 14.5 32 14 Q24 14.5 19.5 20 Z" fill="${hair}" opacity=".92"/>`; break;
+    case "long":
+      strands=`<path d="M19 22 Q12 44 15 64 L21 64 Q20 42 23 28 Z" fill="${hair}"/><path d="M45 22 Q52 44 49 64 L43 64 Q44 42 41 28 Z" fill="${hair}"/>`;
+      hairBack=cap; hairFront=`<path d="M21 20 Q24 13 32 13 Q40 13 43 20 Q38 16.5 32 16.5 Q26 16.5 21 20 Z" fill="${hair}"/>`; break;
+    case "curly":
+      hairBack=`<g fill="${hair}"><circle cx="22" cy="16" r="7"/><circle cx="42" cy="16" r="7"/><circle cx="32" cy="10" r="8"/><circle cx="18" cy="23" r="5.5"/><circle cx="46" cy="23" r="5.5"/></g>`;
+      hairFront=`<path d="M22 20 Q25 14 32 14 Q39 14 42 20 Q37 17 32 17 Q27 17 22 20 Z" fill="${hair}"/>`; break;
+    case "bun":
+      hairBack=`<circle cx="32" cy="7" r="4.5" fill="${hair}"/>`+cap;
+      hairFront=`<path d="M21 20 Q24 13 32 13 Q40 13 43 20 Q38 16.5 32 16.5 Q26 16.5 21 20 Z" fill="${hair}"/>`; break;
+    default:
+      hairBack=cap; hairFront=`<path d="M20 20.5 Q22 12 32 12 Q42 12 44 20.5 Q39 15.5 32 15.5 Q25 15.5 20 20.5 Z" fill="${hair}"/>`;
+  }
+  /* inline aspect-ratio: don't trust Safari to derive it from the viewBox when max-height clamps */
+  return `<svg class="fig-svg" viewBox="0 0 64 ${vbH}" style="aspect-ratio:64/${vbH}" aria-hidden="true">
+    <ellipse class="spot" cx="32" cy="${feetY+4}" rx="22" ry="4" fill="#000" opacity="0"/>${strands}
+    <g class="leg l">${legShape(lx)}${shortsAt(lx)}<rect x="25.6" y="${feetY-2}" width="8" height="4" rx="2" fill="var(--ink)"/></g>
+    <g class="leg r">${legShape(rx)}${shortsAt(rx)}<rect x="30.4" y="${feetY-2}" width="8" height="4" rx="2" fill="var(--ink)"/></g>
+    ${garment}
+    <g class="arm l"><rect x="${alx}" y="45" width="4.6" height="34" rx="2.3" fill="${skin}"/>${sleeveAt(alx)}</g>
+    <g class="arm r"><rect x="${arx}" y="45" width="4.6" height="34" rx="2.3" fill="${skin}"/>${sleeveAt(arx)}</g>
+    <rect x="29.4" y="33" width="5.2" height="9" fill="${skin}"/>
+    ${hairBack}<circle cx="32" cy="24" r="13" fill="${skin}"/>${hairFront}
+    <g class="eyes">
+      <ellipse cx="27.4" cy="25" rx="3.1" ry="3.4" fill="#fff" stroke="#00000022"/>
+      <ellipse cx="36.6" cy="25" rx="3.1" ry="3.4" fill="#fff" stroke="#00000022"/>
+      <circle cx="27.7" cy="25.3" r="2.1" fill="${eye}"/><circle cx="36.3" cy="25.3" r="2.1" fill="${eye}"/>
+      <circle cx="27.7" cy="25.3" r=".8" fill="#1a1118"/><circle cx="36.3" cy="25.3" r=".8" fill="#1a1118"/>
+    </g></svg>`;
+}
+function figWrap(m,cls){ const d=(-Math.random()*3).toFixed(2); return `<div class="figwrap${cls?' '+cls:''}"><div class="fig" style="animation-delay:${d}s">${figure(m)}</div></div>`; }
+/* the annotated figure: the model drawn like a tech pack, dimension line on the left and
+   leader lines to the measurements on the right. Body, lines and labels share ONE viewBox,
+   so the lines land on the body whatever size the card renders at. The geometry tables
+   are the ones figure() uses. */
+function annotated(m){
+  const feetY=Math.round(128+(m.height-178)*2.0), vbH=feetY+9, W=200, FX=58;
+  const inner=figure(m).replace(/^<svg class="fig-svg"[^>]*>/, `<svg x="${FX}" y="0" width="64" height="${vbH}" viewBox="0 0 64 ${vbH}" overflow="visible">`);
+  const band=m.plus?2:m.mid?1:0, half=[11,14,17][band]+(m.sex==="male"?1:0);
+  const wa=[8,11,14.5][band], hip=[11.5,15.5,20][band];
+  const LX=132, TX=135;
+  const rows=[[12,FX+48,"Hair",m.hair],[26,FX+46,"Eyes",m.eye],[50,FX+32+half+3,"Bust",m.bust],[64,FX+32+wa+3,"Waist",m.waist],
+              [78,FX+32+hip+3,"Hips",m.hips],[94,FX+32+hip+3,"Size",m.size],[feetY-3,FX+41,"Shoe",m.shoe]];
+  const right=rows.map(([y,x,k,v])=>`<path class="ln" d="M${x.toFixed(1)} ${y} L${LX} ${y}"/><text x="${TX}" y="${y+2.8}"><tspan class="ak">"${k}"</tspan> <tspan class="av">${v}</tspan></text>`).join("");
+  const DX=44, mid=(8+feetY)/2;
+  const left=`<path class="ln" d="M${DX} 8 L${DX} ${feetY}"/><path class="tk" d="M${DX-3} 8 L${DX+3} 8 M${DX-3} ${feetY} L${DX+3} ${feetY}"/>
+    <text x="${DX-5}" y="${(mid-3).toFixed(1)}" text-anchor="end" class="ak">"Height"</text><text x="${DX-5}" y="${(mid+7).toFixed(1)}" text-anchor="end" class="av">${m.height} cm</text>`;
+  return `<div class="figwrap tech"><div class="fig"><svg class="fig-svg anno" viewBox="0 0 ${W} ${vbH}" style="aspect-ratio:${W}/${vbH}" aria-hidden="true">${left}<g class="fig-body">${inner}</g>${right}</svg></div></div>`;
+}
+
+/* ---------------- gauges ---------------- */
+function gaugeArc(){
+  /* half-DONUT: five thick colored ring segments (bad -> good) around an open centre;
+     fills live in the .g-a* classes so colour-safe mode can repaint them via the --arc vars */
+  const cx=50,cy=50,R=48,Ri=27;
+  const pt=(t,r)=>{const a=(180-t*180)*Math.PI/180; return (cx+r*Math.cos(a)).toFixed(1)+" "+(cy-r*Math.sin(a)).toFixed(1);};
+  return [1,2,3,4,5].map((n,i)=>{const t0=i/5, t1=(i+1)/5;
+    return `<path d="M ${pt(t0,R)} A ${R} ${R} 0 0 1 ${pt(t1,R)} L ${pt(t1,Ri)} A ${Ri} ${Ri} 0 0 0 ${pt(t0,Ri)} Z" class="g-a${n}" stroke="var(--paper)" stroke-width="1"/>`;}).join("");
+}
+const needleAngle=v=>((clamp(v)-50)/50)*90;
+const capClass=v=> v<15?" crit":(v<30?" red":(v<45?" warn":(v>=75?" happy":(v>=60?" ok":""))));   // caption heats with anger, greens with joy
+function gaugeHTML(key,label,value,idp){
+  return `<div class="gauge"><svg viewBox="0 0 100 56" class="gauge-svg">${gaugeArc()}
+    <g class="needle" id="${idp}-${key}" transform="rotate(${needleAngle(value).toFixed(1)} 50 50)">
+      <polygon points="48.6,50 51.4,50 50.5,9 49.5,9" fill="var(--ink)"/></g>
+    <circle cx="50" cy="50" r="4.2" fill="var(--accent)"/></svg>
+    ${label?`<div class="gauge-cap${capClass(value)}">${label}</div>`:""}</div>`;
+}
+/* Needle rotation uses the SVG `transform` ATTRIBUTE (core SVG 1.1, identical in every engine)
+   instead of CSS transform + `transform-box:view-box`, which WebKit/Blink resolve differently
+   from Gecko. The smooth sweep is driven by a tiny rAF tween rather than a CSS transition
+   (attribute changes don't transition). prefers-reduced-motion snaps instead of animating. */
+function setNeedle(el, to){
+  if(!el) return;
+  const from = (el._ang==null) ? to : el._ang;
+  el._ang = to;
+  if(el._raf){ cancelAnimationFrame(el._raf); el._raf=null; }
+  const reduce = (window.A11Y && A11Y.on) || (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  if(reduce || from===to){ el.setAttribute("transform","rotate("+to.toFixed(1)+" 50 50)"); return; }
+  const DUR=1050, t0=performance.now(), ease=p=>1-Math.pow(1-p,3);   // easeOutCubic settle
+  function frame(now){
+    const p=Math.min(1,(now-t0)/DUR);
+    el.setAttribute("transform","rotate("+(from+(to-from)*ease(p)).toFixed(2)+" 50 50)");
+    if(p<1) el._raf=requestAnimationFrame(frame); else el._raf=null;
+  }
+  el._raf=requestAnimationFrame(frame);
+}
+function initNeedles(idp,v){ STAKE.forEach(s=>{ const el=$(idp+"-"+s.id); if(el) el._ang=needleAngle(v[s.id]); }); }
+function renderGauges(c,idp,v){ $(c).innerHTML=STAKE.map(s=>gaugeHTML(s.id,s.cap,v[s.id],idp)).join(""); initNeedles(idp,v); }
+function setNeedles(idp,v){ STAKE.forEach(s=>{ const el=$(idp+"-"+s.id); if(el) setNeedle(el, needleAngle(v[s.id])); }); }
+
+/* ---------------- season render ---------------- */
+function renderSeason(){
+  G.tier=Math.min(3, Math.floor((G.season-1)/2));
+  $("house-name").textContent=G.brand;
+  /* the contract prints its terms: the ending should be a countdown, not a surprise */
+  let tag=`<span class="ak">"Season"</span> ${G.season} of ${TENURE_MAX}`;
+  if(G.season>=TENURE_MAX) tag+=` <b>· final show</b>`;
+  else if(G.season>=TENURE_BASE) tag+=` <b>· under review</b>`;
+  else if(G.season===TENURE_BASE-1) tag+=` <b>· review next show</b>`;
+  $("season-tag").innerHTML=tag;
+  renderGauges("gauges","g",G.meters);
+  resetStream(); G.booked=[]; G.lastPassed=null;
+  G.looks=makeLooks();                              // this season's five looks, one per slot
+  clearWhisper(); renderLookbook(); updateCount(); renderDeck();
+}
+
+/* ---------------- deck (swipe) ---------------- */
+/* Tiny BMI context scale: most players have no feel for raw BMI numbers, so the card
+   shows where this body sits between the industry floor (18.5) and the average person (~29). */
+function bmiBar(m){
+  const LO=15, HI=34, X=v=>6+(clamp(v,LO,HI)-LO)/(HI-LO)*188;
+  const xm=X(m.bmi), xp=X(POP_BMI), xw=X(18.5);
+  const col=m.bmi<18.5?"var(--accent)":"var(--ink)";   // pink below the WHO underweight line
+  let ticks="";
+  for(let v=LO;v<=HI;v++){ const x=X(v).toFixed(1), big=v%5===0;
+    ticks+=`<line class="${big?'rl':'rt'}" x1="${x}" x2="${x}" y1="${big?5:8}" y2="12"/>`; }
+  return `<svg class="bmibar" viewBox="0 0 200 30" aria-hidden="true">
+    <line class="rl" x1="6" x2="194" y1="12" y2="12"/>${ticks}
+    <text x="6" y="22" text-anchor="start">${LO}</text><text x="194" y="22" text-anchor="end">${HI}</text>
+    <text x="${xw.toFixed(1)}" y="22" text-anchor="middle">18.5</text>
+    <path d="M${(xp-3).toFixed(1)} 1.5 L${(xp+3).toFixed(1)} 1.5 L${xp.toFixed(1)} 7.5 Z" fill="var(--ink2)"/>
+    <text x="${xp.toFixed(1)}" y="29.5" text-anchor="middle">"Avg. person" ${POP_BMI}</text>
+    <circle cx="${xm.toFixed(1)}" cy="12" r="3.6" fill="${col}"/></svg>`;
+}
+function cardHTML(m){
+  dress(m, lookFor(G.booked.length));               // everyone auditions in the look being cast
+  const tilt=((Math.random()*3.2)-1.6).toFixed(2);            // every card is pinned up slightly crooked
+  const scrawl=m.alum?'<div class="scrawl-star alum">the board really<br>liked this one<br>last time</div>'
+             :m.star?'<div class="scrawl-star">famous!!<br>book this one</div>'
+             :m.demopick?'<div class="scrawl-star alum">the Board&rsquo;s<br>pick</div>':'';
+  const band=m.plus?"plus":m.mid?"mid":"thin";
+  const ring='<svg class="ring" viewBox="0 0 60 34" preserveAspectRatio="none" aria-hidden="true"><path d="M30 3 C 44 2, 57 8, 57 17 C 57 27, 45 32, 29 31.5 C 14 31, 3 26, 3 17 C 3 8, 16 3.5, 30 3 Z"/></svg>';
+  return `<div class="card" data-uid="${m.uid}" style="--tilt:${tilt}deg">
+    <div class="card-fig">${scrawl}${figWrap(m,"phone")}${annotated(m)}</div>
+    <div class="card-meta"><div class="cname">"${m.name}"${m.star?' <span class="star">★</span>':''}</div>
+      <div class="cases">
+        <div class="case"><span class="case-k">"Origin"</span><span class="case-v">${m.region}</span></div>
+        <div class="case bmi${m.bmi<18.5?' low':''}"><span class="case-k">"BMI"</span><span class="case-v">${ring}${m.bmi}</span><span class="case-tag">${band}</span></div>
+      </div>
+      ${bmiBar(m)}
+      <div class="cfine"><span class="ak">"Height"</span> ${m.height} cm · <span class="ak">"Shoe"</span> ${m.shoe} · <span class="ak">"Size"</span> ${m.size}</div>
+      <div class="cfine"><span class="ak">"Hair"</span> ${m.hair} · <span class="ak">"Eyes"</span> ${m.eye}</div>
+    </div>
+    <div class="swipe-tag book">Book</div><div class="swipe-tag pass">Pass</div></div>`;
+}
+function renderDeck(){
+  const deck=$("deck"); deck.innerHTML="";
+  if(G.booked.length>=PICK || G.stack.length===0){ updateButtons(); return; }
+  if(G.stack[1]){ const b=document.createElement("div"); b.innerHTML=cardHTML(G.stack[1]); const be=b.firstElementChild; be.classList.add("behind"); deck.appendChild(be); }
+  const t=document.createElement("div"); t.innerHTML=cardHTML(G.stack[0]); const top=t.firstElementChild;
+  deck.appendChild(top); attachSwipe(top, G.stack[0]); updateButtons();
+}
+function updateButtons(){ const none=G.stack.length===0||G.booked.length>=PICK||(window.Demo&&Demo.active&&!Demo.casting); $("btn-pass").disabled=none; $("btn-book").disabled=none;
+  $("btn-undo").style.visibility=(G.lastPassed&&!none)?"visible":"hidden"; }
+function renderLookbook(){
+  const host=$("slots"); host.innerHTML="";
+  for(let i=0;i<PICK;i++){ const s=document.createElement("div"); s.className="lb-cell";
+    if(G.booked[i]){ s.classList.add("full"); s.innerHTML=figWrap(dress(G.booked[i], lookFor(i))); s.title="Remove "+G.booked[i].name; s.addEventListener("click",()=>unbook(i)); }
+    else { s.classList.add("empty"); s.innerHTML=`<svg class="hanger" viewBox="0 0 64 40" aria-hidden="true"><path filter="url(#rough${(i%3)+1})" d="M32 4.5 c-3.6 0 -5.8 2.2 -5.8 4.8 c0 2.6 2.4 3.6 5.8 6.2 L6 34.5 L58 34.5 Z"/></svg><span>${ROMAN[i+1]}</span>`; }
+    host.appendChild(s); }
+}
+function updateCount(){ $("count").textContent=G.booked.length+" / "+PICK; }
+
+/* the assistant leans in after every booking: a one-line forecast of how this face will land.
+   Playtesters flew blind until the first show resolved — this is the early feedback loop. */
+let _whT=null;
+function whisper(msg, ms){ const el=$("whisper"); if(!el||!msg) return;
+  el.innerHTML=msg; el.classList.add("show");
+  clearTimeout(_whT); _whT=setTimeout(()=>el.classList.remove("show"), ms||2800); }
+function clearWhisper(){ const el=$("whisper"); if(el) el.classList.remove("show"); clearTimeout(_whT); }
+function whisperFor(m){
+  const b=G.booked, ideals=b.filter(isIdeal).length;
+  if(m.star||m.alum)      return "a famous face. <b>the Board will love it</b>";
+  if(m.plus&&m.nonWhite)  return "one model, every box. <b>the associations will notice</b>";
+  if(m.plus)              return "a fuller body. <b>All Walks will cheer</b>";
+  if(m.nonWhite)          return "a model of colour. <b>the Census approves</b>";
+  if(m.mid)               return "mid-size. <b>All Walks softens a little</b>";
+  if(ideals===b.length&&b.length>=3) return "all thin and white so far. <b>expect protests</b>";
+  if(isIdeal(m))          return "the Board&rsquo;s type. <b>easy to sell</b>";
+  return "thin and white. <b>sells fine, wins no points</b>";
+}
+
+let sw=null;
+function attachSwipe(el, model){
+  el.addEventListener("pointerdown", e=>{
+    if(G._busy) return; if(window.Demo&&Demo.active&&!Demo.casting) return; if(e.button!=null&&e.button!==0) return;
+    sw={el, model, x0:e.clientX, y0:e.clientY, dx:0, active:false, tilt:parseFloat(el.style.getPropertyValue("--tilt"))||0};
+    window.addEventListener("pointermove",swMove,{passive:false});
+    window.addEventListener("pointerup",swUp,{passive:false});
+    window.addEventListener("pointercancel",swCancel,{passive:false});
+  });
+}
+function swMove(e){
+  if(!sw) return; sw.dx=e.clientX-sw.x0; const dy=e.clientY-sw.y0;
+  if(!sw.active){ if(Math.hypot(sw.dx,dy)>6) sw.active=true; else return; }
+  e.preventDefault();
+  sw.el.style.transform=`translateX(${sw.dx}px) rotate(${(sw.dx*0.045+sw.tilt).toFixed(2)}deg)`;
+  const bk=clamp(sw.dx/110,0,1), ps=clamp(-sw.dx/110,0,1);
+  const tb=sw.el.querySelector(".swipe-tag.book"), tp=sw.el.querySelector(".swipe-tag.pass");
+  if(tb) tb.style.opacity=bk; if(tp) tp.style.opacity=ps;
+}
+function endSwipe(){ window.removeEventListener("pointermove",swMove); window.removeEventListener("pointerup",swUp); window.removeEventListener("pointercancel",swCancel); }
+function swUp(e){ if(!sw) return; const {el,model,dx}=sw; endSwipe(); sw=null;
+  if(dx>92) commit(el,model,1); else if(dx<-92) commit(el,model,-1); else snapBack(el); }
+function swCancel(){ if(sw){ const el=sw.el; endSwipe(); sw=null; snapBack(el); } }
+function snapBack(el){ el.style.transition="transform .25s ease"; el.style.transform="";
+  const tb=el.querySelector(".swipe-tag.book"), tp=el.querySelector(".swipe-tag.pass"); if(tb)tb.style.opacity=0; if(tp)tp.style.opacity=0;
+  setTimeout(()=>{ if(el) el.style.transition=""; },260); }
+function commit(el, model, dir){
+  if(dir<0 && window.Demo && Demo.active){ Demo.refuse(el); return; }   // the tutorial list is not optional
+  G._busy=true;
+  el.style.transition="transform .34s cubic-bezier(.4,0,.5,1), opacity .34s";
+  el.style.transform=`translateX(${dir*150}%) rotate(${dir*20+(parseFloat(el.style.getPropertyValue("--tilt"))||0)}deg)`; el.style.opacity="0";
+  (dir>0?Sfx.book:Sfx.pass)();
+  setTimeout(()=>{ G._busy=false; dir>0 ? book(model) : pass(); }, 320);
+}
+function book(model){ G.booked.push(G.stack.shift()); refill(); renderLookbook(); updateCount();
+  whisper((window.Demo&&Demo.active) ? Demo.pickReact(model) : whisperFor(model));
+  if(G.booked.length>=PICK){ renderDeck(); setTimeout(()=>{ (window.Demo&&Demo.active) ? Demo.onCast() : stage(); },360); } else renderDeck(); }
+function pass(){ G.lastPassed=G.stack.shift(); refill(); renderDeck(); }
+function undoPass(){ if(G._busy||!G.lastPassed) return; Sfx.deal(); G.stack.unshift(G.lastPassed); G.lastPassed=null; renderDeck(); }
+function unbook(i){ if(window.Demo&&Demo.active) return; const m=G.booked.splice(i,1)[0]; G.stack.unshift(m); renderLookbook(); updateCount(); renderDeck(); }
+function swipeBtn(dir){ if(G._busy||G.stack.length===0||G.booked.length>=PICK) return;
+  const top=$("deck").querySelector(".card:not(.behind)"); if(!top) return; commit(top, G.stack[0], dir); }
+document.addEventListener("keydown", e=>{ if(window.Tutorial&&window.Tutorial.active) return; if(window.Demo&&Demo.active&&!Demo.casting) return; if(!$("season").classList.contains("active")) return;
+  if(e.key==="ArrowLeft") swipeBtn(-1); else if(e.key==="ArrowRight") swipeBtn(1); });
+/* Enter = the primary action of whatever is on screen */
+document.addEventListener("keydown", e=>{
+  if(e.key!=="Enter") return;
+  if(window.Tutorial && Tutorial.active) return;                                   // tutorial owns its keys
+  const a=document.activeElement; if(a&&(a.tagName==="BUTTON"||a.tagName==="A")) return;  // native click handles it
+  if($("runway-veil").classList.contains("show")){ e.preventDefault(); GAME.skipRunway(); return; }
+  if($("demo-veil").classList.contains("show")){ e.preventDefault(); Demo.next(); return; }
+  if($("brief-veil").classList.contains("show")){ e.preventDefault();
+    if($("env-wrap").style.display!=="none" && !$("envelope").classList.contains("open")) Briefing.open();
+    else if($("brief").style.display!=="none") Briefing.done();
+    return; }
+  if($("veil").classList.contains("show")){ e.preventDefault(); GAME.next(); return; }
+  if($("reveal").classList.contains("active")){ e.preventDefault(); GAME.restart(); return; }
+  if($("intro").classList.contains("active")){ e.preventDefault(); GAME.begin(); }
+});
+
+/* ---------------- scoring (hidden): the four-panel economy ----------------
+   I ideal · L larger bodies · E non-white · T intersectional (both).
+   Div = L+E−T = distinct bodies carrying diversity. Tokenism keeps Div small
+   (one body, both traits); spreading makes it large (different bodies). The Board
+   punishes Div directly, so concentration is the cheap path and spreading is the hard one. */
+function scoreCast(cast){
+  const I=cast.filter(isIdeal).length;
+  const L=cast.filter(m=>m.plus).length, E=cast.filter(m=>m.nonWhite).length, T=cast.filter(m=>m.plus&&m.nonWhite).length;
+  const M=cast.filter(m=>m.mid).length, S=cast.filter(m=>m.star).length;
+  const Div=L+E-T;
+  const whip=Math.abs(L-G.prev.L)+Math.abs(E-G.prev.E);
+  const firstPlus=(L>0 && !G.everPlus);
+  const newDistinct=(L>=1 && E>=1 && T<Math.min(L,E));
+  /* The Board is the binding constraint — but it ACCLIMATES. Diversity beyond what the
+     house is known for (novel) costs -6 a body; diversity the buyers have grown used to
+     (familiar) costs -2.5. Introduce change gradually and the runway's normal shifts with
+     you; jump and the order book panics. Stars still buy tolerance. */
+  const novel=Math.max(0, Div-G.accl), familiar=Div-novel;
+  let dBoard = 1 + 1.2*I + 2.5*S - (6*novel + 2.5*familiar);
+  let dWalks = (L>=1) ? (L===1? 5 : (L===2? 8 : 9))
+             : (M>=2 ? 0 : (M===1 ? -4 : -8));                 // mid-size softens the anger but doesn't satisfy
+  let dCensus= (E===0)? -8 : (E===1? 5 : (E===2? 8 : 9));
+  const early=G.season<=3?1.6:1;                               // debut shows: everyone watches the newcomer — misses cost more
+  if(dWalks<0) dWalks*=early;
+  if(dCensus<0) dCensus*=early;
+  return {dBoard,dWalks,dCensus,I,L,E,T,M,S,Div,novel,whip,firstPlus,newDistinct};
+}
+
+/* ---------------- reactions (authored by each panel) ---------------- */
+function reactBoard(r){ let b;
+  if(G.meters.walks<TAU||G.meters.census<TAU) b=["The owners are fielding angry calls. This is a problem.","“A boycott is not a brand strategy,” the chairman snaps.","The board smells a PR fire and wants it out.","Projections wobble; the owners blame the noise.","“Fix the optics,” the board says, meaning fix you.","The phrase “reputational risk” is now in every meeting.","“We support diversity,” the chairman says, “the moment it stops costing us.”"];
+  else if(r.Div>=3) b=["The board mutters the show “lost the plot” on aspiration.","Buyers blanch: “where's the fantasy we sell?”","“Brave,” the commercial team says, meaning doomed.","An investor leaves at the interval.","“Who is this even for?” the board asks the room.","The order book thins. The owners notice.","“We sell the dream,” the chairman explains. “Nobody dreams of looking possible.”","Marketing asks if the cast could be diverse “in a more invisible way.”","“We don't do that here,” the chairman tells you."];
+  else if(r.Div>=2 && r.novel>0.8) b=["“One statement booking sells courage. Two costs orders,” the board notes.","Two risks on one runway. The buyers ask which one you'll drop.","“Spread it out over seasons,” the commercial team advises. “Or better: one model who covers both.”","The board counts two off-ideal stories in five looks, and frowns.","“Couldn't ONE girl carry all of this?” someone asks. Nobody objects.","“Two statements is a manifesto,” the board warns. “We budgeted for one.”","“Could the plus one also be the diverse one? Efficiency,” says finance."];
+  else if(r.whip>=3) b=["“Pick a lane,” the board pleads. “Any lane. Ideally the profitable one.”","Buyers call the house “exciting,” the way turbulence is exciting."];
+  else if(r.T>=1 && oddsRatio()>=2.5) b=["“Our diversity is very efficient,” the board tells the reporter. She writes it down.","One model, several boxes. Finance calls it “synergy.”","The board admires how little change the change required.","“Maximum optics, minimum disruption,” reads the internal memo, approvingly."];
+  else if(r.Div>=1 && r.novel<=0.3) b=["The buyers have stopped flinching. This is just what the house looks like now.","“Our customer expects this now,” the board admits.","The order book has made its peace with the new faces.","Nobody upstairs blinks at the lineup anymore.","What scandalised them two seasons ago is now the brand.","“We always believed in this,” the chairman tells the press, newly sincere.","The board has renamed your risk “our heritage of inclusion.”"];
+  else if(r.S>=1 && r.Div<=1) b=["The star's name alone moves pre-orders. The board is soothed.","“Book her every season,” the chairman says of the star. Numbers up.","A famous face on the runway. The owners forgive a lot for that.","The star brings press, buyers, calm. The board purrs.","With a star in the lineup, nobody upstairs asks questions.","One celebrity outsells five principles. The board has done the math.","“Book more famous ones,” says the chairman, solving fashion forever."];
+  else if(r.Div<=1 && r.I>=4) b=["Buyers purr over the clean, aspirational line.","“Timeless, on-brand, sellable,” the board beams.","Pre-orders spike. This is the look that moves units.","The money side has never looked happier.","“This,” the chairman says, “is the house.”","A quiet, profitable triumph. The board exhales.","“Perfection”: five bodies, one body, no surprises.","Pre-orders spike. Somewhere a spreadsheet weeps with joy.","“This is what women want,” agrees a boardroom containing no women."];
+  else b=["Sales hold. The board can work with this.","A measured outing. Commercial enough.","“Interesting,” the board says, reserving judgment.","Dependable numbers, if not thrilling.","The buyers nod, slowly.","Nothing scares the owners this season."];
+  return pickFresh(b,"board"); }
+function reactWalks(r){ let b;
+  if(r.firstPlus) b=["At last, a larger body walks. They're moved.","A historic first. All Walks applauds.","They've waited years for this booking.","“Finally,” the coalition says, and means it.","A real body on the runway. The room exhales."];
+  else if(r.L===0 && r.M>=1) b=["Mid-size on the runway. Halfway to the point, they note.","“Closer,” the coalition says. “Now keep going.”","A size 10 walks. It's a start, not the finish.","The middle of the wardrobe finally walks. They want the whole rack.","Softer lines this season. They notice, and wait for more."];
+  else if(r.L===0) b=["Still no room for a real body, the coalition notes.","Another straight-size show. Patience thinning.","Not one larger body. They don't hide the disappointment.","“A house ‘for every body,’” they quote back, drily.","Their statement is one line: “Again?”","The coalition is past polite now."];
+  else if(r.L>=2 && r.newDistinct) b=["Two bodies, two stories. You stopped making one model do all the work.","Genuine range, not a single token. They're thrilled.","“This is what we asked for,” the coalition beams.","Range you can believe in. Real progress.","Bodies of every kind, and they each get to be themselves."];
+  else if(r.T>=1 && r.T>=r.L) b=["A larger body, but they're carrying the colour quota too. They notice.","“Convenient, that your curve model is also your diversity,” they note.","One body, every box ticked at once. Half a clap.","A token doing double duty. They see exactly what it is.","They clock the single booking, and all it's made to carry."];
+  else b=["A larger body walks. They'll take it.","Some range. All Walks nods.","Progress, modest but real.","A booking that matters. Noted."];
+  return pickFresh(b,"walks"); }
+const YEARWORD=["","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"];
+function reactCensus(r){ let b;
+  if(r.E===0){
+    if(G.streaks.noColour>=2 && Math.random()<0.5) return `Year ${YEARWORD[G.streaks.noColour]||G.streaks.noColour} of the monochrome project.`;
+    b=["An all-white lineup. The Census is unamused.","Not one model of colour. They take note.","“A 1995 catalogue,” the Census observes.","Five models, one continent. The Census admires the logistics.","Their silence is louder than any review.","“The world doesn't look like this,” they note."]; }
+  else if(r.E>=3) b=["A genuinely global cast. The Census approves.","“This looks like the world,” they note.","Truly diverse. The Census has no notes.","Faces from everywhere. The real thing."];
+  else if(r.T>=1 && r.T>=r.E) b=["“A token is not a demographic,” the Census notes.","One token carrying all the colour. The Census counts to one.","“Your diversity and your curve model are the same person,” the Census notes.","Representation concentrated onto a token. Half a clap.","They count the faces, and where the colour landed."];
+  else if(r.E===1 && G.streaks.oneColour>=2) b=["Same seat, new season. The Census recognises a quota when it sees one.","“Quota met,” the Census files. “Representation: pending.”"];
+  else b=["Some colour. Noted, if modest.","A face or two. They've seen bolder.","“Better,” the Census says, leaving the rest unsaid.","A step in the right direction. They'd like more."];
+  return pickFresh(b,"census"); }
+const REACT={board:reactBoard, walks:reactWalks, census:reactCensus};
+
+/* pick() that won't say the exact same line twice running, per voice */
+function pickFresh(pool,key){ G._said=G._said||{}; let s=pick(pool);
+  if(pool.length>1 && s===G._said[key]) s=pick(pool.filter(x=>x!==s));
+  G._said[key]=s; return s; }
+/* The press keeps receipts: repeated verdicts climb a ladder instead of replaying —
+   the euphemism wearing out is the point */
+function headlineFor(r){ const B=G.brand, P=G.press;
+  const timeless=(r.L===0 && r.E<=1), plot=(r.Div>=3);
+  P.timeless = timeless? P.timeless+1 : 0;
+  P.plot     = plot?     P.plot+1     : 0;
+  let line=null;
+  if(r.firstPlus) line=`“A watershed”: ${B} sends its first larger body down the runway.`;
+  else if(r.T>=1 && r.I>=3 && r.L<=1) line=`“Finally, a body that looks like mine.” Critics praise ${B}'s inclusive new face.`;
+  else if(timeless){ const t=[
+    `${B}'s lineup draws quiet praise for its “timeless” silhouette.`,
+    `“Timeless,” the critics write of ${B} again, a few of them checking their old copy.`,
+    `The trade reprints last season's ${B} review unchanged. Nobody notices.`,
+    `Critics no longer attend ${B} in person. The review writes itself.`];
+    line=t[Math.min(P.timeless,t.length)-1]; }
+  else if(plot){ const t=[
+    `Buyers grumble that ${B}'s show “lost the plot” on aspiration.`,
+    `“The plot, still lost,” buyers sigh. Yet ${B}'s name keeps coming up.`,
+    `The trade stops calling ${B} a fashion house and starts calling it a position.`];
+    line=t[Math.min(P.plot,t.length)-1]; }
+  else if(r.newDistinct && r.L>=2) line=`Reviewers call ${B}'s runway its most genuinely varied yet.`;
+  else if(r.whip>=3) line=`${B} confounds critics with a wildly different lineup. Again.`;
+  P.applause = line? 0 : P.applause+1;
+  if(!line){ const t=[
+    `${B} closes another season to polite applause.`,
+    `${B} closes again to polite applause: the same hands, at the same volume.`,
+    `The applause at ${B} has become contractual.`,
+    `${B} closes. Applause happens. Everyone checks their phones.`];
+    line=t[Math.min(P.applause,t.length)-1]; }
+  return line; }
+
+/* ---------------- stage / runway / resolve ---------------- */
+function stage(){
+  const cast=G.booked.slice(); if(cast.length!==PICK) return;
+  const r=scoreCast(cast); const before={...G.meters};
+  let dB=r.dBoard;                                             // a well-fed board absorbs bad news better
+  if(dB<0) dB *= (G.meters.board>=70 ? .6 : G.meters.board>=55 ? .8 : 1);
+  G.meters.board =clamp(G.meters.board +dB);
+  G.meters.walks =clamp(G.meters.walks +r.dWalks);
+  G.meters.census=clamp(G.meters.census+r.dCensus);
+  // cross-panel cascade: a furious coalition damages sales
+  if(G.meters.walks<TAU)  G.meters.board=clamp(G.meters.board-5);
+  if(G.meters.census<TAU) G.meters.board=clamp(G.meters.board-5);
+  if(r.L>0){ G.everPlus=true; G.cum.seasonsWithPlus++; }
+  G.cum.total+=cast.length;
+  cast.forEach(m=>{ if(m.nonWhite)G.cum.nonWhite++; G.cum.regions.add(m.region);
+    if(m.plus){ G.cum.plus++; m.nonWhite?G.cum.plusNonWhite++:G.cum.plusWhite++; }
+    else { m.nonWhite?G.cum.nonplusNonWhite++:G.cum.nonplusWhite++; } });
+  const medBMI=median(cast.map(m=>m.bmi)), nwPct=G.cum.nonWhite/G.cum.total*100;
+  const divIndex=clamp(14+9*G.cum.seasonsWithPlus+1.1*nwPct+2.2*G.cum.regions.size);
+  G.hist.push({season:G.season,median:medBMI,divIndex,Div:r.Div,whip:r.whip,L:r.L,E:r.E});
+  cast.forEach(m=>G.allCast.push(m));
+  G.streaks.noColour  = r.E===0 ? G.streaks.noColour+1  : 0;   // reactions read these, so count the current season first
+  G.streaks.oneColour = r.E===1 ? G.streaks.oneColour+1 : 0;
+  G.prev={L:r.L, E:r.E};
+  G.accl=clamp(G.accl + (r.Div>=G.accl?0.5:0.6)*(r.Div-G.accl), 0, 3);   // the house's normal drifts toward what walked
+  playRunway(cast, ()=>showResolution(r,before));
+}
+const RW_THEMES=["rw-noir","rw-blanc","rw-rose","rw-or","rw-beton","rw-nuit","rw-cristal","rw-damier"];
+function playRunway(cast, cb){
+  const w=$("walkers"); w.innerHTML="";
+  cast.forEach((m,i)=>{ const d=document.createElement("div"); d.className="walker"; d.style.animationDelay=(i*0.12)+"s";
+    d.innerHTML=`<div class="fig walking" style="animation-delay:${(-i*0.1).toFixed(2)}s">${figure(m)}</div>`; w.appendChild(d); });
+  $("runway-veil").classList.add("show"); Sfx.walk();
+  const box=$("stagebox"); box.querySelectorAll(".pflash").forEach(e=>e.remove());
+  const venue=pick(RW_THEMES.filter(t=>t!==G._lastVenue)); G._lastVenue=venue;   // new venue every show
+  RW_THEMES.forEach(t=>box.classList.remove(t)); box.classList.add(venue);
+  for(let i=0;i<14;i++){                                      // paparazzi from the dark: sparse early, frenzy at the finale
+    const when=320+Math.pow(Math.random(),0.45)*1980;         // pow<1 biases the shutter storm toward the end of the walk
+    setTimeout(()=>{
+      if(!$("runway-veil").classList.contains("show")) return;
+      const f=document.createElement("div"); f.className="pflash"; f.innerHTML="<i></i>";
+      const s=Math.round(64+(when-320)/1980*70+Math.random()*24);   // late flashes flare bigger
+      f.style.width=f.style.height=s+"px";
+      f.style.left=(4+Math.random()*84)+"%"; f.style.top=(14+Math.random()*70)+"%";
+      box.appendChild(f); Sfx.snap(); setTimeout(()=>f.remove(),520);
+    }, when);
+  }
+  G._runCb=cb; G._runTimer=setTimeout(finishRunway,2500);
+}
+function skipRunway(){ if($("runway-veil").classList.contains("show")) finishRunway(); }
+function finishRunway(){ clearTimeout(G._runTimer); $("runway-veil").classList.remove("show"); const cb=G._runCb; G._runCb=null; if(cb) cb(); }
+function showResolution(r, before){
+  $("resol-kick").innerHTML=`<span class="ak">"Look ${ROMAN[G.season]}"</span> reviews`; $("resol-house").textContent=G.brand;
+  $("resol-hl").innerHTML='<span class="hlt">'+escHTML(headlineFor(r))+'</span>';   // marker-pen highlight over the press line
+  const rows=$("resol-rows"); rows.innerHTML="";
+  STAKE.forEach((s,i)=>{ const el=document.createElement("div"); el.className="rrow"; el.style.animationDelay=(i*0.1)+"s";
+    const d=Math.round(G.meters[s.id]-before[s.id]);
+    const sym=d===0?"":(d>0?(d>=6?"++":"+"):(d<=-6?"−−":"−"));
+    const chip=sym?`<span class="rdelta ${d>0?"up":"down"}">${sym}</span>`:"";
+    el.innerHTML=`<div>${gaugeHTML(s.id,"",before[s.id],"rg")}</div><div><div class="rwho">${PANEL[s.id]}${chip}</div><div class="rtext">${REACT[s.id](r)}</div></div>`;
+    rows.appendChild(el); });
+  initNeedles("rg", before);                                          // start sweep from prior values
+  G.firedBy = (G.meters.board<=0)?"board":(G.meters.walks<=0)?"walks":(G.meters.census<=0)?"census":null;
+  let end=!!G.firedBy;
+  G.notRenewed=null;
+  if(!end && G.season>=TENURE_BASE){                                 // contract review at 8 shows
+    const failing = STAKE.filter(s=>G.meters[s.id]<RENEW_BAR);       // renewed only if all panels healthy
+    if(G.season>=TENURE_MAX || failing.length){
+      end=true;
+      if(failing.length){ const w=failing.sort((a,b)=>G.meters[a.id]-G.meters[b.id])[0];
+        G.notRenewed={cap:w.cap, val:Math.round(G.meters[w.id])}; }  // the reveal prints this pink slip
+    }
+  }
+  G._end=end;
+  $("resol-next").innerHTML=end?'See the record <span class="ar">→</span>':'Continue <span class="ar">→</span>';
+  $("veil").classList.add("show");
+  setTimeout(()=>setNeedles("rg",G.meters),90);
+}
+function next(){ $("veil").classList.remove("show");
+  if(G._end) return reveal();
+  G.season++; show("season"); renderSeason(); }
+
+/* ---------------- reveal ---------------- */
+function oddsRatio(){ const a=G.cum.plusNonWhite,b=G.cum.nonplusNonWhite,c=G.cum.plusWhite,d=G.cum.nonplusWhite; return ((a+0.5)*(d+0.5))/((b+0.5)*(c+0.5)); }
+function sparkline(series, opts){
+  const W=560,H=opts.h||120,padL=34,padR=12,padT=10,padB=20, xs=series.map(p=>p.season),n=xs.length;
+  const x=s=>padL+(n<=1?0:(s-xs[0])/(xs[n-1]-xs[0]))*(W-padL-padR);
+  const lo=opts.lo,hi=opts.hi,y=v=>padT+(1-(v-lo)/(hi-lo))*(H-padT-padB);
+  const pts=series.map(p=>`${x(p.season).toFixed(1)},${y(p.value).toFixed(1)}`).join(" ");
+  const dots=series.map(p=>`<circle cx="${x(p.season).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="3" fill="${opts.color}"/>`).join("");
+  const yl=(opts.ticks||[]).map(t=>`<text x="${padL-6}" y="${y(t)+3}" text-anchor="end" font-family="Archivo,sans-serif" font-weight="700" font-size="10" fill="#6B6B6B">${t}</text><line x1="${padL}" x2="${W-padR}" y1="${y(t)}" y2="${y(t)}" stroke="#D5D5D3" stroke-width="1"/>`).join("");
+  let ref=""; if(opts.ref!=null) ref=`<line x1="${padL}" x2="${W-padR}" y1="${y(opts.ref)}" y2="${y(opts.ref)}" stroke="${opts.refColor}" stroke-width="1.5" stroke-dasharray="6 4"/><text x="${W-padR}" y="${y(opts.ref)-5}" text-anchor="end" font-family="Archivo,sans-serif" font-weight="800" font-size="10" fill="${opts.refColor}">${opts.refLabel}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img">${yl}${ref}<polyline points="${pts}" fill="none" stroke="${opts.color}" stroke-width="2.5" stroke-linejoin="round"/>${dots}</svg>`;
+}
+function classifyEnding(){
+  if(G.firedBy) return {kind:"fired", who:G.firedBy};
+  const OR=oddsRatio();
+  const avgL=G.hist.reduce((s,h)=>s+(h.L||0),0)/Math.max(G.hist.length,1);  // did the body ever really move?
+  const maxWhip=Math.max(0,...G.hist.map(h=>h.whip||0));
+  if(avgL<0.6) return {kind:"standard", OR};        // body stayed thin — business as usual, whatever the index said
+  if(OR>=2.5)  return {kind:"token", OR};           // diversity concentrated onto a few bodies
+  return {kind:"everywalk", OR, smooth:maxWhip<=2}; // spread across distinct bodies
+}
+const escHTML=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---- ending pictogram (SVG) — only the rainbow survives; the others read as noise ---- */
+function pictoEveryWalk(){
+  const cols=["#C5234B","#D87A1F","#C79A2E","#4E7A33","#1F6F8B","#6A3FA0"];
+  const arcs=cols.map((c,i)=>{const r=52-i*6;return `<path d="M ${70-r} 70 A ${r} ${r} 0 0 1 ${70+r} 70" fill="none" stroke="${c}" stroke-width="4"/>`;}).join("");
+  const figs=[{w:4,sk:"#F6D9BE"},{w:7,sk:"#9A6238"},{w:4,sk:"#D9A579"},{w:7,sk:"#F6D9BE"},{w:4,sk:"#5A3420"}]
+    .map((f,i)=>{const x=24+i*23;return `<g transform="translate(${x},44)"><circle cx="0" cy="6" r="4.5" fill="${f.sk}"/><rect x="${-f.w/2}" y="11" width="${f.w}" height="22" rx="3" fill="${f.sk}"/></g>`;}).join("");
+  const flower=x=>`<g transform="translate(${x},62)">${[0,72,144,216,288].map(d=>`<circle cx="${(6*Math.cos(d*Math.PI/180)).toFixed(1)}" cy="${(6*Math.sin(d*Math.PI/180)).toFixed(1)}" r="3" fill="#D81E78"/>`).join("")}<circle cx="0" cy="0" r="3" fill="#C79A2E"/></g>`;
+  return `<svg viewBox="0 0 140 82" width="184" aria-hidden="true">${arcs}${figs}${flower(12)}${flower(128)}</svg>`;
+}
+function reveal(){
+  show("reveal");
+  const B=G.brand, series=G.hist, end=classifyEnding();
+  const divS=series.map(p=>({season:p.season,value:p.divIndex}));
+  const medS=series.map(p=>({season:p.season,value:p.median}));
+  const gap=(POP_BMI-median(series.map(s=>s.median))).toFixed(0);
+  const figs=G.allCast.map(m=>figWrap(m)).join("");
+  const parade=G.allCast.length?`<div class="parade"><div class="pcap">Everyone who walked for ${B} (hover to pause)</div><div class="parade-track">${figs}${figs}</div></div>`:"";
+  const charts=`<div class="chartbox"><p class="ct">Your diversity index <span>the story the press told</span></p>${sparkline(divS,{lo:0,hi:100,color:'#0A0A0A',ticks:[0,50,100],h:120})}</div>
+    <div class="chartbox"><p class="ct">Median body on your runway · BMI <span>what actually walked</span></p>${sparkline(medS,{lo:14,hi:32,color:'#0A0A0A',ticks:[16,22,28],ref:POP_BMI,refColor:'#E6007E',refLabel:'avg. person ≈ '+POP_BMI,h:130})}</div>`;
+  const shows=`${G.hist.length} show${G.hist.length===1?"":"s"}`;
+
+  /* Page order (deliberate): big title → explicit verdict ("You lost/won") → why, right
+     below → the paper, small → play again → the statistical record (parade + numbers + plots). */
+  /* the helpline travels with every ending — the subject doesn't care how the game went */
+  const helpline=`<p class="src">If this subject touches you personally: in Vienna, the Hotline für Essstörungen of Wiener Gesundheitsförderung listens on <strong>0800 20 11 20</strong>, Monday to Thursday 12:00–17:00. In the US, the National Alliance for Eating Disorders runs a free, clinician-staffed helpline: <strong>1-866-662-1235</strong>, weekdays. In the UK, Beat listens on <strong>0808 801 0677</strong>; elsewhere in Europe, <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a> lists local support by country.</p>`;
+  let cls="", h="", result="You lost.", resCls="lost", why="", punch="", rainbow="";
+  const orBig = end.OR>10 ? "10+" : (end.OR!=null ? end.OR.toFixed(1) : "");        // absurd ratios read as bugs — cap the display
+  const orPhrase = end.OR>10 ? "more than 10×" : (end.OR!=null ? end.OR.toFixed(1)+"×" : "");
+  /* the pink slip only where it lands: not on "fired" (redundant) and not on the token
+     ending — "you won — on paper" carries its own irony without the termination stapled on */
+  const slip = (G.notRenewed && (end.kind==="standard" || end.kind==="everywalk"))
+    ? `<p class="rv-slip">Contract not renewed: ${G.notRenewed.cap} at ${G.notRenewed.val}/100</p>` : "";
+  Sfx.ending(end.kind==="everywalk" && !G.notRenewed ? "win":"lose");   // a win the house terminated is no hymn
+  if(end.kind==="fired"){
+    cls="fired";
+    if(end.who==="board"){
+      h=`<em>Replaced</em>`;
+      why=`The Board fired you. Look ${ROMAN[G.season]} was your last. The collection stopped selling and the owners panicked: you pushed the runway further, faster than the house could bank. Change that outruns the Board's patience doesn't reform the system; it just gets the director replaced.`;
+    } else if(end.who==="walks"){
+      h=`<em>Boycotted</em>`;
+      why=`A body-size coalition called a public boycott and the house cut you loose: season after season your runway stayed too thin, and you never gave them a reason to believe it would change. They quoted your own slogan back at you: “fashion for every body.”`;
+    } else {
+      h=`<em>Boycotted</em>`;
+      why=`A representation boycott ended your tenure: your runway stayed too white for too long, and the public stopped waiting. “The world doesn't look like this,” they said.`;
+    }
+  } else if(end.kind==="standard"){
+    h=`Business as <em>usual</em>`;
+    why=`You survived ${shows} by keeping the runway thin and white and feeding the coalitions the bare minimum. Nothing changed. The press called it timeless, but this is exactly the engine the study describes: a runway selling an unreachable body to everyone watching, and the documented cost is real: disordered eating and body dysmorphia, landing hardest on the youngest.`;
+    punch=`<div class="punch"><div class="big">${gap}<span style="font-size:.4em"> BMI</span></div><div class="cap">The gap between your runway's median body and the average person held at ~${gap} BMI points. “Diversity” season after season, and the body never moved.</div></div>`;
+  } else if(end.kind==="token"){
+    h=`You did it. <em>Sort of.</em>`; result=`You lost. The quota won.`; resCls="lost";
+    why=`Diversity arrived, but you concentrated it onto a few bodies: the same models carried the size <em>and</em> the colour at once, a quota met by the fewest possible people. That is the paper's central finding, reproduced by your own hand. It counts on paper. It isn't the same as change.`;
+    punch=`<div class="punch"><div class="big">${orBig}×</div><div class="cap">On your runway a larger body was ${orPhrase} more likely to be non-white than white${end.OR>10?", off the chart":""}. The real industry runs at 4.5×.</div></div>`;
+  } else {
+    cls="good"; h=`Every <em>walk</em>`;
+    const base=`You made ${shows} and introduced diversity honestly: step by step, spread across <strong>different bodies</strong>: size on some, colour on others, no single model made to carry the whole story.`;
+    if(G.notRenewed){                                   // the record won; the house still let you go
+      result="The record says you won. The house let you go anyway."; resCls="";
+      why=base+` The Board never made its peace with it. The contract died at review, but the record stands, and it is the rare kind.`;
+    } else if(end.smooth){
+      result="You won. Cleanly."; resCls="won";
+      why=base+` And you did it without whiplash: the same steady hand every season, so the house's normal moved with you. This is the hard version, done the rare way, and the house survived it.`;
+    } else {
+      result="You won."; resCls="won";
+      why=base+` This is the hard version, and the rare one. The house survived it anyway, though the clerk's note says steadier hands have managed it with less lurching between seasons.`;
+    }
+    rainbow=`<div class="picto">${pictoEveryWalk()}</div>`;
+    punch=`<div class="punch good"><div class="big" style="color:var(--ink)">${orBig}×</div><div class="cap">A larger body was just ${orPhrase} more likely to be non-white than white, with no concentration. The industry runs at 4.5×.</div></div>`;
+  }
+  $("reveal-inner").innerHTML=`<div class="${cls}">
+    <div class="rv-hero"><h2 class="rv-h">${h}</h2><p class="rv-result ${resCls}">${result}</p>${slip}<p class="rv-lead">${why}</p>${rainbow}</div>
+    <div class="rv-small">
+      ${helpline}
+      <p class="src">Every number below mirrors a finding in Boucherie et al., “Cultural evolution of beauty standards,” <em>PNAS</em> 2026.</p>
+      <a class="btn line small" href="https://www.pnas.org/doi/10.1073/pnas.2602380123" target="_blank" rel="noopener" style="text-decoration:none">Read the paper <span class="ar">→</span></a>
+    </div>
+    <div class="end-actions"><button class="btn" onclick="GAME.restart()">Play again <span class="ar">→</span></button></div>
+    <div class="rv-stats">${parade}${punch}${charts}</div>
+  </div>`;
+}
+
+/* ---------------- lifecycle ---------------- */
+function renderIntroStrip(){
+  const h=$("intro-strip"); h.innerHTML="";
+  [makeModel({_ideal:true}),makeModel({_ideal:true}),makeModel({plus:true,nonWhite:true}),makeModel({_ideal:true}),makeModel({nonWhite:true})]
+    .forEach(m=>h.insertAdjacentHTML("beforeend",figWrap(m)));
+}
+function rollHouse(){ G.brand=pick(HOUSES); }   // kept secret until the letter arrives
+function begin(){ Sfx.unlock(); Sfx.music(); show("season"); renderSeason(); Demo.prep(); Briefing.show(()=>Demo.maybeStart()); }
+
+/* ---------------- appointment briefing: animated welcome before the tutorial ---------------- */
+const Briefing=(function(){
+  let cb=null, autoT=null;
+  function show(onDone){
+    cb=onDone;
+    const B=escHTML(G.brand);
+    $("brief").classList.remove("done","pop"); $("brief").style.display="none";
+    $("env-wrap").style.display="flex"; $("env-wrap").classList.remove("fade"); $("envelope").classList.remove("open");
+    $("brief-veil").classList.add("show");
+    autoT=setTimeout(open, 3200);                             // opens itself if the player just watches
+  }
+  function open(){
+    clearTimeout(autoT);
+    const env=$("envelope"); if(env.classList.contains("open")) return;
+    env.classList.add("open"); Sfx.envelope();
+    setTimeout(()=>$("env-wrap").classList.add("fade"), 620);            // fade the envelope while the letter still rises...
+    setTimeout(()=>{ $("env-wrap").style.display="none"; renderLetter(); }, 900);   // ...and the full letter pops out of it
+  }
+  function renderLetter(){
+    const B=escHTML(G.brand);
+    $("brief").style.display="block"; $("brief").classList.add("pop");
+    $("brief").innerHTML=`
+      <p class="bl bt" style="animation-delay:.2s">Welcome. You've just been hired as a casting director of <em>${B}</em>.</p>
+      <p class="bl" style="animation-delay:1.2s">Each season, you choose the five models who walk for the house.</p>
+      <p class="bl" style="animation-delay:2.2s">Your contract runs <b>eight shows</b>, with a review after six.</p>
+      <p class="bl bs" style="animation-delay:3.2s">Come in. <b>The Board</b> insists on showing you how casting is done here.</p>
+      <button class="btn bl" style="animation-delay:3.9s" onclick="Briefing.done(event)">Take the job <span class="ar">→</span></button>`;
+  }
+  function skip(){ $("brief").classList.add("done"); }               // tap: reveal the whole letter at once
+  function done(e){ if(e) e.stopPropagation(); $("brief-veil").classList.remove("show"); const f=cb; cb=null; if(f) f(); }
+  return {show, open, skip, done};
+})();
+window.Briefing=Briefing;
+function restart(){
+  Object.assign(G,{ season:1,tier:0,meters:{board:60,walks:45,census:45}, prev:{L:0,E:0}, streaks:{noColour:0,oneColour:0},
+    press:{timeless:0,applause:0,plot:0}, notRenewed:null,
+    stack:[],booked:[],accl:0, since:{nonWhite:0,plus:0,intersx:0}, gen:0,
+    everPlus:false,allCast:[],hist:[],
+    cum:{total:0,nonWhite:0,plus:0,plusNonWhite:0,plusWhite:0,nonplusNonWhite:0,nonplusWhite:0,regions:new Set(),seasonsWithPlus:0}, firedBy:null,_end:false,_busy:false });
+  renderIntroStrip(); rollHouse(); show("intro");
+}
+
+/* ---------------- first-run tutorial (spotlight coachmarks) ----------------
+   A one-time onboarding overlay: a dimming scrim with a cut-out "hole" around the
+   element being explained (the box-shadow trick), plus an in-house tooltip. It walks
+   the player through reading a comp card, then introduces the four panels one by one,
+   then states the tension between them — WITHOUT revealing the winning strategy, which
+   the game is designed to let the player discover. Auto-runs once on first season entry;
+   re-callable via window.Tutorial.start(). */
+const Tutorial = (function(){
+  let layer, hole, tip, caret, kickEl, titleEl, bodyEl, backBtn, nextBtn, skipBtn;
+  let i = 0, built = false;
+  const PAD = 8, GAP = 14, MARGIN = 14;
+
+  const gauge = n => { const g=$("gauges"); return g ? g.querySelectorAll(".gauge")[n] : null; };
+
+  const steps = [
+    { tgt:()=>document.querySelector("#deck .card:not(.behind)"),
+      title:"Read the card.",
+      body:"The two big labels show what counts: <b>origin</b> and <b>BMI</b>. The measurements around the figure are detail. Swipe right to book, left to pass. Book five models to run the show." },
+    { tgt:()=>$("gauges"),
+      title:"Three dials to keep alive.",
+      body:"Every show you send out moves these dials. <b>Left is trouble, right is pleased.</b> If a dial reaches zero, you are fired." },
+    { tgt:()=>gauge(0),
+      title:"The <em>Board</em>. The money.",
+      body:"The owners who bankroll the show (the <b>Board</b> needle). They want the look they can sell: sleek, conventional, aspirational." },
+    { tgt:()=>gauge(1),
+      title:"<em>All Walks</em>. Body advocacy.",
+      body:"A body-positivity coalition (the <b>Body size</b> needle). They want larger bodies actually booked on the runway, not just named in the press release. Send an all-thin show too many times and their patience runs out." },
+    { tgt:()=>gauge(2),
+      title:"The <em>Census</em>. Representation.",
+      body:"The diversity body (the <b>Ethnicity</b> needle). They want a cast that looks like the world: models of colour, a real spread of origins. An all-white lineup never goes unnoticed." },
+  ];
+  let list = steps;   // start() walks the full tour; startCard() walks just the card step
+
+  function build(){
+    layer = document.createElement("div");
+    layer.className = "tut-layer"; layer.id = "tut-layer";
+    layer.setAttribute("role","dialog"); layer.setAttribute("aria-modal","true"); layer.setAttribute("aria-label","How to play");
+    layer.innerHTML =
+      '<div class="tut-hole" id="tut-hole"></div>' +
+      '<div class="tut-tip" id="tut-tip">' +
+        '<div class="tut-caret" id="tut-caret"></div>' +
+        '<div class="tut-kick" id="tut-kick"></div>' +
+        '<div class="tut-title" id="tut-title"></div>' +
+        '<div class="tut-body" id="tut-body"></div>' +
+        '<div class="tut-nav">' +
+          '<button class="tut-skip" id="tut-skip" type="button">Skip tour</button>' +
+          '<div class="tut-right">' +
+            '<button class="tut-back" id="tut-back" type="button">Back</button>' +
+            '<button class="tut-next" id="tut-next" type="button">Next</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="tut-hint">tap anywhere to continue</div>' +
+      '</div>';
+    document.body.appendChild(layer);
+    hole=$("tut-hole"); tip=$("tut-tip"); caret=$("tut-caret");
+    kickEl=$("tut-kick"); titleEl=$("tut-title"); bodyEl=$("tut-body");
+    backBtn=$("tut-back"); nextBtn=$("tut-next"); skipBtn=$("tut-skip");
+    layer.addEventListener("click", ()=>next());
+    tip.addEventListener("click", e=>e.stopPropagation());
+    nextBtn.addEventListener("click", e=>{ e.stopPropagation(); next(); });
+    backBtn.addEventListener("click", e=>{ e.stopPropagation(); back(); });
+    skipBtn.addEventListener("click", e=>{ e.stopPropagation(); end(); });
+    built = true;
+  }
+
+  function onKey(e){
+    if(!Tutorial.active) return;
+    if(e.key==="Escape"){ e.preventDefault(); e.stopPropagation(); end(); }
+    else if(e.key==="Enter"||e.key==="ArrowRight"||e.key===" "){ e.preventDefault(); e.stopPropagation(); next(); }
+    else if(e.key==="ArrowLeft"){ e.preventDefault(); e.stopPropagation(); back(); }
+  }
+  function onResize(){ if(Tutorial.active) position(); }
+
+  function render(){
+    const s = list[i];
+    kickEl.innerHTML = list.length>1 ? '<span class="tut-n">'+(i+1)+" / "+list.length+"</span>" : "How to read";
+    titleEl.innerHTML = s.title;
+    bodyEl.innerHTML = s.body;
+    backBtn.style.visibility = i===0 ? "hidden" : "visible";
+    nextBtn.textContent = i>=list.length-1 ? "Start casting" : "Next";
+    requestAnimationFrame(()=>{ position(); try{ nextBtn.focus({preventScroll:true}); }catch(_){ nextBtn.focus(); } });
+  }
+
+  function position(){
+    if(!Tutorial.active) return;
+    const s = list[i], el = s.tgt && s.tgt();
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const tr = tip.getBoundingClientRect(), tw = tr.width, th = tr.height;
+    if(!el){
+      hole.style.opacity = "0"; caret.style.display = "none";
+      tip.style.left = Math.max(MARGIN,(vw-tw)/2)+"px";
+      tip.style.top  = Math.max(MARGIN,(vh-th)/2)+"px";
+      return;
+    }
+    hole.style.opacity = "1";
+    const r = el.getBoundingClientRect();
+    const hx = Math.max(0,r.left-PAD), hy = Math.max(0,r.top-PAD), hw = r.width+PAD*2, hh = r.height+PAD*2;
+    hole.style.left=hx+"px"; hole.style.top=hy+"px"; hole.style.width=hw+"px"; hole.style.height=hh+"px";
+    const holeCx = hx+hw/2, holeBottom = hy+hh, holeTop = hy;
+    const roomBelow = (holeBottom+GAP+th+MARGIN) <= vh;
+    const roomAbove = (holeTop-GAP-th-MARGIN) >= 0;
+    const placeBelow = roomBelow || !roomAbove;
+    let top = placeBelow ? holeBottom+GAP : holeTop-GAP-th;
+    top = Math.max(MARGIN, Math.min(top, vh-th-MARGIN));
+    let left = holeCx - tw/2;
+    left = Math.max(MARGIN, Math.min(left, vw-tw-MARGIN));
+    tip.style.left=left+"px"; tip.style.top=top+"px";
+    caret.style.display = "block";
+    caret.style.left = Math.max(14, Math.min(holeCx-left, tw-14))+"px";
+    caret.classList.toggle("below", placeBelow);
+    caret.classList.toggle("above", !placeBelow);
+  }
+
+  function start(){ list=steps; open_(); }
+  function startCard(){ list=[steps[0]]; open_(); }   // single coachmark after the guided opening
+  function open_(){
+    if(window.Demo && Demo.active) return;
+    if(!built) build();
+    i = 0; Tutorial.active = true;
+    document.documentElement.style.overflow = "hidden"; document.body.style.overflow = "hidden";
+    layer.classList.add("show");
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("resize", onResize);
+    window.addEventListener("scroll", onResize, true);
+    render();
+    setTimeout(()=>{ if(Tutorial.active) position(); }, 260); // re-fix once webfonts settle
+  }
+  function next(){ if(i >= list.length-1) end(); else { i++; render(); } }
+  function back(){ if(i > 0){ i--; render(); } }
+  function end(){
+    Tutorial.active = false;
+    if(layer) layer.classList.remove("show");
+    document.documentElement.style.overflow = ""; document.body.style.overflow = "";
+    window.removeEventListener("keydown", onKey, true);
+    window.removeEventListener("resize", onResize);
+    window.removeEventListener("scroll", onResize, true);
+    const b = $("btn-book"); if(b){ try{ b.focus({preventScroll:true}); }catch(_){ b.focus(); } }
+  }
+  function maybeStart(){
+    if(Tutorial.seen) return; Tutorial.seen = true;   // once per page load — a reload brings it back
+    setTimeout(()=>{ if($("season").classList.contains("active")) start(); }, 60);
+  }
+
+  return { start, startCard, next, back, end, position, maybeStart, active:false, seen:false };
+})();
+window.Tutorial = Tutorial;
+
+/* ---------------- guided opening (the new tutorial) ----------------
+   Playtesters found the rules opaque when told, so now they're PLAYED: first only the
+   Board's dial exists and the Board hands the player its list — five thin, white
+   models, the industry default. The player books each one themselves (passing gets
+   refused: the list is a lesson), and the Board reacts to every booking. The protests
+   that follow summon the other two dials one by one: All Walks pickets the all-thin
+   lineup, then, when the Board concedes a single curve model, the Census counts the
+   faces. Then the chair is theirs. Runs once per page load (a reload brings it back
+   for the next visitor); skippable throughout. */
+const Demo=(function(){
+  let timers=[], cancelled=false, nextCb=null, phase=1;
+  function later(fn,ms){ const t=setTimeout(()=>{ const k=timers.indexOf(t); if(k>-1) timers.splice(k,1); if(!cancelled) fn(); },ms); timers.push(t); }
+  /* the dialog box starts below the real, rendered gauges — measured, not assumed, because
+     the header is ~40px taller on a laptop than on a phone */
+  function fitVeil(){
+    const g=$("gauges"); if(!g) return;
+    const b=Math.round(g.getBoundingClientRect().bottom);
+    $("demo-veil").style.setProperty("--hdrH", clamp(b,90,window.innerHeight*0.45)+"px");
+  }
+  function dialog(kick, html, btn, cb){
+    fitVeil();
+    $("demo-kick").textContent=kick;
+    $("demo-txt").innerHTML=html;
+    $("demo-next").innerHTML=btn+' <span class="ar">→</span>';
+    nextCb=cb;
+    $("demo-veil").classList.add("show");
+  }
+  function next(){ if(!Demo.active||cancelled) return; $("demo-veil").classList.remove("show"); const f=nextCb; nextCb=null; if(f) f(); }
+  function prep(){ if(!Demo.seen) $("gauges").classList.add("demo1"); }   // hide dials 2+3 before the letter lifts
+  function maybeStart(){ if(Demo.seen) return; Demo.seen=true; start(); }
+  function start(){
+    cancelled=false; phase=1; Demo.active=true;
+    window.addEventListener("resize", fitVeil);
+    $("gauges").classList.add("demo1");
+    $("season-tag").innerHTML='<span class="ak">"Audition"</span> <b>the Board is casting</b>';
+    dialog("How to play · 1 of 7",
+      "The dial above is <b>the Board</b>: the owners of the house. It rises when the collection sells, and falls when it does not. <b>If it reaches zero, you are fired.</b><br><br>First, a lesson. The Board hands you its list of five models. <b>Book each one it shows you: swipe right, or tap the ✓.</b>",
+      "Take the list", ()=>boardPicks(false));
+  }
+  function boardPicks(withPlus){
+    G.booked=[]; G.lastPassed=null; renderLookbook(); updateCount();
+    G.stack=[];
+    for(let k=0;k<PICK+2;k++){
+      const m=(withPlus&&k===2) ? makeModel({plus:true, nonWhite:false}) : makeModel({_ideal:true});
+      m.demopick=true; G.stack.push(m);
+    }
+    Demo.casting=true;                                // the player books the Board's list themselves
+    renderDeck();
+    whisper("the Board hands you its list. <b>swipe right to book</b>", 5200);
+  }
+  /* the Board reacts to every booking off its list */
+  function pickReact(m){
+    if(m.plus) return "the concession. <b>one is enough,</b> they say";
+    const n=Math.min(G.booked.length,PICK);
+    const lines= phase===1
+      ? ["the Board nods. <b>exactly the house look</b>","good. <b>same again</b>","thin, white, blonde. <b>the buyers know this face</b>","one more like her","a full lineup. <b>send them out</b>"]
+      : ["the Board nods. <b>the usual</b>","good. <b>the house look</b>","the buyers know this face","back to the list","done. <b>send them out</b>"];
+    return lines[n-1];
+  }
+  /* passing is not on the menu while the Board is teaching */
+  function refuse(el){
+    if(el) snapBack(el);
+    Sfx.deny();
+    whisper("<b>the Board insists.</b> book this one");
+    if(el) setTimeout(()=>{ if(el.isConnected){ el.classList.add("shake"); setTimeout(()=>el.classList.remove("shake"),500); } }, 270);
+  }
+  function onCast(){ if(cancelled) return; Demo.casting=false; playRunway(G.booked.slice(), ()=>{ if(!cancelled) (phase===1?after1:after2)(); }); }
+  function after1(){
+    G.meters.board=76; setNeedles("g",G.meters);
+    dialog("How to play · 2 of 7",
+      "Five thin, white models: the industry default. <b>Sales are strong, and the Board dial goes up.</b>",
+      "Continue", protest1);
+  }
+  function protest1(){
+    const g=$("gauges"); g.classList.remove("demo1"); g.classList.add("demo2");
+    const el=g.children[1]; if(el) el.classList.add("stamp");
+    Sfx.bad();
+    later(()=>{ G.meters.walks=29; setNeedles("g",G.meters); }, 700);
+    dialog("How to play · 3 of 7",
+      "Overnight, a protest. <b>All Walks</b>, a body size association, pickets the house: <i>&ldquo;Not one body above a size&nbsp;6. A house &lsquo;for every body&rsquo;?&rdquo;</i><br><br>A second dial appears: <b>Body size</b>. It rises when you book larger bodies, and falls when your show is all thin. <b>At zero, they call a boycott and you are fired.</b>",
+      "Continue", board2);
+  }
+  function board2(){
+    phase=2;
+    $("season-tag").innerHTML='<span class="ak">"Audition"</span> <b>the Board tries again</b>';
+    dialog("How to play · 4 of 7",
+      "The Board tries again. Same list, one concession: <b>a single curve model</b>. <b>Book the five it hands you.</b>",
+      "Take the list", ()=>boardPicks(true));
+  }
+  function after2(){
+    G.meters.walks=37; G.meters.board=79; setNeedles("g",G.meters);
+    dialog("How to play · 5 of 7",
+      "One larger body on the runway, and the Body size dial recovers a little. <i>&ldquo;A start,&rdquo;</i> says All Walks. <i>&ldquo;Not the finish.&rdquo;</i>",
+      "Continue", protest2);
+  }
+  function protest2(){
+    const g=$("gauges"); g.classList.remove("demo2");
+    const el=g.children[2]; if(el) el.classList.add("stamp");
+    Sfx.bad();
+    later(()=>{ G.meters.census=30; setNeedles("g",G.meters); }, 700);
+    dialog("How to play · 6 of 7",
+      "A second protest. <b>The Census</b>, an ethnic diversity association, counts the faces: <i>&ldquo;Five models, one continent. The world doesn't look like this.&rdquo;</i><br><br>Your third dial: <b>Ethnicity</b>. It rises when you book models of colour from different regions, and falls when the lineup is all white. <b>At zero, boycott, and you are fired.</b>",
+      "Continue", finale);
+  }
+  function finale(){
+    dialog("The rules · 7 of 7",
+      "Now the chair is yours."+
+      "<ul><li><b>Swipe right</b> to book a model, <b>swipe left</b> to pass. Five bookings make a show.</li>"+
+      "<li>After every show, the three dials move, and each group tells you why.</li>"+
+      "<li><b>If any dial reaches zero, you are fired.</b></li>"+
+      "<li>Your contract is <b>8 shows</b>. From show 6 on, the Board reviews you after each show: any needle still in the red or orange, and the contract ends.</li></ul>"+
+      "The dials are reset for your debut. Good luck.",
+      "Take the chair", ()=>end(true));
+  }
+  function end(finished){
+    if(!Demo.active) return;
+    cancelled=true; timers.forEach(clearTimeout); timers=[]; nextCb=null;
+    window.removeEventListener("resize", fitVeil);
+    $("demo-veil").classList.remove("show");
+    if($("runway-veil").classList.contains("show")){ clearTimeout(G._runTimer); G._runCb=null; $("runway-veil").classList.remove("show"); }
+    setTimeout(()=>{                                  // let any in-flight swipe land, then rebuild clean
+      Demo.active=false; Demo.casting=false; G._busy=false;
+      $("gauges").classList.remove("demo1","demo2");
+      G.season=1; G.meters={board:60, walks:45, census:45};
+      renderSeason();
+      if(finished) Tutorial.startCard();
+    }, 420);
+  }
+  return { prep, maybeStart, next, skip:()=>end(false), onCast, pickReact, refuse, active:false, casting:false, seen:false };
+})();
+window.Demo = Demo;
+
+function toggleSound(){ const on=Sfx.toggle(); const b=$("snd-btn"); if(b) b.classList.toggle("off",!on); }
+
+/* accessibility: ONE switch for everything — reduced motion + colour-safe gauges together.
+   rm mirrors prefers-reduced-motion; cvd repaints the red→green language orange→blue. */
+const A11Y={on:false};
+function a11yApply(){
+  document.body.classList.toggle("rm",A11Y.on);
+  document.body.classList.toggle("cvd",A11Y.on);
+  const b=$("a11y-btn"); if(b) b.setAttribute("aria-pressed",A11Y.on?"true":"false");
+}
+function a11yToggle(){ A11Y.on=!A11Y.on; try{ localStorage.setItem("hoc_a11y",A11Y.on?"1":"0"); }catch(_){} a11yApply(); }
+/* old per-switch keys count as "on", so nobody loses their setting */
+try{ A11Y.on = localStorage.getItem("hoc_a11y")==="1"
+            || (localStorage.getItem("hoc_a11y")==null && (localStorage.getItem("hoc_rm")==="1" || localStorage.getItem("hoc_cvd")==="1")); }catch(_){}
+a11yApply();
+window.A11Y=A11Y;
+window.GAME={ begin, swipe:swipeBtn, undo:undoPass, next, reveal, restart, skipRunway, sound:toggleSound, access:a11yToggle };
+if(!Sfx.on) $("snd-btn").classList.add("off");
+renderIntroStrip(); rollHouse();
+</script>
+</body>
+</html>
