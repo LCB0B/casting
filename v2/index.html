@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="version" content="2.1.3 · 2026-09-04">
+<meta name="version" content="2.1.4 · 2026-09-04">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Casting v2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -292,7 +292,7 @@
   .fig .leg{transform-box:fill-box; transform-origin:50% 6%}
   .fig .spot{transition:opacity .25s}
   /* while a dialog is up, or on the card behind, the figures hold still: every SVG limb animation is a repaint */
-  body.dim .fig, body.dim .fig .arm, body.dim .fig .eyes, body.dim .fig .leg, body.dim .needle,
+  body.dim .wrap .fig, body.dim .wrap .fig .arm, body.dim .wrap .fig .eyes, body.dim .wrap .fig .leg,
   .card.behind .fig, .card.behind .fig .arm, .card.behind .fig .eyes{animation-play-state:paused}
   .fig.walking{animation:walkbob .52s ease-in-out infinite}
   .fig.walking .leg.l{animation:stepL .52s ease-in-out infinite}
@@ -468,6 +468,7 @@
     box-shadow:0 12px 30px rgba(0,0,0,.3); padding:16px 16px 12px; pointer-events:auto; will-change:transform;
     background-image:var(--regs); background-repeat:no-repeat; background-size:9px 9px; background-position:var(--regpos);
     transition:transform .35s cubic-bezier(.33,1.05,.45,1)}
+  .tut-tip.jump{transition:none}   /* first placement after opening: no slide in from the corner */
   .tut-caret{position:absolute; width:12px; height:12px; background:var(--paper); transform:translateX(-50%) rotate(45deg); display:none}
   .tut-caret.below{top:-6px}
   .tut-caret.above{bottom:-6px}
@@ -1205,6 +1206,7 @@ let sw=null;
 function attachSwipe(el, model){
   el.addEventListener("pointerdown", e=>{
     if(G._busy) return; if(window.Demo&&Demo.active&&!Demo.casting) return; if(e.button!=null&&e.button!==0) return;
+    el.classList.remove("deal","return");   // the deal-in animation would otherwise own the transform until it ends
     sw={el, model, x0:e.clientX, y0:e.clientY, dx:0, active:false, armed:0, tilt:parseFloat(el.style.getPropertyValue("--tilt"))||0};
     window.addEventListener("pointermove",swMove,{passive:false});
     window.addEventListener("pointerup",swUp,{passive:false});
@@ -1238,12 +1240,12 @@ function snapBack(el){ disarm(); el.style.transition="transform .48s cubic-bezie
   setTimeout(()=>{ if(el){ el.style.transition=""; el.classList.remove("lift"); } },480); }
 function commit(el, model, dir){
   if(dir<0 && window.Demo && Demo.active){ disarm(); Demo.refuse(el); return; }   // the tutorial list is not optional
-  G._busy=true; disarm();
+  G._busy=true; disarm(); el.classList.remove("deal","return");
   /* the stamp lands whichever way the verdict came: drag, button or key */
   const tag=el.querySelector(dir>0?".swipe-tag.book":".swipe-tag.pass");
   if(tag && parseFloat(tag.style.opacity||0)<.8){ tag.style.opacity=1; tag.classList.add("slam"); Sfx.tick(); }
   if(dir>0){ Sfx.book(G.booked.length+1); Haptic.book(); flyToSlot(el, model, G.booked.length); } else Sfx.pass();
-  el.style.transition="transform .34s cubic-bezier(.4,0,.5,1), opacity .34s";
+  el.style.transition="transform .3s cubic-bezier(.4,0,.5,1), opacity .3s";   // done before the deck is rebuilt at 320 ms
   el.style.transform=`translateX(${dir*150}%) rotate(${dir*20+(parseFloat(el.style.getPropertyValue("--tilt"))||0)}deg)`; el.style.opacity="0";
   setTimeout(()=>{ G._busy=false; dir>0 ? book(model) : pass(); }, 320);
 }
@@ -1768,7 +1770,7 @@ const Tutorial = (function(){
     bodyEl.innerHTML = s.body;
     backBtn.style.visibility = i===0 ? "hidden" : "visible";
     nextBtn.textContent = i>=list.length-1 ? "Start casting" : "Next";
-    requestAnimationFrame(()=>{ position(); try{ nextBtn.focus({preventScroll:true}); }catch(_){ nextBtn.focus(); } });
+    requestAnimationFrame(()=>{ position(); tip.classList.remove("jump"); try{ nextBtn.focus({preventScroll:true}); }catch(_){ nextBtn.focus(); } });
   }
 
   function position(){
@@ -1804,7 +1806,7 @@ const Tutorial = (function(){
   function open_(){
     if(window.Demo && Demo.active) return;
     if(!built) build();
-    i = 0; Tutorial.active = true; hole.cur=null;
+    i = 0; Tutorial.active = true; hole.cur=null; tip.classList.add("jump");
     document.documentElement.style.overflow = "hidden"; document.body.style.overflow = "hidden";
     layer.classList.add("show");
     window.addEventListener("keydown", onKey, true);
@@ -1834,7 +1836,7 @@ const Tutorial = (function(){
 window.Tutorial = Tutorial;
 /* any open dialog dims the page: the figures and needles pause so the sheet on top scrolls and moves smoothly */
 (function(){
-  const ids=["tut-layer","demo-veil","brief-veil","veil","runway-veil"], seen=new Set();
+  const ids=["tut-layer","demo-veil","brief-veil","veil"], seen=new Set();   // not the runway: the walkers must walk
   const mo=new MutationObserver(sync);
   function sync(){
     ids.forEach(id=>{ const e=$(id); if(e && !seen.has(e)){ seen.add(e); mo.observe(e,{attributes:true, attributeFilter:["class"]}); } });   // the tutorial layer is built late
@@ -1993,7 +1995,7 @@ a11yApply();
 window.A11Y=A11Y;
 window.GAME={ begin, swipe:swipeBtn, undo:undoPass, next, reveal, restart, skipRunway, sound:toggleSound, access:a11yToggle };
 if(!Sfx.on) $("snd-btn").classList.add("off");
-const VERSION="2.1.3 · 2026-09-04"; window.VERSION=VERSION; { const v=$("ver"); if(v) v.textContent=VERSION; }
+const VERSION="2.1.4 · 2026-09-04"; window.VERSION=VERSION; { const v=$("ver"); if(v) v.textContent=VERSION; }
 renderIntroStrip(); rollHouse();
 </script>
 </body>
