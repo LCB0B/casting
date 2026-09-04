@@ -211,7 +211,10 @@
   /* feel: the card lifts while held, springs back, and the next one is dealt from the pile */
   .card.lift{box-shadow:0 2px 4px rgba(0,0,0,.14), 0 24px 40px rgba(0,0,0,.2); z-index:5}
   .card.deal{animation:dealin .38s cubic-bezier(.2,.9,.3,1.15) both}
-  @keyframes dealin{from{transform:scale(.93) translateY(12px) rotate(var(--tilt,0deg)); opacity:.5} to{transform:rotate(var(--tilt,0deg)); opacity:1}}
+  /* the incoming card must be OPAQUE from the first frame: it starts life exactly on top of
+     the .behind card, so any transparency lets a different model read straight through it and
+     the deal looks like a double exposure. The "off the pile" feel is carried by scale alone. */
+  @keyframes dealin{from{transform:scale(.93) translateY(12px) rotate(var(--tilt,0deg))} to{transform:rotate(var(--tilt,0deg))}}
   .card.return{animation:returnin .4s cubic-bezier(.2,.9,.3,1.1) both}
   @keyframes returnin{from{transform:translateX(-150%) rotate(-20deg); opacity:0} to{transform:rotate(var(--tilt,0deg)); opacity:1}}
   .swipe-tag.book.slam{animation:slamB .28s cubic-bezier(.2,1.6,.4,1) both}
