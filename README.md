@@ -14,9 +14,10 @@ spreading representation across distinct bodies is the hard one. That friction i
 
 Play online: **https://lcb0b.github.io/casting/**
 
-A visual redesign is in progress at **https://lcb0b.github.io/casting/v2/** (`v2/index.html`):
-same game, same rules, comp cards drawn like a tech pack instead of boxed type. The root
-game stays as it is until v2 is done.
+The 2026 redesign — comp cards drawn like a tech pack instead of boxed type, same game and
+same rules — is now the game at that URL. The old look is in git history (before the
+"v2 becomes the game" commit); `/v2/`, where the redesign lived while it was being built,
+redirects to the root.
 
 Or open `index.html` in any modern browser. No build step, no dependencies — everything
 (art, animation, logic) lives in the one file.
